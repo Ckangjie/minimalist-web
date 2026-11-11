@@ -171,7 +171,37 @@ npx wrangler pages deploy dist --project-name minimalist-web-frontend
 
 | Secret 变量名 | 获取来源 / 说明 | 示例值 |
 | :--- | :--- | :--- |
-| **`CLOUDFLARE_API_TOKEN`** | Cloudflare 控制台 -> **My Profile** -> **API Tokens** 创建（包含 Workers & Pages 权限） | `...` |
+| **`CLOUDFLARE_API_TOKEN`** | Cloudflare 控制台 -> **My Profile** -> **API Tokens** 创建（包含下述前端与后端完整权限） | `...` |
 | **`CLOUDFLARE_ACCOUNT_ID`**| Cloudflare 账户 ID | `cb5bb69457d6d8626ed814e86493e500` |
+
+---
+
+### 3. Cloudflare API 令牌 (`CLOUDFLARE_API_TOKEN`) 必需权限清单
+
+前往 [Cloudflare 控制台 - API 令牌](https://dash.cloudflare.com/profile/api-tokens)，创建自定义令牌（或编辑已有令牌），必须包含以下**全部权限**，否则 GitHub Actions 自动化部署将报错：
+
+#### (1) 账户权限 (Account Policies)
+> **资源范围**：`包含所有账户`（或选择对应的主账户）
+
+| 权限分类 (Category) | 权限项 (Permission) | 访问级别 (Access) | 作用说明 |
+| :--- | :--- | :--- | :--- |
+| **账户 (Account)** | **Cloudflare Pages** | **编辑 (Edit)** | **前端必需**：用于 `wrangler pages deploy` 构建产物上传与版本发布 |
+| **账户 (Account)** | **Workers 脚本 (Workers Scripts)** | **编辑 (Edit)** | **后端必需**：用于 `wrangler deploy` 发布与更新后端 Workers 脚本 |
+| **账户 (Account)** | **D1** | **编辑 (Edit)** | **后端必需**：用于远程 D1 数据库执行初始化脚本与 SQL 迁移 (`wrangler d1 execute`) |
+| **账户 (Account)** | **Workers KV 存储 (Workers KV Storage)** | **编辑 (Edit)** | **后端必需**：用于创建、绑定与操作 KV 缓存命名空间 |
+
+#### (2) 区域权限 (Zone Policies)
+> **资源范围**：`包含所有区域`（或选择绑定的域名 `du1.ccwu.cc`）
+
+| 权限分类 (Category) | 权限项 (Permission) | 访问级别 (Access) | 作用说明 |
+| :--- | :--- | :--- | :--- |
+| **区域 (Zone)** | **Workers 路由 (Workers Routes)** | **编辑 (Edit)** | **路由必需**：用于自动将边缘路由规则（如 `du1.ccwu.cc/api/*`）绑定到对应域名 |
+| **区域 (Zone)** | **区域 (Zone)** | **读取 (Read)** | **检查必需**：用于 Wrangler 校验域名托管状态与检索 Zone 标识 |
+
+#### (3) 用户权限 (User Policies - 可选/默认)
+- **User Details**: `读取 (Read)`
+- **Memberships**: `读取 (Read)`
+
+---
 
 配置完成后，后续任何针对前端或后端的改动，执行 `git push origin main` 即可全自动触发线上发布。
