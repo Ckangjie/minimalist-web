@@ -1,5 +1,5 @@
 <template>
-  <main class="home">
+  <main class="page-container home">
     <span>{{ greetingText }}</span>
   </main>
 </template>
@@ -36,8 +36,6 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .home {
-  box-sizing: border-box;
-  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -35,3 +35,10 @@ a {
 [v-cloak]{
   display: none !important;
 }
+
+/* 全局页面公共根容器 */
+.page-container {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
