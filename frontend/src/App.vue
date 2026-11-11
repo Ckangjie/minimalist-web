@@ -1,29 +1,16 @@
 <template>
-  <div id="app">
-    <NavBar />
-    <main class="main-content">
-      <router-view />
-    </main>
-    <TheFooter />
-    <BackToTop />
-  </div>
+  <router-view />
 </template>
 
-<script setup>
-import NavBar from "@/layout/NavBar.vue";
-import TheFooter from "@/layout/TheFooter.vue";
-import BackToTop from "@/components/BackToTop.vue";
-</script>
+<script setup></script>
 
 <style lang="scss">
+html,
+body,
 #app {
+  margin: 0;
+  padding: 0;
   width: 100%;
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.main-content {
-  flex: 1;
+  height: 100%;
 }
 </style>

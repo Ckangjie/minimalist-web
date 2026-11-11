@@ -5,8 +5,10 @@ import * as schema from "./schema";
  * Cloudflare 边缘运行绑定环境类型
  */
 export type Bindings = {
-  DB: D1Database;
-  KV: KVNamespace;
+  DB?: D1Database;
+  minimalist_db?: D1Database;
+  KV?: KVNamespace;
+  minimalist_kv?: KVNamespace;
 };
 
 /**
