@@ -155,3 +155,23 @@ npx wrangler pages deploy dist --project-name minimalist-web-frontend
    以保证 Vite 单页应用在任意前端路径刷新时正常工作。
 3. **敏感凭据与环境变量管理**：
    若需接入 JWT 密钥或第三方 API Key，请使用 `wrangler secret put <KEY_NAME>` 配置在云端，严禁写入前端代码或提交到代码仓库。
+
+---
+
+## 六、全自动持续集成与部署 (GitHub Actions)
+
+项目已配置 GitHub Actions 自动部署流水线，实现代码推送到 `main` 分支后自动构建并更新至 Cloudflare。
+
+### 1. 工作流文件结构
+- 前端工作流：`.github/workflows/deploy-frontend.yml`（仅当 `frontend/**` 变更时触发）
+- 后端工作流：`.github/workflows/deploy-backend.yml`（仅当 `backend/**` 变更时触发）
+
+### 2. GitHub 仓库 Secret 环境变量配置
+前往 GitHub 仓库 -> **Settings** -> **Secrets and variables** -> **Actions**，点击 **New repository secret** 添加以下两项：
+
+| Secret 变量名 | 获取来源 / 说明 | 示例值 |
+| :--- | :--- | :--- |
+| **`CLOUDFLARE_API_TOKEN`** | Cloudflare 控制台 -> **My Profile** -> **API Tokens** 创建（包含 Workers & Pages 权限） | `...` |
+| **`CLOUDFLARE_ACCOUNT_ID`**| Cloudflare 账户 ID | `cb5bb69457d6d8626ed814e86493e500` |
+
+配置完成后，后续任何针对前端或后端的改动，执行 `git push origin main` 即可全自动触发线上发布。

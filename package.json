@@ -9,6 +9,8 @@
     "dev:backend:wrangler": "npm --prefix backend run dev:wrangler",
     "dev:backend:remote": "npm --prefix backend run dev:remote",
     "build:frontend": "npm --prefix frontend run build",
-    "deploy:backend": "npm --prefix backend run deploy"
+    "deploy:frontend": "npm --prefix frontend run build && wrangler pages deploy frontend/dist --project-name minimalist-web-frontend",
+    "deploy:backend": "npm --prefix backend run deploy",
+    "deploy:all": "npm run deploy:backend && npm run deploy:frontend"
   }
 }
