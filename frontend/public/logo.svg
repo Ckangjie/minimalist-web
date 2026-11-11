@@ -1,48 +1,56 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
   <defs>
-    <linearGradient id="ckj-grad-primary" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#2563EB" />
-      <stop offset="60%" stop-color="#3B82F6" />
-      <stop offset="100%" stop-color="#60A5FA" />
+    <!-- 主渐变：量子蓝到极光紫，科技与互联感 -->
+    <linearGradient id="jie-grad-primary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06B6D4" />
+      <stop offset="50%" stop-color="#3B82F6" />
+      <stop offset="100%" stop-color="#7C3AED" />
     </linearGradient>
-    <linearGradient id="ckj-grad-accent" x1="0%" y1="0%" x2="100%" y2="100%">
+
+    <!-- 焦点亮核渐变：能量橙红 -->
+    <linearGradient id="jie-grad-accent" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#F59E0B" />
-      <stop offset="100%" stop-color="#F97316" />
+      <stop offset="100%" stop-color="#F43F5E" />
     </linearGradient>
-    <filter id="ckj-shadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.12" flood-color="#1E3A8A" />
+
+    <!-- 柔和质感投影 -->
+    <filter id="jie-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-opacity="0.18" flood-color="#3B82F6" />
     </filter>
   </defs>
 
-  <g filter="url(#ckj-shadow)">
-    <!-- 'C' 弧：外层大弧开环，圆润端点 -->
+  <g filter="url(#jie-glow)">
+    <!-- 外层 Hub 互联环轨道（开环设计，象征开放聚合） -->
     <path
-      d="M 68 24 C 42 12, 16 32, 16 54 C 16 76, 42 92, 68 80"
-      stroke="url(#ckj-grad-primary)"
-      stroke-width="7"
+      d="M 68 28 C 78 40, 78 62, 64 74 C 50 86, 26 84, 18 68 C 12 56, 16 38, 30 26 C 36 20, 46 16, 56 18"
+      stroke="url(#jie-grad-primary)"
+      stroke-width="5"
       stroke-linecap="round"
-      stroke-linejoin="round"
+      stroke-dasharray="88 12"
+      opacity="0.45"
     />
 
-    <!-- 'K' 坚实干轴并向下延伸形成 'J' 底部勾画 -->
+    <!-- 核心主体：几何律动 'J' 字符干轴与优雅勾角 -->
     <path
-      d="M 44 26 L 44 68 C 44 76, 36 82, 28 78"
-      stroke="url(#ckj-grad-primary)"
+      d="M 52 22 L 52 62 C 52 74, 42 82, 30 78 C 22 75, 18 66, 20 58"
+      stroke="url(#jie-grad-primary)"
       stroke-width="6.5"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
 
-    <!-- 'K' 右向开展分支翅膀 -->
+    <!-- 'i' / 'e' 意象交互斜切能量折线：形成立体空间张力 -->
     <path
-      d="M 68 32 L 44 50 L 66 68"
-      stroke="url(#ckj-grad-primary)"
-      stroke-width="6.5"
+      d="M 36 34 L 68 34 L 52 50 L 72 70"
+      stroke="url(#jie-grad-primary)"
+      stroke-width="4.5"
       stroke-linecap="round"
       stroke-linejoin="round"
+      opacity="0.85"
     />
 
-    <!-- 焦点亮核 (Accent Node) -->
-    <circle cx="74" cy="50" r="4" fill="url(#ckj-grad-accent)" />
+    <!-- Hub 核心枢纽节点 (Hub Node) -->
+    <circle cx="74" cy="24" r="5" fill="url(#jie-grad-accent)" />
+    <circle cx="74" cy="24" r="8" stroke="url(#jie-grad-accent)" stroke-width="1.5" opacity="0.4" />
   </g>
 </svg>

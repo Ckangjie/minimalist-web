@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "jie-hub",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
@@ -10,13 +10,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
+    "element-plus": "^2.14.8",
     "vue": "^3.4.0",
     "vue-router": "^4.2.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.7",
     "sass": "^1.79.0",
+    "unocss": "^66.12.0",
     "unplugin-auto-import": "^0.18.6",
+    "unplugin-vue-components": "^32.1.0",
     "vite": "^6.4.2",
     "wrangler": "^4.160.0"
   }

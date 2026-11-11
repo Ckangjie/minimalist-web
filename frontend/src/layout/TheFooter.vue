@@ -1,7 +1,9 @@
 <template>
-  <footer class="footer">
-    <div class="footer-inner">
-      <p class="footer-copy">&copy; {{ year }} Brand. All rights reserved.</p>
+  <footer class="footer border-t transition-colors duration-300">
+    <div class="footer-inner max-w-1200px mx-auto px-6 py-6 text-center">
+      <p class="footer-copy text-xs m-0">
+        &copy; {{ year }} <b>Jie Hub</b> · 云端聚合导航 · Powered by Cloudflare Pages &amp; Workers
+      </p>
     </div>
   </footer>
 </template>
@@ -12,19 +14,11 @@ const year = new Date().getFullYear();
 
 <style lang="scss" scoped>
 .footer {
-  color: #c0c4cc;
-  background-color: #1d2d44;
-
-  &-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 24px;
-    text-align: center;
-    box-sizing: border-box;
-  }
+  background-color: var(--bg-surface);
+  border-color: var(--border-color);
 
   &-copy {
-    font-size: 13px;
+    color: var(--text-muted);
   }
 }
 </style>

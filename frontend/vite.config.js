@@ -1,6 +1,9 @@
 import vue from "@vitejs/plugin-vue";
 import path from "path";
+import UnoCSS from "unocss/vite";
 import AutoImport from "unplugin-auto-import/vite";
+import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
+import Components from "unplugin-vue-components/vite";
 import { fileURLToPath } from "url";
 import { defineConfig, loadEnv } from "vite";
 
@@ -13,13 +16,18 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       vue(),
+      UnoCSS(),
       AutoImport({
-        imports: ["vue"]
+        imports: ["vue"],
+        resolvers: [ElementPlusResolver()]
+      }),
+      Components({
+        resolvers: [ElementPlusResolver()]
       }),
       {
         name: "html-title-transform",
         transformIndexHtml(html) {
-          const title = env.VITE_APP_TITLE || "cloudflare";
+          const title = env.VITE_APP_TITLE || "Jie Hub";
           return html.replace(/%VITE_APP_TITLE%/g, title);
         }
       }

@@ -1,6 +1,10 @@
-// ========== 主题色 ==========
-$primary-color: #409eff;
-$success-color: #67c23a;
-$warning-color: #e6a23c;
-$danger-color: #f56c6c;
-$info-color: #909399;
+// ========== SCSS 基础变量与设计 Token 映射 ==========
+$primary-color: var(--primary-color, #3b82f6);
+$primary-hover: var(--primary-hover, #2563eb);
+$success-color: #10b981;
+$warning-color: #f59e0b;
+$danger-color: #ef4444;
+$info-color: #64748b;
+
+// 转场过渡动画
+$transition-base: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);

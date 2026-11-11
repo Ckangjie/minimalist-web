@@ -1,3 +1,40 @@
+// ========== 设计 Token (CSS Variables) ==========
+:root {
+  --bg-page: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-soft: #f1f5f9;
+  --bg-card: #ffffff;
+  --border-color: #e2e8f0;
+  --border-color-soft: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-regular: #475569;
+  --text-muted: #94a3b8;
+  --primary-color: #3b82f6;
+  --primary-light: #eff6ff;
+  --primary-hover: #2563eb;
+  --navbar-bg: rgba(255, 255, 255, 0.85);
+  --card-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+  --card-shadow-hover: 0 10px 25px rgba(59, 130, 246, 0.12);
+}
+
+html.dark {
+  --bg-page: #0b0f19;
+  --bg-surface: #111827;
+  --bg-surface-soft: #1f2937;
+  --bg-card: #111827;
+  --border-color: #1f2937;
+  --border-color-soft: #162032;
+  --text-primary: #f8fafc;
+  --text-regular: #cbd5e1;
+  --text-muted: #64748b;
+  --primary-color: #3b82f6;
+  --primary-light: rgba(59, 130, 246, 0.15);
+  --primary-hover: #60a5fa;
+  --navbar-bg: rgba(17, 24, 39, 0.85);
+  --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --card-shadow-hover: 0 10px 25px rgba(59, 130, 246, 0.2);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -5,40 +42,78 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-html,
-body,
-#app {
+html {
   width: 100%;
-  height: 100%;
+  min-height: 100%;
+  scroll-behavior: smooth;
 }
 
 body {
-  color: #303133;
-  background-color: #f5f7fa;
+  width: 100%;
+  min-height: 100%;
+  color: var(--text-primary);
+  background-color: var(--bg-page);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
     sans-serif;
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#app {
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 a {
-  color: $primary-color;
+  color: var(--primary-color);
   text-decoration: none;
-  transition: color 0.3s;
+  transition: color 0.2s ease;
 
   &:hover {
-    color: #337ecc;
+    color: var(--primary-hover);
   }
 }
 
-[v-cloak]{
+[v-cloak] {
   display: none !important;
 }
 
-/* 全局页面公共根容器 */
+/* 全局页面公共根容器：完全自适应包裹所有内容，避免粘性布局失效 */
 .page-container {
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========== 自定义精致滚动条样式（匹配全局主题） ========== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: 4px;
+  border: 2px solid var(--bg-page);
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: var(--text-muted);
+  }
+}
+
+/* Firefox 支持 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
 }
