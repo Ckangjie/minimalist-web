@@ -26,14 +26,10 @@
               v-for="engine in SEARCH_ENGINES"
               :key="engine.id"
               :command="engine.id"
-              class="channel-menu-item flex items-center justify-between"
+              class="channel-menu-item flex items-center"
               :class="{ 'is-active': activeEngineId === engine.id }"
             >
-              <div class="flex items-center gap-2">
-                <span class="text-sm">{{ engine.icon }}</span>
-                <span class="text-sm font-medium">{{ engine.name }}</span>
-              </div>
-              <span v-if="activeEngineId === engine.id" class="check-icon text-xs font-bold">✓</span>
+              <span class="text-sm font-medium">{{ engine.name }}</span>
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>
@@ -43,8 +39,7 @@
       <div class="channel-divider h-5 w-1px mx-2 flex-shrink-0"></div>
 
       <!-- 输入框主体 -->
-      <div class="search-input-field flex-1 flex items-center min-w-0 pr-1">
-        <span class="search-icon mr-2 text-sm select-none opacity-60">🔍</span>
+      <div class="search-input-field flex-1 flex items-center min-w-0 pr-1 pl-1">
         <input
           ref="inputRef"
           v-model="internalKeyword"
@@ -253,10 +248,6 @@ const handleSearch = () => {
       background-color: var(--primary-light) !important;
       color: var(--primary-color) !important;
       font-weight: 600 !important;
-
-      .check-icon {
-        color: var(--primary-color);
-      }
     }
   }
 

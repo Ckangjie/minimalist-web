@@ -1,43 +1,56 @@
 <template>
   <header class="navbar sticky top-0 z-100 w-full transition-colors duration-300">
-    <div class="navbar-inner max-w-1200px h-60px mx-auto px-4 md:px-6 flex items-center justify-between">
-      <router-link to="/" class="navbar-brand flex items-center gap-2">
-        <img src="/logo.svg" alt="Jie Hub Logo" class="w-8 h-8 flex-shrink-0" />
-        <span class="font-bold text-lg tracking-tight">Jie Hub</span>
-        <span class="navbar-badge text-xs px-2 py-0.5 rounded-full font-medium">Nav</span>
-      </router-link>
+    <div class="navbar-inner max-w-1440px h-60px mx-auto px-4 md:px-8 flex items-center justify-between">
+      <div class="flex items-center gap-6">
+        <router-link to="/" class="navbar-brand flex items-center gap-2">
+          <img src="/logo.svg" alt="Jie Hub Logo" class="w-8 h-8 flex-shrink-0" />
+          <span class="font-bold text-lg tracking-tight">Jie Hub</span>
+          <span class="navbar-badge text-xs px-2 py-0.5 rounded-full font-medium">Nav</span>
+        </router-link>
 
-      <!-- 桌面端导航（无 Emoji 图标） -->
-      <nav class="navbar-nav desktop-nav hidden md:flex items-center gap-8 h-full">
-        <a
-          v-for="item in navItems"
-          :key="item.id"
-          :href="`#category-${item.id}`"
-          class="nav-link flex items-center h-full"
-          :class="{ 'is-active': activeSection === item.id }"
-          @click.prevent="scrollToCategory(item.id)"
-        >
-          {{ item.label }}
-        </a>
+        <!-- 桌面端两大顶级大类切换 Tabs -->
+        <nav class="nav-mode-tabs hidden md:flex items-center p-1 rounded-xl" aria-label="导航模式切换">
+          <button
+            type="button"
+            class="mode-tab-btn flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all cursor-pointer"
+            :class="{ 'is-active': currentNavMode === 'system' }"
+            @click="switchNavMode('system')"
+          >
+            系统导航
+          </button>
+          <button
+            type="button"
+            class="mode-tab-btn flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all cursor-pointer"
+            :class="{ 'is-active': currentNavMode === 'bookmarks' }"
+            @click="switchNavMode('bookmarks')"
+          >
+            <span>收藏导航</span>
+            <span
+              v-if="customCount > 0"
+              class="tab-count-badge text-xs px-1.5 py-0.2 rounded-full font-medium"
+            >
+              {{ customCount }}
+            </span>
+          </button>
+        </nav>
+      </div>
 
+      <!-- 桌面端右侧操作区 -->
+      <div class="nav-right hidden md:flex items-center gap-5">
         <a
           href="https://github.com/Ckangjie/minimalist-web"
           target="_blank"
           rel="noopener noreferrer"
-          class="nav-link nav-ext-link flex items-center h-full"
+          class="nav-link nav-ext-link flex items-center"
         >
           GitHub
         </a>
-
-        <!-- 无边框无阴影纯净主题切换 -->
         <ThemeToggle />
-      </nav>
+      </div>
 
       <!-- 移动端操作栏 -->
       <div class="flex items-center gap-3 md:hidden">
-        <!-- 移动端顶部主题切换 -->
         <ThemeToggle />
-
         <button
           class="navbar-toggle"
           :class="{ 'is-active': isMenuOpen }"
@@ -76,17 +89,24 @@
           </button>
         </div>
 
-        <nav class="mobile-menu__nav p-4 flex flex-col gap-2 flex-1">
+        <!-- 移动端子分类导航（仅展示系统导航） -->
+        <nav class="mobile-menu__nav p-3 flex flex-col gap-1.5 flex-1 overflow-y-auto">
+          <div class="px-2 py-1 text-xs font-semibold text-muted">
+            系统导航
+          </div>
           <a
-            v-for="item in navItems"
+            v-for="item in mobileNavItems"
             :key="item.id"
             :href="`#category-${item.id}`"
-            class="mobile-link"
+            class="mobile-link flex items-center justify-between"
             :class="{ 'is-active': activeSection === item.id }"
             @click.prevent="scrollToCategory(item.id)"
           >
-            {{ item.label }}
+            <span class="truncate">{{ item.label }}</span>
+            <span class="text-xs opacity-50">{{ item.count }}</span>
           </a>
+
+          <div class="my-2 border-t border-[var(--border-color)]"></div>
           <a
             href="https://github.com/Ckangjie/minimalist-web"
             target="_blank"
@@ -110,16 +130,29 @@
 
 <script setup>
 import ThemeToggle from "@/components/ThemeToggle.vue";
-import { onMounted, onUnmounted, ref, watch } from "vue";
+import { useBookmarks } from "@/composables/useBookmarks";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
-const navItems = [
-  { id: "dev-tools", label: "开发工具" },
-  { id: "ai-hub", label: "AI 工具" },
-  { id: "design-assets", label: "设计素材" },
-  { id: "media-leisure", label: "影视娱乐" }
-];
+const { currentNavMode, activeCategories, systemCategories, customCount, switchNavMode } = useBookmarks();
 
-const activeSection = ref("dev-tools");
+// 移动端专用：固定仅展示系统导航的子分类
+const mobileNavItems = computed(() => {
+  return systemCategories.map((cat) => ({
+    id: cat.id,
+    label: cat.name,
+    count: cat.items?.length || 0
+  }));
+});
+
+const subNavItems = computed(() => {
+  return activeCategories.value.map((cat) => ({
+    id: cat.id,
+    label: cat.name,
+    count: cat.items?.length || 0
+  }));
+});
+
+const activeSection = ref(subNavItems.value[0]?.id ?? "dev-tools");
 const isMenuOpen = ref(false);
 
 let isManualScrolling = false;
@@ -133,7 +166,7 @@ const closeMenu = () => {
   isMenuOpen.value = false;
 };
 
-// 锚点跳转（参考 VitePress/Docusaurus 成熟方案：平滑滚动期间加锁，杜绝中间视口频繁跳动）
+// 锚点跳转（平滑滚动锁）
 const scrollToCategory = (id) => {
   activeSection.value = id;
   isManualScrolling = true;
@@ -170,7 +203,7 @@ watch(isMenuOpen, (open) => {
   document.body.style.overflow = open ? "hidden" : "";
 });
 
-// 确定性的视口滚动监听（rAF 节流 + 触底保护）
+// 确定性的视口滚动监听
 let ticking = false;
 const handleScrollSpy = () => {
   if (isManualScrolling) return;
@@ -182,19 +215,23 @@ const handleScrollSpy = () => {
         return;
       }
 
-      const scrollY = window.scrollY;
-      const headerOffset = 90;
-
-      // 触底判定：若已滚动到页面最底端，自动聚焦最后一个分类
-      if (window.innerHeight + scrollY >= document.documentElement.scrollHeight - 50) {
-        activeSection.value = navItems[navItems.length - 1].id;
+      const items = subNavItems.value;
+      if (!items.length) {
         ticking = false;
         return;
       }
 
-      // 从后往前查找顶部当前所在的板块
-      for (let i = navItems.length - 1; i >= 0; i--) {
-        const item = navItems[i];
+      const scrollY = window.scrollY;
+      const headerOffset = 90;
+
+      if (window.innerHeight + scrollY >= document.documentElement.scrollHeight - 50) {
+        activeSection.value = items[items.length - 1].id;
+        ticking = false;
+        return;
+      }
+
+      for (let i = items.length - 1; i >= 0; i--) {
+        const item = items[i];
         const el = document.getElementById(`category-${item.id}`);
         if (el) {
           const top = el.offsetTop - headerOffset;
@@ -206,7 +243,7 @@ const handleScrollSpy = () => {
         }
       }
 
-      activeSection.value = navItems[0].id;
+      activeSection.value = items[0].id;
       ticking = false;
     });
     ticking = true;
@@ -245,24 +282,42 @@ onUnmounted(() => {
   }
 }
 
+/* 顶部两大类切换 Tab */
+.nav-mode-tabs {
+  background-color: var(--bg-surface-soft);
+  border: 1px solid var(--border-color);
+
+  .mode-tab-btn {
+    border: none;
+    background: transparent;
+    color: var(--text-regular);
+
+    &:hover {
+      color: var(--text-primary);
+    }
+
+    &.is-active {
+      background-color: var(--bg-surface);
+      color: var(--primary-color);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+  }
+
+  .tab-count-badge {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+  }
+}
+
 .nav-link {
-  position: relative;
   font-size: 14px;
   color: var(--text-regular);
-  cursor: pointer;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s ease;
-  user-select: none;
-  padding: 0 4px;
 
   &:hover {
     color: var(--primary-color);
-  }
-
-  &.is-active {
-    color: var(--primary-color);
-    font-weight: 600;
   }
 }
 
@@ -300,11 +355,12 @@ onUnmounted(() => {
   }
 }
 
-/* 移动端遮罩与从左侧滑出的抽屉 */
+/* 移动端抽屉 */
 .mobile-menu-mask {
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
   z-index: 998;
   opacity: 0;
   visibility: hidden;
@@ -316,61 +372,72 @@ onUnmounted(() => {
   }
 }
 
-.mobile-menu.from-left {
+.mobile-menu {
   position: fixed;
   top: 0;
-  left: 0; // 从左侧滑出
-  right: auto;
   bottom: 0;
   width: 280px;
   max-width: 80vw;
   background-color: var(--bg-surface);
-  border-right: 1px solid var(--border-color);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
   z-index: 999;
-  transform: translateX(-100%); // 默认隐藏在左侧屏幕外
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &.from-left {
+    left: 0;
+    transform: translateX(-100%);
+  }
 
   &.is-open {
-    transform: translateX(0); // 滑入屏幕
+    transform: translateX(0);
   }
 
-  .mobile-menu__header {
+  &__header {
     border-color: var(--border-color);
     color: var(--text-primary);
-  }
-
-  .mobile-drawer-footer {
-    border-color: var(--border-color);
-
-    .footer-label {
-      color: var(--text-regular);
-    }
   }
 }
 
 .close-drawer-btn {
   background: transparent;
   border: none;
-  color: var(--text-muted);
   font-size: 18px;
+  color: var(--text-muted);
   cursor: pointer;
-  padding: 4px;
+  padding: 4px 8px;
+
+  &:hover {
+    color: var(--text-primary);
+  }
 }
 
 .mobile-link {
-  color: var(--text-regular);
-  font-size: 15px;
   padding: 10px 14px;
+  font-size: 14px;
+  color: var(--text-regular);
+  text-decoration: none;
   border-radius: 8px;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
 
-  &:hover,
+  &:hover {
+    background-color: var(--bg-surface-soft);
+    color: var(--primary-color);
+  }
+
   &.is-active {
     background-color: var(--primary-light);
     color: var(--primary-color);
     font-weight: 600;
+  }
+}
+
+.mobile-drawer-footer {
+  border-color: var(--border-color);
+
+  .footer-label {
+    color: var(--text-muted);
   }
 }
 </style>
