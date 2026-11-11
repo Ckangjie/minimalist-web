@@ -6,7 +6,7 @@ compatibility_flags = ["nodejs_compat"]
 
 # 域名与边缘路由规则（必须位于顶层，不能放在数组表格下方）
 routes = [
-  { pattern = "du1.ccwu.cc/api/*", zone_name = "ccwu.cc" }
+  { pattern = "du1.ccwu.cc/api/*", zone_name = "du1.ccwu.cc" }
 ]
 
 # Cloudflare D1 关系型数据库绑定

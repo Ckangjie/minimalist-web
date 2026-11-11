@@ -5,9 +5,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
+import { getUserInfo } from "@/api/user";
 
-const userName = ref("");
+const USER_NAME_STORAGE_KEY = "cached_user_name";
+const userName = ref(localStorage.getItem(USER_NAME_STORAGE_KEY) ?? "");
 
 // 纯派生问候文案，文字无多余修饰
 const greetingText = computed(() => {
@@ -17,10 +19,10 @@ const greetingText = computed(() => {
 // 获取用户信息（读取后端 D1 数据，异常时保持默认 kj）
 const loadUserInfo = async () => {
   try {
-    const res = await fetch("/api/user");
-    const json = await res.json();
-    if (json?.code === 200 && json?.data?.name) {
-      userName.value = json.data.name;
+    const data = await getUserInfo();
+    if (data?.name) {
+      userName.value = data.name;
+      localStorage.setItem(USER_NAME_STORAGE_KEY, data.name);
     }
   } catch (error) {
     console.error("获取用户信息异常:", error);
