@@ -15,7 +15,14 @@ export default defineConfig(({ mode }) => {
       vue(),
       AutoImport({
         imports: ["vue"]
-      })
+      }),
+      {
+        name: "html-title-transform",
+        transformIndexHtml(html) {
+          const title = env.VITE_APP_TITLE || "cloudflare";
+          return html.replace(/%VITE_APP_TITLE%/g, title);
+        }
+      }
     ],
     resolve: {
       alias: {
