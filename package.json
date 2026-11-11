@@ -1,0 +1,14 @@
+{
+  "name": "minimalist-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vue3 + Bun + Hono + Drizzle on Cloudflare Pages & Workers",
+  "scripts": {
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:backend:wrangler": "npm --prefix backend run dev:wrangler",
+    "dev:backend:remote": "npm --prefix backend run dev:remote",
+    "build:frontend": "npm --prefix frontend run build",
+    "deploy:backend": "npm --prefix backend run deploy"
+  }
+}

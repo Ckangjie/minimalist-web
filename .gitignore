@@ -1,0 +1,24 @@
+# 依赖与产物
+node_modules/
+dist/
+.wrangler/
+drizzle/
+
+# 本地数据与日志
+*.db
+*.db-journal
+*.sqlite
+logs/
+uploads/
+
+# 环境变量与密钥凭据 (严禁提交)
+.env
+.env.*
+!.env.example
+*.local
+
+# 编辑器与系统文件
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

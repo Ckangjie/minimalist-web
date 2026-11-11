@@ -1,0 +1,21 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "minimalist-web-backend"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+# 域名与边缘路由规则（必须位于顶层，不能放在数组表格下方）
+routes = [
+  { pattern = "du1.ccwu.cc/api/*", zone_name = "ccwu.cc" }
+]
+
+# Cloudflare D1 关系型数据库绑定
+[[d1_databases]]
+binding = "DB"
+database_name = "minimalist-db"
+database_id = "11abe273-d6af-45ae-8da1-cad2960e990c"
+
+# Cloudflare Workers KV 缓存命名空间绑定
+[[kv_namespaces]]
+binding = "KV"
+id = "42c4b04dda864c919907a66f4ac1a296"
