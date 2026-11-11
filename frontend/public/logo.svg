@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="ckj-grad-primary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563EB" />
+      <stop offset="60%" stop-color="#3B82F6" />
+      <stop offset="100%" stop-color="#60A5FA" />
+    </linearGradient>
+    <linearGradient id="ckj-grad-accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#F97316" />
+    </linearGradient>
+    <filter id="ckj-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.12" flood-color="#1E3A8A" />
+    </filter>
+  </defs>
+
+  <g filter="url(#ckj-shadow)">
+    <!-- 'C' 弧：外层大弧开环，圆润端点 -->
+    <path
+      d="M 68 24 C 42 12, 16 32, 16 54 C 16 76, 42 92, 68 80"
+      stroke="url(#ckj-grad-primary)"
+      stroke-width="7"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+
+    <!-- 'K' 坚实干轴并向下延伸形成 'J' 底部勾画 -->
+    <path
+      d="M 44 26 L 44 68 C 44 76, 36 82, 28 78"
+      stroke="url(#ckj-grad-primary)"
+      stroke-width="6.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+
+    <!-- 'K' 右向开展分支翅膀 -->
+    <path
+      d="M 68 32 L 44 50 L 66 68"
+      stroke="url(#ckj-grad-primary)"
+      stroke-width="6.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+
+    <!-- 焦点亮核 (Accent Node) -->
+    <circle cx="74" cy="50" r="4" fill="url(#ckj-grad-accent)" />
+  </g>
+</svg>

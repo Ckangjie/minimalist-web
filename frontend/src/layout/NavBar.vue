@@ -1,7 +1,10 @@
 <template>
   <header class="navbar">
     <div class="navbar-inner">
-      <router-link to="/" class="navbar-brand">Brand</router-link>
+      <router-link to="/" class="navbar-brand">
+        <img src="/logo.svg" alt="CKJ Logo" class="navbar-logo" />
+        <span>CKJ</span>
+      </router-link>
 
       <button
         class="navbar-toggle"
@@ -34,7 +37,10 @@
         :aria-hidden="!isMenuOpen"
       >
         <div class="mobile-menu__header">
-          <router-link to="/" class="mobile-menu__brand" @click="closeMenu">Brand</router-link>
+          <router-link to="/" class="mobile-menu__brand" @click="closeMenu">
+            <img src="/logo.svg" alt="CKJ Logo" class="navbar-logo" />
+            <span>CKJ</span>
+          </router-link>
         </div>
         <nav class="mobile-menu__nav">
           <router-link to="/" @click="closeMenu">首页</router-link>
@@ -85,10 +91,20 @@ onUnmounted(() => {
   }
 
   &-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     color: $primary-color;
     font-size: 18px;
     font-weight: 700;
     text-decoration: none;
+  }
+
+  &-logo {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    display: block;
   }
 
   &-nav {
@@ -208,9 +224,19 @@ onUnmounted(() => {
   }
 
   &__brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     color: $primary-color;
     font-weight: 600;
     text-decoration: none;
+
+    .navbar-logo {
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+      display: block;
+    }
   }
 
   &__nav {
