@@ -1,6 +1,6 @@
 /**
  * 默认导航数据预设配置
- * 覆盖：开发工具、AI 工具、设计素材、影视娱乐 四大分类
+ * 覆盖：开发工具、编程技术、组件库、JavaScript 库、AI 工具、设计素材、影视娱乐、直播平台 八大分类
  */
 export const DEFAULT_NAV_CATEGORIES = [
   {
@@ -92,6 +92,198 @@ export const DEFAULT_NAV_CATEGORIES = [
         url: "https://msdn.aihao.cc/",
         desc: "微软官方原版 Windows 系统、开发工具与 Office 镜像资源库",
         tag: "镜像"
+      }
+    ]
+  },
+  {
+    id: "programming",
+    name: "编程技术",
+    icon: "💻",
+    description: "算法刷题、技术社区、开发者问答与极客资讯",
+    items: [
+      {
+        id: "leetcode",
+        title: "LeetCode 力扣",
+        url: "https://leetcode.cn",
+        desc: "全球顶尖程序员技术成长与经典算法面试平台",
+        tag: "刷题"
+      },
+      {
+        id: "juejin",
+        title: "稀土掘金",
+        url: "https://juejin.cn",
+        desc: "高质量原创技术分享与前端/后端开发者交流社区",
+        tag: "社区"
+      },
+      {
+        id: "stackoverflow",
+        title: "Stack Overflow",
+        url: "https://stackoverflow.com",
+        desc: "全球最大的程序员技术问答与编程疑难解答平台",
+        tag: "问答"
+      },
+      {
+        id: "v2ex",
+        title: "V2EX",
+        url: "https://www.v2ex.com",
+        desc: "创意工作者、极客与互联网从业者的纯粹交流讨论区",
+        tag: "极客"
+      },
+      {
+        id: "github-trending",
+        title: "GitHub Trending",
+        url: "https://github.com/trending",
+        desc: "探索全球每日与每周最新热门开源项目趋势",
+        tag: "趋势"
+      },
+      {
+        id: "nowcoder",
+        title: "牛客网",
+        url: "https://www.nowcoder.com",
+        desc: "互联网名企真题笔试面经与技术工程师求职交流平台",
+        tag: "求职"
+      },
+      {
+        id: "segmentfault",
+        title: "SegmentFault 思否",
+        url: "https://segmentfault.com",
+        desc: "中文领先的开发者技术交流平台，技术沉淀与问答社区",
+        tag: "社区"
+      },
+      {
+        id: "runoob",
+        title: "菜鸟教程",
+        url: "https://www.runoob.com",
+        desc: "全面丰富的编程基础教程与多语言语法速查手册",
+        tag: "教程"
+      }
+    ]
+  },
+  {
+    id: "ui-components",
+    name: "组件库",
+    icon: "🧩",
+    description: "Vue、React 及跨端现代化前端界面组件库与设计系统",
+    items: [
+      {
+        id: "element-plus",
+        title: "Element Plus",
+        url: "https://element-plus.org/zh-CN/",
+        desc: "基于 Vue 3 的面向设计师和开发者的桌面端组件库",
+        tag: "Vue3"
+      },
+      {
+        id: "ant-design",
+        title: "Ant Design",
+        url: "https://ant.design/index-cn",
+        desc: "企业级产品设计体系与高质量 React UI 组件库",
+        tag: "React"
+      },
+      {
+        id: "shadcn-ui",
+        title: "Shadcn UI",
+        url: "https://ui.shadcn.com",
+        desc: "精美设计、无头化且源码完全受控的现代组件套件",
+        tag: "Tailwind"
+      },
+      {
+        id: "arco-design",
+        title: "Arco Design",
+        url: "https://arco.design",
+        desc: "字节跳动企业级开源设计系统与现代化组件库",
+        tag: "企业级"
+      },
+      {
+        id: "naive-ui",
+        title: "Naive UI",
+        url: "https://www.naiveui.com/zh-CN/os-theme",
+        desc: "基于 Vue 3 的现代化 UI 组件库，全量 TypeScript 支持",
+        tag: "Vue3"
+      },
+      {
+        id: "tailwind-css",
+        title: "Tailwind CSS",
+        url: "https://tailwindcss.com",
+        desc: "实用优先的原子化 CSS 框架，无需脱离 HTML 即可构建现代 UI",
+        tag: "CSS"
+      },
+      {
+        id: "vant",
+        title: "Vant",
+        url: "https://vant-ui.github.io/vant/",
+        desc: "轻量、可靠的移动端 Vue 3 组件库，支持多种移动场景",
+        tag: "移动端"
+      },
+      {
+        id: "uniapp",
+        title: "Uni-app",
+        url: "https://uniapp.dcloud.net.cn",
+        desc: "编写一套代码，发布至微信小程序、App 及 H5 的跨端框架",
+        tag: "跨端"
+      }
+    ]
+  },
+  {
+    id: "js-libraries",
+    name: "JavaScript 库",
+    icon: "⚡",
+    description: "前端框架、状态管理、数据图表与高频实用工具库",
+    items: [
+      {
+        id: "vuejs",
+        title: "Vue.js",
+        url: "https://cn.vuejs.org",
+        desc: "渐进式 JavaScript 框架，易学易用、性能出色且生态繁荣",
+        tag: "框架"
+      },
+      {
+        id: "react",
+        title: "React",
+        url: "https://react.dev",
+        desc: "用于构建现代化 Web 和原生交互界面的主流前端框架",
+        tag: "框架"
+      },
+      {
+        id: "vite",
+        title: "Vite",
+        url: "https://cn.vitejs.dev",
+        desc: "下一代前端开发与构建工具，极速冷启动与毫秒级热更新",
+        tag: "构建"
+      },
+      {
+        id: "pinia",
+        title: "Pinia",
+        url: "https://pinia.vuejs.org/zh/",
+        desc: "Vue 官方推荐的新一代直观、类型安全的状态管理库",
+        tag: "状态"
+      },
+      {
+        id: "axios",
+        title: "Axios",
+        url: "https://axios-http.com",
+        desc: "轻量易用、基于 Promise 的现代浏览器与 Node.js HTTP 客户端",
+        tag: "网络"
+      },
+      {
+        id: "echarts",
+        title: "Apache ECharts",
+        url: "https://echarts.apache.org/zh/index.html",
+        desc: "基于 JavaScript 的开源可视化图表库，涵盖海量商业图表",
+        tag: "图表"
+      },
+      {
+        id: "lodash",
+        title: "Lodash",
+        url: "https://lodash.com",
+        desc: "现代化 JavaScript 实用工具库，提供模块化与高性能函数",
+        tag: "工具"
+      },
+      {
+        id: "dayjs",
+        title: "Day.js",
+        url: "https://day.js.org/zh-CN/",
+        desc: "仅 2KB 大小的轻量级时间与日期解析处理库",
+        tag: "工具"
       }
     ]
   },
@@ -312,6 +504,56 @@ export const DEFAULT_NAV_CATEGORIES = [
         url: "https://549.tv",
         desc: "一站式影视导航聚合，快速定位主流影视与解析站点",
         tag: "导航"
+      }
+    ]
+  },
+  {
+    id: "live-stream",
+    name: "直播平台",
+    icon: "📺",
+    description: "游戏电竞、互动直播、全球赛事与综合娱乐流媒体",
+    items: [
+      {
+        id: "douyu",
+        title: "斗鱼直播",
+        url: "https://www.douyu.com",
+        desc: "头部游戏与电竞直播平台，高清互动与海量游戏主播",
+        tag: "游戏"
+      },
+      {
+        id: "huya",
+        title: "虎牙直播",
+        url: "https://www.huya.com",
+        desc: "热门游戏赛事、电竞独家直播与综合泛娱乐互动平台",
+        tag: "电竞"
+      },
+      {
+        id: "twitch",
+        title: "Twitch",
+        url: "https://www.twitch.tv",
+        desc: "全球顶尖的游戏互动直播社区与全球电竞赛事转播平台",
+        tag: "海外"
+      },
+      {
+        id: "douyin-live",
+        title: "抖音直播",
+        url: "https://live.douyin.com",
+        desc: "抖音网页版直播专区，泛娱乐、知识生活与优质创作者",
+        tag: "综合"
+      },
+      {
+        id: "cc-live",
+        title: "CC 直播",
+        url: "https://cc.163.com",
+        desc: "网易旗下电竞赛事、MMO 与精品游戏直播互动社区",
+        tag: "游戏"
+      },
+      {
+        id: "kuaishou-live",
+        title: "快手直播",
+        url: "https://live.kuaishou.com",
+        desc: "多元化的泛娱乐、生活记录与才艺达人互动直播",
+        tag: "生活"
       }
     ]
   }
