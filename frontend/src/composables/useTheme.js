@@ -1,26 +1,34 @@
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 
 const THEME_STORAGE_KEY = "jie_theme";
 
-// 全局单例响应式状态
-const isDark = ref(false);
+// 同步获取初始主题状态（首帧即刻确定，彻底消除刷新时亮灯闪烁）
+function getInitialTheme() {
+  if (typeof window === "undefined") return false;
+  try {
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    if (savedTheme) {
+      return savedTheme === "dark";
+    }
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  } catch {
+    return false;
+  }
+}
+
+// 全局单例响应式状态（直接同步赋初值，绝不延迟到 onMounted）
+const isDark = ref(getInitialTheme());
+
+// 模块加载即刻同步文档根节点
+if (typeof document !== "undefined") {
+  if (isDark.value) {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
+}
 
 export function useTheme() {
-  const initTheme = () => {
-    try {
-      const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-      if (savedTheme) {
-        isDark.value = savedTheme === "dark";
-      } else {
-        // 跟随系统主题偏好
-        isDark.value = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      }
-      applyTheme();
-    } catch (error) {
-      console.error("初始化主题异常:", error);
-    }
-  };
-
   const applyTheme = () => {
     if (isDark.value) {
       document.documentElement.classList.add("dark");
@@ -29,7 +37,7 @@ export function useTheme() {
     }
   };
 
-  // 现实场景开/关灯切换：无需圆形裁切动画，全站即时响应
+  // 现实场景开/关灯切换：全站即时响应
   const toggleTheme = () => {
     isDark.value = !isDark.value;
     applyTheme();
@@ -40,13 +48,8 @@ export function useTheme() {
     }
   };
 
-  onMounted(() => {
-    initTheme();
-  });
-
   return {
     isDark,
-    toggleTheme,
-    initTheme
+    toggleTheme
   };
 }

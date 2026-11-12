@@ -92,6 +92,76 @@ export const DEFAULT_NAV_CATEGORIES = [
         url: "https://msdn.aihao.cc/",
         desc: "微软官方原版 Windows 系统、开发工具与 Office 镜像资源库",
         tag: "镜像"
+      },
+      {
+        id: "apifox",
+        title: "Apifox",
+        url: "https://apifox.com",
+        desc: "API 文档、API 调试、API Mock、API 自动化测试一体化协作平台",
+        tag: "接口"
+      },
+      {
+        id: "postman",
+        title: "Postman",
+        url: "https://www.postman.com",
+        desc: "全球领先的 API 接口设计、调试与自动化测试开发平台",
+        tag: "接口"
+      },
+      {
+        id: "bundlephobia",
+        title: "Bundlephobia",
+        url: "https://bundlephobia.com",
+        desc: "查询分析 NPM 包的打包体积大小与浏览器端加载耗时",
+        tag: "性能"
+      },
+      {
+        id: "transform-tools",
+        title: "Transform.tools",
+        url: "https://transform.tools",
+        desc: "多语言代码转换神器，支持 JSON转TS、HTML转JSX 等",
+        tag: "转换"
+      },
+      {
+        id: "svgomg",
+        title: "SVGOMG",
+        url: "https://jakearchibald.github.io/svgomg/",
+        desc: "在线 SVG 矢量图极速无损压缩与冗余属性清理利器",
+        tag: "压缩"
+      },
+      {
+        id: "stackblitz",
+        title: "StackBlitz",
+        url: "https://stackblitz.com",
+        desc: "基于 WebContainer 的在线全栈 IDE，秒级启动前端与后端工程",
+        tag: "IDE"
+      },
+      {
+        id: "docker-hub",
+        title: "Docker Hub",
+        url: "https://hub.docker.com",
+        desc: "全球官方容器镜像中心，后端微服务与基础运行环境仓库",
+        tag: "容器"
+      },
+      {
+        id: "crontab-guru",
+        title: "Crontab Guru",
+        url: "https://crontab.guru",
+        desc: "后端定时任务 Cron 表达式可视化在线编辑器与执行时间解析",
+        tag: "定时"
+      },
+      {
+        id: "linux-command",
+        title: "Linux 命令速查",
+        url: "https://wangchujiang.com/linux-command/",
+        desc: "最全的 Linux 常用命令全中文速查手册与实用参数详解",
+        tag: "运维"
+      },
+      {
+        id: "cyberchef",
+        title: "CyberChef",
+        url: "https://gchq.github.io/CyberChef/",
+        desc: "瑞士军刀级万能数据编解码、加密解密与哈希计算套件",
+        tag: "安全"
       }
     ]
   },
