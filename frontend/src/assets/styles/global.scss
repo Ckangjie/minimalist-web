@@ -90,33 +90,6 @@ a {
   flex-direction: column;
 }
 
-/* ========== View Transitions 主题切换动画（暗色层：切暗展开 / 切亮收拢） ========== */
-::view-transition-group(root),
-::view-transition-image-pair(root),
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none !important;
-  mix-blend-mode: normal !important;
-  pointer-events: none;
-}
-
-/* 默认（切至亮色）：旧的暗色图层置顶收拢，露出底层亮色 */
-::view-transition-old(root) {
-  z-index: 9999 !important;
-}
-::view-transition-new(root) {
-  z-index: 1 !important;
-}
-
-/* 切至暗色：新的暗色图层置顶展开，覆盖底层亮色 */
-:root.dark::view-transition-old(root),
-html.dark::view-transition-old(root) {
-  z-index: 1 !important;
-}
-:root.dark::view-transition-new(root),
-html.dark::view-transition-new(root) {
-  z-index: 9999 !important;
-}
 
 /* ========== 全局隐藏滚动条（兼容主流浏览器，保持正常滚动） ========== */
 html,
