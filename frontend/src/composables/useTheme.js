@@ -104,14 +104,14 @@ export function useTheme() {
               offset: 0
             },
             {
-              clipPath: `circle(${Math.round(endRadius * 0.45)}px at ${x}px ${y}px)`,
-              opacity: 0.85,
-              offset: 0.45
+              clipPath: `circle(${Math.round(endRadius * 0.5)}px at ${x}px ${y}px)`,
+              opacity: 0.9,
+              offset: 0.5
             },
             {
-              clipPath: `circle(${Math.round(buttonRadius * 2.5)}px at ${x}px ${y}px)`,
-              opacity: 0.5,
-              offset: 0.75
+              clipPath: `circle(${Math.round(buttonRadius * 2)}px at ${x}px ${y}px)`,
+              opacity: 0.6,
+              offset: 0.8
             },
             {
               clipPath: `circle(${buttonRadius}px at ${x}px ${y}px)`,
@@ -121,8 +121,8 @@ export function useTheme() {
           ];
 
       const anim = document.documentElement.animate(keyframes, {
-        duration: isGoingDark ? 380 : 520, // 收拢阶段放缓至 520ms，留出充足舒适的渐变过渡过程
-        easing: isGoingDark ? "ease-out" : "cubic-bezier(0.22, 1, 0.36, 1)",
+        duration: isGoingDark ? 380 : 520,
+        easing: isGoingDark ? "ease-out" : "cubic-bezier(0.4, 0, 0.2, 1)", // 采用均衡平滑曲线，杜绝前段极速塌缩
         fill: "forwards",
         pseudoElement: isGoingDark
           ? "::view-transition-new(root)"
