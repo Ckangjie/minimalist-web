@@ -3,7 +3,7 @@
     <div class="navbar-inner max-w-1440px h-60px mx-auto px-4 md:px-8 flex items-center justify-between">
       <div class="flex items-center gap-6">
         <router-link to="/" class="navbar-brand flex items-center gap-2">
-          <img src="/logo.svg" alt="Jie Hub Logo" class="w-8 h-8 flex-shrink-0" />
+          <img src="/logo.svg?v=4" alt="Jie Hub Logo" class="w-8 h-8 flex-shrink-0" />
           <span class="font-bold text-lg tracking-tight">Jie Hub</span>
           <span class="navbar-badge text-xs px-2 py-0.5 rounded-full font-medium">Nav</span>
         </router-link>
