@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jie Hub 品牌 Logo 设计方案展厅 - 6 大构型矩阵</title>
+  <title>Jie Hub 品牌 Logo 设计探索方案展厅 — 6 大构型矩阵</title>
   <style>
     :root {
       --bg: #0b0f19;
@@ -12,18 +12,56 @@
       --text: #f3f4f6;
       --text-muted: #9ca3af;
       --accent: #3b82f6;
+      --preview-bg: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
     }
+
+    html.light-preview {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --accent: #2563eb;
+      --preview-bg: radial-gradient(circle at center, #f1f5f9 0%, #e2e8f0 100%);
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       background: var(--bg);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      padding: 40px 20px;
+      padding: 40px 20px 80px;
+      transition: background 0.3s ease, color 0.3s ease;
     }
     .header {
       max-width: 1100px;
-      margin: 0 auto 40px;
+      margin: 0 auto 36px;
       text-align: center;
+      position: relative;
+    }
+    .top-controls {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .toggle-preview-btn {
+      padding: 8px 16px;
+      border-radius: 9999px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .toggle-preview-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
     }
     .badge {
       display: inline-block;
@@ -34,7 +72,7 @@
       font-size: 13px;
       margin-bottom: 12px;
     }
-    h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+    h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
     p.subtitle { color: var(--text-muted); font-size: 15px; }
     .grid {
       display: grid;
@@ -51,17 +89,17 @@
       display: flex;
       flex-direction: column;
       gap: 16px;
-      transition: all 0.25s ease;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
       position: relative;
     }
     .card:hover {
       border-color: var(--accent);
       transform: translateY(-4px);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
     }
     .card.is-active {
       border-color: #3b82f6;
-      background: linear-gradient(180deg, #162032 0%, #111827 100%);
+      box-shadow: 0 0 0 1px #3b82f6, 0 12px 30px rgba(59, 130, 246, 0.15);
     }
     .current-badge {
       position: absolute;
@@ -70,195 +108,324 @@
       background: #10b981;
       color: #fff;
       font-size: 11px;
-      padding: 2px 8px;
-      border-radius: 10px;
+      padding: 3px 10px;
+      border-radius: 12px;
       font-weight: 600;
     }
     .preview-box {
       width: 100%;
       height: 180px;
-      background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+      background: var(--preview-bg);
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid #1e293b;
+      border: 1px solid var(--border);
+      transition: background 0.3s ease;
     }
     .preview-box svg {
       width: 100px;
       height: 100px;
+      transition: transform 0.3s ease;
     }
-    .card-meta h3 { font-size: 18px; margin-bottom: 6px; }
-    .card-meta p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
-    .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-    .tag { font-size: 11px; background: #1f2937; padding: 2px 8px; border-radius: 6px; color: #94a3b8; }
+    .card:hover .preview-box svg {
+      transform: scale(1.08);
+    }
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+    }
+    .card-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      flex: 1;
+    }
+    .card-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .btn {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #10b981;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 9999px;
+      font-size: 14px;
+      font-weight: 600;
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 9999;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
+
   <div class="header">
-    <div class="badge">Brand Identity Design Matrix</div>
-    <h1>Jie Hub 品牌 Logo 创意矩阵</h1>
-    <p class="subtitle">围绕关键词 "jie"（捷/杰/界）与 "Hub"（枢纽/连接）构思的 6 大矢量视觉形态</p>
+    <div class="top-controls">
+      <button class="toggle-preview-btn" onclick="toggleCanvasTheme()">
+        🌓 切换底色对比 (Dark / Light)
+      </button>
+    </div>
+    <span class="badge">Logo Generator · 极简美学探索</span>
+    <h1>Jie Hub 品牌 Logo 方案矩阵</h1>
+    <p class="subtitle">以 'jie' (J / 枢纽 Hub / 连接) 为核心意象构建的 6 种不同设计语言构型</p>
   </div>
 
   <div class="grid">
-    <!-- 方案 1: 主选方案 -->
-    <div class="card is-active">
-      <span class="current-badge">✓ 当前主选</span>
+    <!-- 方案 1: Void Orbit J (当前项目默认采用方案) -->
+    <div class="card is-active" id="card-v1">
+      <span class="current-badge">旗舰采用款</span>
       <div class="preview-box">
-        <svg viewBox="0 0 100 100" fill="none">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
           <defs>
-            <linearGradient id="p1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#06B6D4" />
-              <stop offset="50%" stop-color="#3B82F6" />
-              <stop offset="100%" stop-color="#7C3AED" />
+            <linearGradient id="v1-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#06B6D4"/>
+              <stop offset="50%" stop-color="#3B82F6"/>
+              <stop offset="100%" stop-color="#6366F1"/>
             </linearGradient>
-            <linearGradient id="p1-accent" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#F59E0B" />
-              <stop offset="100%" stop-color="#F43F5E" />
+            <linearGradient id="v1-accent" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#F59E0B"/>
+              <stop offset="100%" stop-color="#EF4444"/>
             </linearGradient>
           </defs>
-          <path d="M 68 28 C 78 40, 78 62, 64 74 C 50 86, 26 84, 18 68 C 12 56, 16 38, 30 26 C 36 20, 46 16, 56 18" stroke="url(#p1)" stroke-width="5" stroke-linecap="round" stroke-dasharray="88 12" opacity="0.45" />
-          <path d="M 52 22 L 52 62 C 52 74, 42 82, 30 78 C 22 75, 18 66, 20 58" stroke="url(#p1)" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M 36 34 L 68 34 L 52 50 L 72 70" stroke="url(#p1)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.85" />
-          <circle cx="74" cy="24" r="5" fill="url(#p1-accent)" />
+          <path d="M 68 28 C 82 42, 82 66, 66 80 C 50 94, 24 92, 14 74 C 6 58, 12 36, 28 22 C 38 14, 52 14, 62 18" stroke="url(#v1-grad)" stroke-width="4.2" stroke-linecap="round" opacity="0.4"/>
+          <path d="M 52 24 L 52 64 C 52 74, 42 82, 30 78 C 22 75, 18 66, 20 58" stroke="url(#v1-grad)" stroke-width="6.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M 38 36 L 70 36 L 54 52 L 74 72" stroke="url(#v1-grad)" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+          <circle cx="72" cy="24" r="5" fill="url(#v1-accent)"/>
+          <circle cx="72" cy="24" r="8" stroke="url(#v1-accent)" stroke-width="1.5" opacity="0.4"/>
         </svg>
       </div>
-      <div class="card-meta">
-        <h3>方案一：Hub Orbital J (星轨互联)</h3>
-        <p>开环外层轨道代表开放生态，核心 'J' 字符干轴沉稳有力，搭配右上角能量焦点光核，寓意多端高效聚合中枢。</p>
-        <div class="tags">
-          <span class="tag">动态星轨</span>
-          <span class="tag">高辨识度</span>
-          <span class="tag">科技蓝紫</span>
-        </div>
+      <div class="card-title">
+        1. 极简负空间轨道 (Void Orbit J)
+        <span class="tag">Pure Geometric</span>
+      </div>
+      <div class="card-desc">
+        结合极简主义大师原则，以精算开环与负空间切割构建字母 "J"，右上悬浮能量枢纽微核，并融合折线速度感，兼备结构稳定性与现代灵动感。
+      </div>
+      <div class="card-actions">
+        <button class="btn" onclick="copySvg('card-v1')">复制 SVG 代码</button>
       </div>
     </div>
 
-    <!-- 方案 2: 单线连续莫比乌斯环 -->
-    <div class="card">
+    <!-- 方案 2: Dot Matrix Jie -->
+    <div class="card" id="card-v2">
       <div class="preview-box">
-        <svg viewBox="0 0 100 100" fill="none">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
           <defs>
-            <linearGradient id="p2" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#38BDF8" />
-              <stop offset="100%" stop-color="#6366F1" />
+            <linearGradient id="v2-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#38BDF8"/>
+              <stop offset="100%" stop-color="#818CF8"/>
             </linearGradient>
           </defs>
-          <path d="M 30 25 C 55 25, 75 45, 75 60 C 75 75, 55 85, 40 75 C 25 65, 30 40, 50 35 C 65 30, 75 20, 80 15" stroke="url(#p2)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
-          <circle cx="30" cy="25" r="4.5" fill="#38BDF8" />
+          <g fill="url(#v2-grad)">
+            <circle cx="50" cy="18" r="4.5" fill="#F59E0B"/>
+            <circle cx="50" cy="30" r="4"/>
+            <circle cx="50" cy="41" r="4"/>
+            <circle cx="50" cy="52" r="4"/>
+            <circle cx="50" cy="63" r="4"/>
+            <circle cx="45" cy="73" r="3.8"/>
+            <circle cx="36" cy="78" r="3.5"/>
+            <circle cx="26" cy="74" r="3.2"/>
+            <circle cx="21" cy="65" r="2.8"/>
+            <circle cx="63" cy="36" r="3.2" opacity="0.8"/>
+            <circle cx="75" cy="46" r="3.5" opacity="0.9"/>
+            <circle cx="83" cy="60" r="2.8" opacity="0.6"/>
+            <circle cx="68" cy="60" r="3" opacity="0.75"/>
+            <circle cx="76" cy="72" r="2.2" opacity="0.5"/>
+          </g>
         </svg>
       </div>
-      <div class="card-meta">
-        <h3>方案二：Monoline Infinity (单线无穷极)</h3>
-        <p>一笔绘制出 'J' 与莫比乌斯环形态，象征跨设备数据无界流转与云端持续互通。</p>
-        <div class="tags">
-          <span class="tag">极简单线</span>
-          <span class="tag">莫比乌斯</span>
-          <span class="tag">流畅灵动</span>
-        </div>
+      <div class="card-title">
+        2. 点阵量子拓扑 (Dot Matrix Jie)
+        <span class="tag">Dot Matrix</span>
+      </div>
+      <div class="card-desc">
+        遵循点阵系统范式，以离散递变微点描绘 J 字符轨迹并向外散开，呈现分布式网络节点聚合的科技意象。
+      </div>
+      <div class="card-actions">
+        <button class="btn" onclick="copySvg('card-v2')">复制 SVG 代码</button>
       </div>
     </div>
 
-    <!-- 方案 3: 负空间相交几何 -->
-    <div class="card">
+    <!-- 方案 3: Twin Orbitals -->
+    <div class="card" id="card-v3">
       <div class="preview-box">
-        <svg viewBox="0 0 100 100" fill="none">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
           <defs>
-            <linearGradient id="p3" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#2563EB" />
-              <stop offset="100%" stop-color="#3B82F6" />
+            <linearGradient id="v3-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#0EA5E9"/>
+              <stop offset="100%" stop-color="#6366F1"/>
             </linearGradient>
           </defs>
-          <rect x="22" y="22" width="56" height="56" rx="14" fill="url(#p3)" />
-          <path d="M 58 34 L 58 58 C 58 66, 52 70, 44 68 C 38 66, 36 60, 36 56" stroke="#0F172A" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
-          <circle cx="58" cy="30" r="3" fill="#60A5FA" />
+          <path d="M 64 18 A 38 38 0 1 0 84 62" stroke="url(#v3-grad)" stroke-width="3" stroke-linecap="round" opacity="0.4"/>
+          <path d="M 52 18 L 52 64 A 20 20 0 0 1 20 64" stroke="url(#v3-grad)" stroke-width="5" stroke-linecap="round"/>
+          <path d="M 38 38 L 74 38 L 56 56 L 76 76" stroke="url(#v3-grad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>
+          <circle cx="76" cy="22" r="4.5" fill="#10B981"/>
         </svg>
       </div>
-      <div class="card-meta">
-        <h3>方案三：Punched Rounded Node (圆角雕琢)</h3>
-        <p>扎实的圆角胶囊容器，利用负空间雕刻出坚实平滑的 'J' 形结构，端庄沉稳，在微小尺寸下亦极其清晰。</p>
-        <div class="tags">
-          <span class="tag">负空间</span>
-          <span class="tag">扎实稳健</span>
-          <span class="tag">小图标友好</span>
-        </div>
+      <div class="card-title">
+        3. 双轨几何加速环 (Twin Orbitals)
+        <span class="tag">Line System</span>
+      </div>
+      <div class="card-desc">
+        双重同心弧环与平行线构成的线条系统，内轨平滑回转咬合，视觉节奏干净利落，具备极高的边缘运算与网络加速意象。
+      </div>
+      <div class="card-actions">
+        <button class="btn" onclick="copySvg('card-v3')">复制 SVG 代码</button>
       </div>
     </div>
 
-    <!-- 方案 4: 拓扑节点网络 -->
-    <div class="card">
+    <!-- 方案 4: Prism Nexus -->
+    <div class="card" id="card-v4">
       <div class="preview-box">
-        <svg viewBox="0 0 100 100" fill="none">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
           <defs>
-            <linearGradient id="p4" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#10B981" />
-              <stop offset="100%" stop-color="#3B82F6" />
+            <linearGradient id="v4-grad-a" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#3B82F6"/>
+              <stop offset="100%" stop-color="#1D4ED8"/>
+            </linearGradient>
+            <linearGradient id="v4-grad-b" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#60A5FA"/>
+              <stop offset="100%" stop-color="#3B82F6"/>
             </linearGradient>
           </defs>
-          <path d="M 30 35 L 50 20 L 70 35 L 50 65 L 30 75" stroke="url(#p4)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
-          <circle cx="30" cy="35" r="5" fill="#10B981" />
-          <circle cx="50" cy="20" r="6" fill="#3B82F6" />
-          <circle cx="70" cy="35" r="5" fill="#6366F1" />
-          <circle cx="50" cy="65" r="5.5" fill="#3B82F6" />
-          <circle cx="30" cy="75" r="4.5" fill="#10B981" />
+          <polygon points="50,14 78,30 78,54 50,38" fill="url(#v4-grad-b)" opacity="0.9"/>
+          <polygon points="22,30 50,46 50,78 22,62" fill="url(#v4-grad-a)"/>
+          <path d="M 50 46 L 50 78 C 50 86, 38 90, 30 84" stroke="#93C5FD" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="50" cy="14" r="4.5" fill="#F43F5E"/>
         </svg>
       </div>
-      <div class="card-meta">
-        <h3>方案四：Topology Network (拓扑节点)</h3>
-        <p>通过多节点连线隐喻开发工具、AI、设计与多媒体四大模块的高速拓扑互联。</p>
-        <div class="tags">
-          <span class="tag">拓扑图谱</span>
-          <span class="tag">节点相连</span>
-          <span class="tag">极客范</span>
-        </div>
+      <div class="card-title">
+        4. 晶体等轴棱镜 (Prism Nexus)
+        <span class="tag">Geometry + Line</span>
+      </div>
+      <div class="card-desc">
+        以 45° 轴测晶体多边形穿插为核心，结构严丝合缝，传递坚实可靠、模块化可组装的工程师工程文化。
+      </div>
+      <div class="card-actions">
+        <button class="btn" onclick="copySvg('card-v4')">复制 SVG 代码</button>
       </div>
     </div>
 
-    <!-- 方案 5: 六边形蜂巢 Hub -->
-    <div class="card">
+    <!-- 方案 5: Binary Fusion -->
+    <div class="card" id="card-v5">
       <div class="preview-box">
-        <svg viewBox="0 0 100 100" fill="none">
-          <polygon points="50,16 80,32 80,68 50,84 20,68 20,32" stroke="#3B82F6" stroke-width="4.5" stroke-linejoin="round" fill="rgba(59, 130, 246, 0.08)" />
-          <path d="M 52 30 L 52 60 C 52 68, 44 72, 36 68" stroke="#60A5FA" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
-          <circle cx="52" cy="26" r="3.5" fill="#F59E0B" />
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+          <defs>
+            <linearGradient id="v5-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#EC4899"/>
+              <stop offset="50%" stop-color="#8B5CF6"/>
+              <stop offset="100%" stop-color="#3B82F6"/>
+            </linearGradient>
+          </defs>
+          <path d="M 54 20 C 64 20, 64 36, 54 36 C 44 36, 44 50, 48 64 C 52 76, 38 84, 28 80 C 18 76, 18 64, 26 58 C 34 52, 38 58, 40 64" stroke="url(#v5-grad)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="56" cy="20" r="5" fill="#F59E0B"/>
+          <circle cx="74" cy="52" r="7" fill="url(#v5-grad)" opacity="0.8"/>
+          <path d="M 50 56 Q 62 52, 74 52" stroke="url(#v5-grad)" stroke-width="2.5" stroke-dasharray="3 3"/>
         </svg>
       </div>
-      <div class="card-meta">
-        <h3>方案五：Hexagon Cyber Matrix (赛博六边形)</h3>
-        <p>六边形坚固架构契合 Cloudflare 边缘计算与分布式网络意向，内嵌 J 字核心标识。</p>
-        <div class="tags">
-          <span class="tag">六边形</span>
-          <span class="tag">边缘架构</span>
-          <span class="tag">对称美学</span>
-        </div>
+      <div class="card-title">
+        5. 双核流体共生 (Binary Fusion)
+        <span class="tag">Node + Flow</span>
+      </div>
+      <div class="card-desc">
+        流体态贝塞尔顺滑桥接双核，具有有机生命体质感，象征现代 AI 时代柔性计算与人机协同。
+      </div>
+      <div class="card-actions">
+        <button class="btn" onclick="copySvg('card-v5')">复制 SVG 代码</button>
       </div>
     </div>
 
-    <!-- 方案 6: 纯粹极速弧光 -->
-    <div class="card">
+    <!-- 方案 6: Continuous Ribbon -->
+    <div class="card" id="card-v6">
       <div class="preview-box">
-        <svg viewBox="0 0 100 100" fill="none">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
           <defs>
-            <linearGradient id="p6" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#F43F5E" />
-              <stop offset="100%" stop-color="#8B5CF6" />
+            <linearGradient id="v6-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#00F2FE"/>
+              <stop offset="100%" stop-color="#4FACFE"/>
             </linearGradient>
           </defs>
-          <path d="M 64 20 C 64 20, 64 62, 64 68 C 64 80, 48 86, 34 78 C 24 72, 26 60, 26 60" stroke="url(#p6)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
-          <circle cx="42" cy="24" r="5" fill="#F43F5E" />
+          <path d="M 54 18 L 54 62 C 54 76, 40 84, 28 78 C 18 72, 20 60, 30 58 C 42 56, 58 64, 72 50 C 82 40, 78 26, 64 26 C 52 26, 44 34, 46 44" stroke="url(#v6-grad)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="54" cy="18" r="4" fill="#00F2FE"/>
         </svg>
       </div>
-      <div class="card-meta">
-        <h3>方案六：Speed Arc J (极速光弧)</h3>
-        <p>去粗取精，极致纯粹的弧度勾勒，搭配独立的悬浮视觉原点，简洁高雅。</p>
-        <div class="tags">
-          <span class="tag">极简纯粹</span>
-          <span class="tag">高张力</span>
-          <span class="tag">时尚利落</span>
-        </div>
+      <div class="card-title">
+        6. 一笔流光环线 (Continuous Ribbon)
+        <span class="tag">Extreme Simplicity</span>
+      </div>
+      <div class="card-desc">
+        一笔贯通连续曲线，暗合 "j"、"i"、"e" 字母韵律，动线轻盈饱满，展现无限生长与持续延展的生命周期。
+      </div>
+      <div class="card-actions">
+        <button class="btn" onclick="copySvg('card-v6')">复制 SVG 代码</button>
       </div>
     </div>
   </div>
+
+  <div id="toast" class="toast">SVG 代码已复制到剪贴板</div>
+
+  <script>
+    function toggleCanvasTheme() {
+      document.documentElement.classList.toggle('light-preview');
+    }
+
+    function copySvg(cardId) {
+      const card = document.getElementById(cardId);
+      const svg = card.querySelector('svg');
+      if (svg) {
+        navigator.clipboard.writeText(svg.outerHTML).then(() => {
+          showToast('SVG 代码已复制到剪贴板！');
+        }).catch(() => {
+          showToast('复制失败，请手动右键查看源代码。');
+        });
+      }
+    }
+
+    function showToast(text) {
+      const toast = document.getElementById('toast');
+      toast.textContent = text;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+  </script>
 </body>
 </html>

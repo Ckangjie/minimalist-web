@@ -58,7 +58,6 @@ body {
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #app {
@@ -91,29 +90,44 @@ a {
   flex-direction: column;
 }
 
-/* ========== 自定义精致滚动条样式（匹配全局主题） ========== */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* ========== View Transitions 主题切换动画（暗色层：切暗展开 / 切亮收拢） ========== */
+::view-transition-group(root),
+::view-transition-image-pair(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none !important;
+  mix-blend-mode: normal !important;
+  pointer-events: none;
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
+/* 默认（切至亮色）：旧的暗色图层置顶收拢，露出底层亮色 */
+::view-transition-old(root) {
+  z-index: 9999 !important;
+}
+::view-transition-new(root) {
+  z-index: 1 !important;
 }
 
-::-webkit-scrollbar-thumb {
-  background-color: var(--border-color);
-  border-radius: 4px;
-  border: 2px solid var(--bg-page);
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: var(--text-muted);
-  }
+/* 切至暗色：新的暗色图层置顶展开，覆盖底层亮色 */
+:root.dark::view-transition-old(root),
+html.dark::view-transition-old(root) {
+  z-index: 1 !important;
+}
+:root.dark::view-transition-new(root),
+html.dark::view-transition-new(root) {
+  z-index: 9999 !important;
 }
 
-/* Firefox 支持 */
+/* ========== 全局隐藏滚动条（兼容主流浏览器，保持正常滚动） ========== */
+html,
+body,
 * {
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-color) transparent;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE / Edge */
+
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 }

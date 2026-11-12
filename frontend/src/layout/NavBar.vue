@@ -37,14 +37,6 @@
 
       <!-- 桌面端右侧操作区 -->
       <div class="nav-right hidden md:flex items-center gap-5">
-        <a
-          href="https://github.com/Ckangjie/minimalist-web"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="nav-link nav-ext-link flex items-center"
-        >
-          GitHub
-        </a>
         <ThemeToggle />
       </div>
 
@@ -104,17 +96,6 @@
           >
             <span class="truncate">{{ item.label }}</span>
             <span class="text-xs opacity-50">{{ item.count }}</span>
-          </a>
-
-          <div class="my-2 border-t border-[var(--border-color)]"></div>
-          <a
-            href="https://github.com/Ckangjie/minimalist-web"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="mobile-link"
-            @click="closeMenu"
-          >
-            GitHub 源码
           </a>
         </nav>
 
@@ -309,17 +290,6 @@ onUnmounted(() => {
   }
 }
 
-.nav-link {
-  font-size: 14px;
-  color: var(--text-regular);
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s ease;
-
-  &:hover {
-    color: var(--primary-color);
-  }
-}
 
 /* 汉堡按钮 */
 .navbar-toggle {

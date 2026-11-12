@@ -78,6 +78,20 @@ export const DEFAULT_NAV_CATEGORIES = [
         url: "https://jsoncrack.com/editor",
         desc: "可视化图表生成器，将复杂 JSON 结构图形化展现",
         tag: "工具"
+      },
+      {
+        id: "dnshe",
+        title: "电脑社",
+        url: "https://www.dnshe.com/",
+        desc: "精选优质实用软件、电脑装机必备与技术效率工具分享",
+        tag: "工具"
+      },
+      {
+        id: "msdn-aihao",
+        title: "MSDN 我告诉你",
+        url: "https://msdn.aihao.cc/",
+        desc: "微软官方原版 Windows 系统、开发工具与 Office 镜像资源库",
+        tag: "镜像"
       }
     ]
   },
