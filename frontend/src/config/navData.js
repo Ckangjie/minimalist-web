@@ -362,6 +362,13 @@ export const DEFAULT_NAV_CATEGORIES = [
         url: "https://huggingface.co",
         desc: "全球开源机器学习模型、数据集与 Spaces 应用社区",
         tag: "开源"
+      },
+      {
+        id: "google-stitch",
+        title: "Google Stitch",
+        url: "https://stitch.google.com/",
+        desc: "Google 出品的 AI 原生界面与原型设计画布，自然语言生成高保真 UI",
+        tag: "设计"
       }
     ]
   },

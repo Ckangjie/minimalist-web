@@ -1,70 +1,76 @@
 <template>
   <div
-    class="hanging-bulb-container"
+    class="hanging-bulb-container hidden md:flex"
     :class="{ 'is-lit': !isDark, 'is-pulling': isPulling }"
     :title="isDark ? '拉动灯泡开灯 (切换为亮色模式)' : '拉动灯泡关灯 (切换为暗色模式)'"
     @click="handlePull"
   >
-    <!-- 从天花板垂下的电线/吊绳 -->
+    <!-- 从天花板垂下的金属细吊线 -->
     <div class="bulb-wire"></div>
 
-    <!-- 吊灯主体挂件（随点击有拉扯物理回弹） -->
+    <!-- 吊灯主体挂件（一体化 SVG，严丝合缝无缝咬合） -->
     <div class="bulb-pendant">
-      <!-- 复古金属螺口灯头底座 -->
-      <div class="bulb-socket">
-        <div class="socket-cap"></div>
-        <div class="socket-rings"></div>
-      </div>
+      <!-- 现实开灯柔和光锥漫射（亮灯时照射） -->
+      <div class="bulb-beam"></div>
 
-      <!-- 灯泡主体与光晕层 -->
-      <div class="bulb-body">
-        <!-- 现实开灯漫射锥形柔光场（仅亮灯时呈现） -->
-        <div class="bulb-beam"></div>
+      <!-- 一体化矢量吊灯（金属螺头、玻璃泡、钨丝与拉绳融为一个整体） -->
+      <svg
+        class="bulb-unified-svg"
+        viewBox="0 0 60 94"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <!-- 1. 玻璃灯泡外壳（颈部深入金属底座内部 3px，杜绝断节脱节） -->
+        <path
+          d="M 22 20 L 22 24 C 22 24, 11 36, 11 50 C 11 65, 19 74, 30 74 C 41 74, 49 65, 49 50 C 49 36, 38 24, 38 24 L 38 20 Z"
+          class="bulb-glass"
+        />
 
-        <!-- 高保真矢量玻璃灯泡与钨丝 -->
-        <svg
-          class="bulb-svg"
-          viewBox="0 0 60 84"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <!-- 玻璃球外壳 -->
+        <!-- 2. 内部导电支架与钨丝 -->
+        <g class="bulb-filament">
+          <!-- 支架电极引线 -->
+          <path d="M 25 20 L 26 38 M 35 20 L 34 38" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+          <!-- 钨丝线圈 -->
           <path
-            d="M 18 10 C 18 10, 10 24, 10 38 C 10 52, 22 62, 30 62 C 38 62, 50 52, 50 38 C 50 24, 42 10, 42 10 Z"
-            class="bulb-glass"
-          />
-
-          <!-- 内部导电支架与钨丝 -->
-          <g class="bulb-filament">
-            <!-- 支架电极引线 -->
-            <path d="M 24 10 L 26 28 M 36 10 L 34 28" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
-            <!-- 爱迪生缠绕钨丝线圈 -->
-            <path
-              d="M 26 28 Q 28 22, 30 28 Q 32 34, 34 28"
-              class="filament-coil"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <!-- 亮灯时的核心光核 -->
-            <circle cx="30" cy="28" r="3.5" class="filament-core" />
-          </g>
-
-          <!-- 玻璃表面弧形高光反射（增强立体通透质感） -->
-          <path
-            d="M 16 32 C 16 22, 22 16, 28 14"
-            class="glass-glare"
-            stroke-width="1.6"
+            d="M 26 38 Q 28 32, 30 38 Q 32 44, 34 38"
+            class="filament-coil"
+            stroke-width="1.8"
             stroke-linecap="round"
+            stroke-linejoin="round"
           />
-        </svg>
-      </div>
+          <!-- 亮灯时的通电光核 -->
+          <circle cx="30" cy="38" r="3.5" class="filament-core" />
+        </g>
 
-      <!-- 小巧拉绳坠饰 -->
-      <div class="pull-string">
-        <div class="string-line"></div>
-        <div class="string-bead"></div>
-      </div>
+        <!-- 3. 玻璃反光弧线 -->
+        <path
+          d="M 16 42 C 16 32, 21 26, 27 24"
+          class="glass-glare"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
+
+        <!-- 4. 金属螺口灯头底座（层叠覆盖在灯泡颈部，严丝合缝） -->
+        <g class="bulb-socket-group">
+          <!-- 金属上顶盖 -->
+          <rect x="23" y="2" width="14" height="6" rx="2" class="socket-cap" />
+          <!-- 螺纹金属筒 -->
+          <rect x="20" y="8" width="20" height="14" rx="2" class="socket-body" />
+          <!-- 螺纹螺旋横纹 -->
+          <line x1="20" y1="12" x2="40" y2="12" class="socket-thread" />
+          <line x1="20" y1="16" x2="40" y2="16" class="socket-thread" />
+          <!-- 底座下压密封圈：紧密锁死灯泡颈部 -->
+          <rect x="21" y="20" width="18" height="3" rx="1" class="socket-rim" />
+        </g>
+
+        <!-- 5. 底部拉绳与金属拉珠开关 -->
+        <g class="pull-chain-group">
+          <!-- 细金属珠链吊线 -->
+          <line x1="30" y1="74" x2="30" y2="86" class="chain-line" />
+          <!-- 坠饰拉珠 -->
+          <rect x="28" y="86" width="4" height="6" rx="1.5" class="chain-bead" />
+        </g>
+      </svg>
     </div>
   </div>
 </template>
@@ -90,12 +96,13 @@ const handlePull = () => {
 </script>
 
 <style lang="scss" scoped>
+/* 仅在 PC 端展示，移动端彻底隐藏 */
 .hanging-bulb-container {
+  display: none;
   position: fixed;
   top: 0;
   right: clamp(18px, 4.2vw, 64px);
   z-index: 90;
-  display: flex;
   flex-direction: column;
   align-items: center;
   cursor: pointer;
@@ -103,6 +110,10 @@ const handlePull = () => {
   -webkit-tap-highlight-color: transparent;
   transform-origin: top center;
   transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  @media (min-width: 768px) {
+    display: flex;
+  }
 
   &:hover {
     .bulb-pendant {
@@ -115,69 +126,63 @@ const handlePull = () => {
   }
 }
 
-/* 顶部垂下的坚韧细电线 */
+/* 顶部细电线 */
 .bulb-wire {
   width: 2px;
-  height: clamp(60px, 8vh, 90px);
+  height: clamp(60px, 8vh, 85px);
   background: linear-gradient(180deg, #475569 0%, #334155 100%);
   box-shadow: 1px 0 2px rgba(0, 0, 0, 0.2);
 }
 
 .bulb-pendant {
+  position: relative;
+  width: 48px;
+  height: 75px;
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: center;
   transform-origin: top center;
   transition: filter 0.25s ease;
 }
 
-/* 金属螺口灯头 */
-.bulb-socket {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  .socket-cap {
-    width: 14px;
-    height: 7px;
-    background: #64748b;
-    border-radius: 3px 3px 0 0;
-  }
-
-  .socket-rings {
-    width: 18px;
-    height: 10px;
-    background: repeating-linear-gradient(
-      180deg,
-      #94a3b8 0px,
-      #94a3b8 2px,
-      #475569 2px,
-      #475569 4px
-    );
-    border-radius: 2px;
-  }
-}
-
-/* 灯泡与光场 */
-.bulb-body {
-  position: relative;
-  width: 44px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.bulb-svg {
+.bulb-unified-svg {
   width: 100%;
   height: 100%;
   overflow: visible;
 }
 
+/* 金属灯头底座（一体化金属质感） */
+.socket-cap {
+  fill: #64748b;
+}
+
+.socket-body {
+  fill: #475569;
+}
+
+.socket-thread {
+  stroke: rgba(148, 163, 184, 0.6);
+  stroke-width: 1.4;
+}
+
+.socket-rim {
+  fill: #334155;
+}
+
+/* 拉绳开关 */
+.chain-line {
+  stroke: #64748b;
+  stroke-width: 1.2;
+}
+
+.chain-bead {
+  fill: #94a3b8;
+}
+
 /* 关灯状态（暗色模式） */
 .bulb-glass {
   fill: rgba(148, 163, 184, 0.08);
-  stroke: rgba(148, 163, 184, 0.35);
+  stroke: rgba(148, 163, 184, 0.38);
   stroke-width: 1.5;
   transition: all 0.3s ease;
 }
@@ -200,16 +205,17 @@ const handlePull = () => {
   stroke: rgba(255, 255, 255, 0.2);
 }
 
+/* 现实开灯柔和光锥漫射 */
 .bulb-beam {
   position: absolute;
-  top: 25px;
+  top: 30px;
   left: 50%;
   transform: translateX(-50%);
-  width: 160px;
-  height: 240px;
+  width: 180px;
+  height: 260px;
   background: radial-gradient(
     ellipse at top,
-    rgba(253, 224, 71, 0.2) 0%,
+    rgba(253, 224, 71, 0.22) 0%,
     rgba(250, 204, 21, 0.08) 45%,
     transparent 75%
   );
@@ -217,18 +223,22 @@ const handlePull = () => {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.35s ease;
-  filter: blur(8px);
+  filter: blur(10px);
 }
 
-/* 开灯状态（亮色模式）：现实场景高光通电 */
+/* 开灯状态（亮色模式）：现实场景通电发光 */
 .is-lit {
-  .bulb-body {
+  .bulb-pendant {
     filter: drop-shadow(0 0 16px rgba(250, 204, 21, 0.8))
       drop-shadow(0 0 35px rgba(245, 158, 11, 0.45));
   }
 
+  .socket-body {
+    fill: #78716c;
+  }
+
   .bulb-glass {
-    fill: rgba(254, 240, 138, 0.85);
+    fill: rgba(254, 240, 138, 0.88);
     stroke: #facc15;
     stroke-width: 1.8;
   }
@@ -256,28 +266,7 @@ const handlePull = () => {
   }
 }
 
-/* 吊绳微拉线与金属坠 */
-.pull-string {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: -4px;
-
-  .string-line {
-    width: 1px;
-    height: 14px;
-    background: #64748b;
-  }
-
-  .string-bead {
-    width: 5px;
-    height: 7px;
-    border-radius: 2px;
-    background: #94a3b8;
-  }
-}
-
-/* 现实微风轻微摆动 */
+/* 现实轻微物理摇曳 */
 @keyframes gentle-sway {
   0%,
   100% {

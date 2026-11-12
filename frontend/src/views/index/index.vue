@@ -42,7 +42,7 @@
           <!-- 工具栏：仅在 PC 端展示 -->
           <div class="bookmark-toolbar hidden md:flex items-center justify-between px-1 text-xs">
             <span class="text-muted text-[11px]">
-              {{ currentNavMode === 'system' ? '官方精选系统导航' : `已载入 ${customCount} 个个人本地书签` }}
+              {{ currentNavMode === 'bookmarks' ? `已载入 ${customCount} 个个人本地书签` : '' }}
             </span>
             <div class="flex items-center gap-3">
               <el-tooltip
