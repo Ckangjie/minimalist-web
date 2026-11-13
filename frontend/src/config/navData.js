@@ -1,5 +1,5 @@
 /**
- * 默认导航数据预设配置
+ * 默认系统导航数据预设配置
  * 覆盖：开发工具、编程技术、组件库、JavaScript 库、AI 工具、设计素材、影视娱乐、直播平台 八大分类
  */
 export const DEFAULT_NAV_CATEGORIES = [
@@ -642,4 +642,51 @@ export const SEARCH_ENGINES = [
   { id: "github", name: "GitHub", icon: "🐙", url: "https://github.com/search?q=" },
   { id: "baidu", name: "百度", icon: "🐾", url: "https://www.baidu.com/s?wd=" },
   { id: "bing", name: "Bing", icon: "⚡", url: "https://www.bing.com/search?q=" }
+];
+
+/**
+ * 顶部「导航工具」专属分类数据
+ * 每个工具/资源包对应一个卡片，支持离线包直接下载；附带仓库的显示 GitHub 图标直达源码
+ */
+export const TOOL_NAV_CATEGORIES = [
+  {
+    id: "nav-tools",
+    name: "导航工具",
+    icon: "🧰",
+    description: "自研工具资源包与开源项目集合，支持离线包直接下载与 GitHub 仓库直达",
+    items: [
+      {
+        id: "tool-uni-offline-pack",
+        title: "UniOfflinePack.exe",
+        url: "https://github.com/Ckangjie/uni-packer",
+        downloadUrl: "/resources/UniOfflinePack.exe",
+        downloadName: "UniOfflinePack.exe",
+        repoUrl: "https://github.com/Ckangjie/uni-packer",
+        desc: "零 Android Studio 依赖的 uni-app 本地离线打包工作台，支持环境一键自愈、证书自动嗅探与极速 APK 编译交付",
+        tag: "EXE",
+        icon: "📦"
+      },
+      {
+        id: "tool-bookmark-desk",
+        title: "BookmarkDesk",
+        url: "https://github.com/Ckangjie/bookmark-desk",
+        downloadUrl: "/resources/BookmarkDesk.zip",
+        downloadName: "BookmarkDesk.zip",
+        repoUrl: "https://github.com/Ckangjie/bookmark-desk",
+        desc: "书签管家 BookmarkDesk 是一个本地书签工作台。打开扩展即可在独立标签页里查看、搜索和整理导入的浏览器书签",
+        tag: "ZIP",
+        isZip: true,
+        icon: "📑"
+      },
+      {
+        id: "tool-minimalist-web",
+        title: "Jie Hub 导航项目源码",
+        url: "https://github.com/Ckangjie/minimalist-web",
+        repoUrl: "https://github.com/Ckangjie/minimalist-web",
+        desc: "基于 Vue 3 + UnoCSS + Cloudflare Pages 构建的聚合导航中枢源码仓库",
+        tag: "开源项目",
+        icon: "🐙"
+      }
+    ]
+  }
 ];

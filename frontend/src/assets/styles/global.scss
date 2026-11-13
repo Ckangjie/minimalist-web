@@ -42,16 +42,18 @@ html.dark {
   -webkit-tap-highlight-color: transparent;
 }
 
-html {
-  background-color: var(--bg-page);
+html,
+body {
   width: 100%;
   min-height: 100%;
+}
+
+html {
+  background-color: var(--bg-page);
   scroll-behavior: smooth;
 }
 
 body {
-  width: 100%;
-  min-height: 100%;
   color: var(--text-primary);
   background-color: var(--bg-page);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
@@ -63,7 +65,8 @@ body {
 
 #app {
   width: 100%;
-  min-height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -85,7 +88,7 @@ a {
 /* 全局页面公共根容器：完全自适应包裹所有内容，避免粘性布局失效 */
 .page-container {
   width: 100%;
-  min-height: 100vh;
+  min-height: 100%;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -119,4 +122,14 @@ body,
 ::view-transition-new(root) {
   animation-duration: 0.25s;
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ========== 移动端抽屉打开时，彻底隐藏回到顶部按钮 ========== */
+body.mobile-menu-open .back-to-top,
+body:has(#mobile-nav.is-open) .back-to-top,
+body:has(.mobile-menu-mask.is-show) .back-to-top {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
 }

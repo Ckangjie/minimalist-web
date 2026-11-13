@@ -1,14 +1,14 @@
 <template>
-  <div class="page-container hub-layout min-h-screen flex flex-col">
-    <!-- 粘性顶部导航栏（两大顶级大类切换） -->
-    <NavBar />
-
+  <div class="page-container hub-layout flex-1 flex flex-col">
     <div class="hub-wrapper flex-1 w-full max-w-1440px mx-auto px-4 md:px-8 py-6 flex gap-8 items-start relative">
-      <!-- PC 端左侧固定粘性侧边栏 (Sidebar)：展示当前大类对应的子分类 -->
-      <aside class="hub-sidebar hidden md:flex flex-col w-56 flex-shrink-0 sticky top-[76px] max-h-[calc(100vh-96px)] p-3 rounded-2xl border">
+      <!-- PC 端左侧固定粘性侧边栏 (Sidebar)：展示当前大类对应的子分类（移动端彻底不渲染） -->
+      <aside
+        v-if="currentNavMode !== 'tools' && !isMobile"
+        class="hub-sidebar hidden md:flex flex-col w-56 flex-shrink-0 sticky top-[76px] max-h-[calc(100vh-96px)] p-3 rounded-2xl border"
+      >
         <div class="sidebar-header pb-2 mb-2 border-b flex items-center justify-between">
           <span class="text-xs font-bold text-muted uppercase tracking-wider">
-            {{ currentNavMode === 'system' ? '系统分类' : '收藏目录' }}
+            {{ currentNavMode === 'system' ? '系统分类' : (currentNavMode === 'tools' ? '工具分类' : '收藏目录') }}
           </span>
           <span class="text-xs px-2 py-0.5 rounded-full bg-[var(--primary-light)] text-[var(--primary-color)] font-medium">
             {{ displayCategories.length }}
@@ -35,16 +35,16 @@
 
       <!-- 右侧主内容区 (Main Content) -->
       <main class="hub-main flex-1 min-w-0 flex flex-col gap-6">
-        <!-- 聚合搜索区与轻量书签工具栏 -->
-        <section class="search-section w-full flex flex-col gap-2">
+        <!-- 聚合搜索区与轻量书签工具栏（导航工具模式下不展示） -->
+        <section v-if="currentNavMode !== 'tools'" class="search-section w-full flex flex-col gap-2">
           <SearchBar v-model="searchKeyword" />
 
           <!-- 工具栏：仅在 PC 端展示 -->
           <div class="bookmark-toolbar hidden md:flex items-center justify-between px-1 text-xs">
             <span class="text-muted text-[11px]">
-              {{ currentNavMode === 'bookmarks' ? `已载入 ${customCount} 个个人本地书签` : '' }}
+              {{ currentNavMode === 'bookmarks' ? `已载入 ${customCount} 个个人本地书签` : (currentNavMode === 'tools' ? `已收录 ${toolsCount} 个自研工具及开源项目` : '') }}
             </span>
-            <div class="flex items-center gap-3">
+            <div v-if="currentNavMode === 'bookmarks'" class="flex items-center gap-3">
               <el-tooltip
                 content="快捷键：Ctrl+Shift+O 打开浏览器书签 ➔ 导出书签为 html ➔ 点击此处即可一键导入。"
                 placement="top"
@@ -75,7 +75,7 @@
         </section>
 
         <!-- 搜索状态与实时统计反馈 -->
-        <section v-if="hasActiveSearch" class="search-feedback-section p-3 rounded-lg border">
+        <section v-if="hasActiveSearch && currentNavMode !== 'tools'" class="search-feedback-section p-3 rounded-lg border">
           <div class="search-feedback-header flex items-center justify-between text-sm">
             <span>
               在当前导航中搜索 "<b>{{ searchKeyword }}</b>" 共有 <b>{{ totalMatchCount }}</b> 个匹配项
@@ -110,7 +110,7 @@
               <p v-if="cat.description" class="category-desc text-xs m-0">{{ cat.description }}</p>
             </div>
 
-            <!-- UnoCSS 响应式网格切块：移动端双列，桌面端多列自适应 -->
+            <!-- UnoCSS 响应式网格切块：全端统一双列及以上自适应（移动端两个一行） -->
             <div class="cards-grid grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4">
               <NavCard
                 v-for="item in cat.items"
@@ -147,8 +147,7 @@
       </main>
     </div>
 
-    <!-- 页脚与回到顶部 -->
-    <TheFooter />
+    <!-- 回到顶部 -->
     <BackToTop />
 
     <!-- 右上角悬挂拟物开关灯泡（现实场景开/关灯交互） -->
@@ -172,8 +171,6 @@ import HangingBulb from "@/components/HangingBulb.vue";
 import NavCard from "@/components/NavCard.vue";
 import SearchBar from "@/components/SearchBar.vue";
 import { useBookmarks } from "@/composables/useBookmarks";
-import NavBar from "@/layout/NavBar.vue";
-import TheFooter from "@/layout/TheFooter.vue";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 const USER_NAME_STORAGE_KEY = "cached_user_name";
@@ -183,6 +180,8 @@ const {
   activeCategories,
   systemCategories,
   customCount,
+  toolsCount,
+  switchNavMode,
   importFromFile,
   clearCustomBookmarks
 } = useBookmarks();
@@ -196,13 +195,20 @@ const isMobile = ref(false);
 const updateIsMobile = () => {
   if (typeof window !== "undefined") {
     isMobile.value = window.innerWidth < 768;
+    // 移动端不展示收藏导航，若当前处于收藏模式则自动切回系统导航
+    if (isMobile.value && currentNavMode.value === "bookmarks") {
+      switchNavMode("system");
+    }
   }
 };
 
-// 派生搜索过滤后的分类展示数据（移动端固定仅展示系统导航）
+// 派生搜索过滤后的分类展示数据（导航工具模式下直接展示全量工具）
 const displayCategories = computed(() => {
+  if (currentNavMode.value === "tools") {
+    return activeCategories.value;
+  }
   const query = searchKeyword.value.trim().toLowerCase();
-  const base = isMobile.value ? systemCategories : activeCategories.value;
+  const base = activeCategories.value;
   if (!query) {
     return base;
   }

@@ -5,10 +5,9 @@
         <router-link to="/" class="navbar-brand flex items-center gap-2">
           <img src="/logo.svg?v=4" alt="Jie Hub Logo" class="w-8 h-8 flex-shrink-0" />
           <span class="font-bold text-lg tracking-tight">Jie Hub</span>
-          <span class="navbar-badge text-xs px-2 py-0.5 rounded-full font-medium">Nav</span>
         </router-link>
 
-        <!-- 桌面端两大顶级大类切换 Tabs -->
+        <!-- 桌面端三大顶级大类切换 Tabs -->
         <nav class="nav-mode-tabs hidden md:flex items-center p-1 rounded-xl" aria-label="导航模式切换">
           <button
             type="button"
@@ -30,6 +29,20 @@
               class="tab-count-badge text-xs px-1.5 py-0.2 rounded-full font-medium"
             >
               {{ customCount }}
+            </span>
+          </button>
+          <button
+            type="button"
+            class="mode-tab-btn flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all cursor-pointer"
+            :class="{ 'is-active': currentNavMode === 'tools' }"
+            @click="switchNavMode('tools')"
+          >
+            <span>导航工具</span>
+            <span
+              v-if="toolsCount > 0"
+              class="tab-count-badge text-xs px-1.5 py-0.2 rounded-full font-medium"
+            >
+              {{ toolsCount }}
             </span>
           </button>
         </nav>
@@ -66,7 +79,8 @@
         :class="{ 'is-open': isMenuOpen }"
         :aria-hidden="!isMenuOpen"
       >
-        <div class="mobile-menu__header flex items-center justify-between p-4 border-b">
+        <!-- 抽屉头部：固定在顶部 -->
+        <div class="mobile-menu__header flex items-center justify-between p-4 border-b flex-shrink-0">
           <router-link to="/" class="flex items-center gap-2" @click="closeMenu">
             <img src="/logo.svg" alt="Jie Hub Logo" class="w-7 h-7" />
             <span class="font-bold text-base">Jie Hub</span>
@@ -76,29 +90,78 @@
           </button>
         </div>
 
-        <!-- 移动端子分类导航（仅展示系统导航） -->
-        <nav class="mobile-menu__nav p-3 flex flex-col gap-1.5 flex-1 overflow-y-auto">
-          <div class="px-2 py-1 text-xs font-semibold text-muted">
-            系统导航
+        <!-- 顶部固定操作与分类标题区：不随滚动，绝不顶出视口 -->
+        <div class="mobile-drawer-top p-3 pb-2 flex flex-col gap-2 flex-shrink-0 border-b">
+          <!-- 移动端模式切换行（仅展示系统导航与导航工具） -->
+          <div class="mobile-mode-tabs flex p-1 bg-[var(--bg-surface-soft)] rounded-xl">
+            <button
+              type="button"
+              class="mobile-mode-btn"
+              :class="{ 'is-active': currentNavMode === 'system' }"
+              @click="handleMobileModeSwitch('system')"
+            >
+              <span>系统导航</span>
+            </button>
+            <button
+              type="button"
+              class="mobile-mode-btn"
+              :class="{ 'is-active': currentNavMode === 'tools' }"
+              @click="handleMobileModeSwitch('tools')"
+            >
+              <span>导航工具</span>
+              <span v-if="toolsCount > 0" class="mode-count-tag">{{ toolsCount }}</span>
+            </button>
           </div>
-          <a
-            v-for="item in mobileNavItems"
-            :key="item.id"
-            :href="`#category-${item.id}`"
-            class="mobile-link flex items-center justify-between"
-            :class="{ 'is-active': activeSection === item.id }"
-            @click.prevent="scrollToCategory(item.id)"
+
+          <!-- 子分类标题栏（系统导航模式下固定可见） -->
+          <div
+            v-if="currentNavMode === 'system'"
+            class="px-1 pt-1 text-xs font-semibold text-muted flex items-center justify-between select-none"
           >
-            <span class="truncate">{{ item.label }}</span>
-            <span class="text-xs opacity-50">{{ item.count }}</span>
-          </a>
+            <span>系统导航分类</span>
+            <span class="text-[11px] opacity-60">{{ mobileNavItems.length }} 个分类</span>
+          </div>
+        </div>
+
+        <!-- 独立滚动区域：仅内部子分类列表滚动 -->
+        <nav class="mobile-menu__nav p-3 flex flex-col gap-1.5 flex-1 min-h-0 overflow-y-auto">
+          <!-- 导航工具模式提示（工具模式不显示侧栏层级，直接导向视图） -->
+          <div
+            v-if="currentNavMode === 'tools'"
+            class="mobile-tools-prompt p-3 rounded-xl bg-[var(--bg-surface-soft)] border border-[var(--border-color)] flex flex-col gap-2"
+          >
+            <div class="flex items-center gap-1.5 text-xs font-bold text-[var(--text-primary)]">
+              <span>🧰</span>
+              <span>自研导航工具</span>
+            </div>
+            <p class="text-[11px] text-[var(--text-muted)] leading-relaxed m-0">
+              包含自研离线资源包（支持直接下载）与开源项目仓库。
+            </p>
+            <button
+              type="button"
+              class="mobile-tools-confirm-btn w-full py-1.5 rounded-lg text-xs font-semibold text-white bg-[var(--primary-color)] border-none cursor-pointer"
+              @click="closeMenu"
+            >
+              查看全部工具 ({{ toolsCount }})
+            </button>
+          </div>
+
+          <!-- 系统导航 / 收藏导航模式下的子分类列表（独立滚动项） -->
+          <template v-else>
+            <a
+              v-for="item in mobileNavItems"
+              :key="item.id"
+              :href="`#category-${item.id}`"
+              class="mobile-link flex items-center justify-between"
+              :class="{ 'is-active': activeSection === item.id }"
+              @click.prevent="scrollToCategory(item.id)"
+            >
+              <span class="truncate">{{ item.label }}</span>
+              <span class="text-xs opacity-50">{{ item.count }}</span>
+            </a>
+          </template>
         </nav>
 
-        <!-- 移动端抽屉底部主题外观切换行 -->
-        <div class="mobile-drawer-footer p-4 border-t flex items-center justify-between">
-          <span class="text-sm font-medium footer-label">外观模式</span>
-          <ThemeToggle />
-        </div>
       </aside>
     </Teleport>
   </header>
@@ -109,11 +172,19 @@ import ThemeToggle from "@/components/ThemeToggle.vue";
 import { useBookmarks } from "@/composables/useBookmarks";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
-const { currentNavMode, activeCategories, systemCategories, customCount, switchNavMode } = useBookmarks();
+const { currentNavMode, activeCategories, systemCategories, customCount, toolsCount, switchNavMode } = useBookmarks();
 
-// 移动端专用：固定仅展示系统导航的子分类
+// 移动端切换模式：切换到工具时自动收起抽屉直接浏览
+const handleMobileModeSwitch = (mode) => {
+  switchNavMode(mode);
+  if (mode === "tools") {
+    closeMenu();
+  }
+};
+
+// 移动端子分类导航根据当前模式动态跟随
 const mobileNavItems = computed(() => {
-  return systemCategories.map((cat) => ({
+  return activeCategories.value.map((cat) => ({
     id: cat.id,
     label: cat.name,
     count: cat.items?.length || 0
@@ -129,6 +200,15 @@ const subNavItems = computed(() => {
 });
 
 const activeSection = ref(subNavItems.value[0]?.id ?? "dev-tools");
+
+watch(
+  () => activeCategories.value,
+  (newVal) => {
+    if (newVal?.length > 0) {
+      activeSection.value = newVal[0].id;
+    }
+  }
+);
 const isMenuOpen = ref(false);
 
 let isManualScrolling = false;
@@ -177,6 +257,7 @@ const scrollToCategory = (id) => {
 
 watch(isMenuOpen, (open) => {
   document.body.style.overflow = open ? "hidden" : "";
+  document.body.classList.toggle("mobile-menu-open", open);
 });
 
 // 确定性的视口滚动监听
@@ -237,11 +318,16 @@ onUnmounted(() => {
     clearTimeout(manualScrollTimer);
   }
   document.body.style.overflow = "";
+  document.body.classList.remove("mobile-menu-open");
 });
 </script>
 
 <style lang="scss" scoped>
 .navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
   background-color: var(--navbar-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -249,12 +335,6 @@ onUnmounted(() => {
 
   &-brand {
     color: var(--text-primary);
-  }
-
-  &-badge {
-    background: var(--primary-light);
-    color: var(--primary-color);
-    border: 1px solid var(--border-color);
   }
 }
 
@@ -343,11 +423,14 @@ onUnmounted(() => {
   bottom: 0;
   width: 280px;
   max-width: 80vw;
+  height: 100%;
+  max-height: 100vh;
   background-color: var(--bg-surface);
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
   z-index: 999;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 
   &.from-left {
@@ -363,18 +446,101 @@ onUnmounted(() => {
     border-color: var(--border-color);
     color: var(--text-primary);
   }
+
+  &__nav {
+    min-height: 0;
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+.mobile-drawer-top {
+  border-color: var(--border-color);
 }
 
 .close-drawer-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: transparent;
   border: none;
+  outline: none;
   font-size: 18px;
+  line-height: 1;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 4px 8px;
+  transition: color 0.2s;
 
   &:hover {
     color: var(--text-primary);
+  }
+}
+
+/* 移动端模式切换分段按钮 */
+.mobile-mode-tabs {
+  background-color: var(--bg-surface-soft);
+  border: 1px solid var(--border-color);
+  padding: 4px;
+  border-radius: 12px;
+  display: flex;
+  gap: 4px;
+
+  .mobile-mode-btn {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 4px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      color: var(--text-primary);
+    }
+
+    &.is-active {
+      background-color: var(--primary-color);
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(59, 130, 246, 0.28);
+    }
+
+    .mode-count-tag {
+      font-size: 10px;
+      padding: 0 5px;
+      border-radius: 8px;
+      line-height: 14px;
+      background-color: rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+    }
+
+    &:not(.is-active) .mode-count-tag {
+      background-color: var(--border-color);
+      color: var(--text-muted);
+    }
+  }
+}
+
+.mobile-tools-confirm-btn {
+  transition: background-color 0.2s ease, transform 0.1s ease;
+
+  &:hover {
+    background-color: var(--primary-hover);
+  }
+
+  &:active {
+    transform: scale(0.98);
   }
 }
 
@@ -398,11 +564,4 @@ onUnmounted(() => {
   }
 }
 
-.mobile-drawer-footer {
-  border-color: var(--border-color);
-
-  .footer-label {
-    color: var(--text-muted);
-  }
-}
 </style>

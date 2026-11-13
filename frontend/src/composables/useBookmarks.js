@@ -1,4 +1,4 @@
-import { DEFAULT_NAV_CATEGORIES } from "@/config/navData";
+import { DEFAULT_NAV_CATEGORIES, TOOL_NAV_CATEGORIES } from "@/config/navData";
 import {
   exportBookmarksToHtml,
   parseBookmarksFromHtml
@@ -58,12 +58,20 @@ export function useBookmarks() {
     if (currentNavMode.value === "bookmarks") {
       return customCategories.value;
     }
+    if (currentNavMode.value === "tools") {
+      return TOOL_NAV_CATEGORIES;
+    }
     return DEFAULT_NAV_CATEGORIES;
   });
 
   // 收藏导航内的书签总数
   const customCount = computed(() => {
     return customCategories.value.reduce((sum, c) => sum + (c.items?.length || 0), 0);
+  });
+
+  // 导航工具内的资源总数
+  const toolsCount = computed(() => {
+    return TOOL_NAV_CATEGORIES.reduce((sum, c) => sum + (c.items?.length || 0), 0);
   });
 
   // 切换顶级导航大类
@@ -184,8 +192,10 @@ export function useBookmarks() {
     currentNavMode,
     activeCategories,
     systemCategories: DEFAULT_NAV_CATEGORIES,
+    toolCategories: TOOL_NAV_CATEGORIES,
     customCategories,
     customCount,
+    toolsCount,
     switchNavMode,
     importFromFile,
     clearCustomBookmarks
