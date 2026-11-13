@@ -675,15 +675,6 @@ export const TOOL_NAV_CATEGORIES = [
         tag: "ZIP",
         isZip: true,
         icon: "📑"
-      },
-      {
-        id: "tool-minimalist-web",
-        title: "Jie Hub 导航项目源码",
-        url: "https://github.com/Ckangjie/minimalist-web",
-        repoUrl: "https://github.com/Ckangjie/minimalist-web",
-        desc: "基于 Vue 3 + UnoCSS + Cloudflare Pages 构建的聚合导航中枢源码仓库",
-        tag: "开源项目",
-        icon: "🐙"
       }
     ]
   }
