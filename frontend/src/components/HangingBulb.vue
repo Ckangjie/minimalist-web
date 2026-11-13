@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="bulb"
     class="hanging-bulb-container hidden md:flex"
     :class="{ 'is-lit': !isDark, 'is-pulling': isPulling }"
     :title="isDark ? '拉动灯泡开灯 (切换为亮色模式)' : '拉动灯泡关灯 (切换为暗色模式)'"
@@ -77,10 +78,53 @@
 
 <script setup>
 import { useTheme } from "@/composables/useTheme";
-import { ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 
 const { isDark, toggleTheme } = useTheme();
+const bulb = ref(null);
 const isPulling = ref(false);
+let breezeMedia;
+let breezeTimer;
+let sway;
+
+const scheduleBreeze = () => {
+  clearTimeout(breezeTimer);
+  sway?.cancel();
+  if (!breezeMedia.matches || document.hidden) return;
+
+  breezeTimer = setTimeout(() => {
+    const peakAngle = Math.random() < 0.5 ? -4 : 4;
+    const duration = 3000;
+    const sampleCount = 60;
+    const rotations = Array.from({ length: sampleCount + 1 }, (_, index) => {
+      const progress = index / sampleCount;
+      // 用指数衰减的正弦曲线模拟阻尼摆，末端归零。
+      return index === sampleCount
+        ? 0
+        : Math.exp(-4.5 * progress) * Math.sin(6 * Math.PI * progress);
+    });
+    const peak = Math.max(...rotations);
+    const keyframes = rotations.map((rotation) => ({ rotate: `${(rotation / peak) * peakAngle}deg` }));
+
+    // 旋转整盏灯，让吊线、灯泡和光束从同一个悬挂点摆动。
+    sway = bulb.value.animate(keyframes, { duration });
+    sway.onfinish = scheduleBreeze;
+  }, 9000 + Math.random() * 15000);
+};
+
+onMounted(() => {
+  breezeMedia = window.matchMedia("(min-width: 768px) and (prefers-reduced-motion: no-preference)");
+  breezeMedia.addEventListener("change", scheduleBreeze);
+  document.addEventListener("visibilitychange", scheduleBreeze);
+  scheduleBreeze();
+});
+
+onUnmounted(() => {
+  breezeMedia.removeEventListener("change", scheduleBreeze);
+  document.removeEventListener("visibilitychange", scheduleBreeze);
+  clearTimeout(breezeTimer);
+  sway?.cancel();
+});
 
 const handlePull = (event) => {
   if (isPulling.value) return;
@@ -113,12 +157,6 @@ const handlePull = (event) => {
 
   @media (min-width: 768px) {
     display: flex;
-  }
-
-  &:hover {
-    .bulb-pendant {
-      animation: gentle-sway 2.4s ease-in-out infinite;
-    }
   }
 
   &.is-pulling {
@@ -263,20 +301,6 @@ const handlePull = (event) => {
 
   .bulb-beam {
     opacity: 1;
-  }
-}
-
-/* 现实轻微物理摇曳 */
-@keyframes gentle-sway {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  25% {
-    transform: rotate(1.8deg);
-  }
-  75% {
-    transform: rotate(-1.8deg);
   }
 }
 </style>
