@@ -9,7 +9,7 @@ import { computed, ref } from "vue";
 const CUSTOM_STORAGE_KEY = "jie_hub_custom_bookmarks";
 const MODE_STORAGE_KEY = "jie_hub_nav_mode";
 
-// 当前顶层分类模式：'system'（系统导航） | 'bookmarks'（收藏导航）
+// 顶层导航模式仅保存在当前页签的会话中。
 const currentNavMode = ref(loadInitialMode());
 
 // 用户自定义收藏书签列表
@@ -17,7 +17,13 @@ const customCategories = ref(loadCustomCategories());
 
 function loadInitialMode() {
   try {
-    return localStorage.getItem(MODE_STORAGE_KEY) || "system";
+    localStorage.removeItem(MODE_STORAGE_KEY);
+  } catch {
+    // 忽略旧存储清理失败。
+  }
+
+  try {
+    return sessionStorage.getItem(MODE_STORAGE_KEY) || "system";
   } catch {
     return "system";
   }
@@ -78,7 +84,7 @@ export function useBookmarks() {
   const switchNavMode = (mode) => {
     currentNavMode.value = mode;
     try {
-      localStorage.setItem(MODE_STORAGE_KEY, mode);
+      sessionStorage.setItem(MODE_STORAGE_KEY, mode);
     } catch {
       // 忽略
     }
