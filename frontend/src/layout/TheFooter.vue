@@ -1,5 +1,5 @@
 <template>
-  <footer class="footer border-t transition-colors duration-300">
+  <footer class="footer border-t">
     <div class="footer-inner max-w-1200px mx-auto px-6 py-6 text-center">
       <p class="footer-copy text-xs m-0">
         &copy; {{ year }} <b>Jie Hub</b> · 云端聚合导航 · Powered by Cloudflare Pages &amp; Workers

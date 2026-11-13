@@ -1,5 +1,5 @@
 <template>
-  <header class="navbar sticky top-0 z-100 w-full transition-colors duration-300">
+  <header class="navbar sticky top-0 z-100 w-full">
     <div class="navbar-inner max-w-1440px h-60px mx-auto px-4 md:px-8 flex items-center justify-between">
       <div class="flex items-center gap-6">
         <router-link to="/" class="navbar-brand flex items-center gap-2">
@@ -35,6 +35,10 @@
         </nav>
       </div>
 
+      <!-- 桌面端操作栏 -->
+      <div class="hidden md:flex items-center gap-3">
+        <ThemeToggle />
+      </div>
 
       <!-- 移动端操作栏 -->
       <div class="flex items-center gap-3 md:hidden">

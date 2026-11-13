@@ -1,11 +1,11 @@
 <template>
-  <div class="page-container hub-layout min-h-screen flex flex-col transition-colors duration-300">
+  <div class="page-container hub-layout min-h-screen flex flex-col">
     <!-- 粘性顶部导航栏（两大顶级大类切换） -->
     <NavBar />
 
     <div class="hub-wrapper flex-1 w-full max-w-1440px mx-auto px-4 md:px-8 py-6 flex gap-8 items-start relative">
       <!-- PC 端左侧固定粘性侧边栏 (Sidebar)：展示当前大类对应的子分类 -->
-      <aside class="hub-sidebar hidden md:flex flex-col w-56 flex-shrink-0 sticky top-[76px] max-h-[calc(100vh-96px)] p-3 rounded-2xl border transition-colors duration-300">
+      <aside class="hub-sidebar hidden md:flex flex-col w-56 flex-shrink-0 sticky top-[76px] max-h-[calc(100vh-96px)] p-3 rounded-2xl border">
         <div class="sidebar-header pb-2 mb-2 border-b flex items-center justify-between">
           <span class="text-xs font-bold text-muted uppercase tracking-wider">
             {{ currentNavMode === 'system' ? '系统分类' : '收藏目录' }}

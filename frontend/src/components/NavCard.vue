@@ -3,7 +3,7 @@
     :href="item.url"
     target="_blank"
     rel="noopener noreferrer"
-    class="nav-card flex flex-col gap-2 sm:gap-2.5 p-2.5 sm:p-4 rounded-xl border transition-all duration-200 relative overflow-hidden select-none"
+    class="nav-card flex flex-col gap-2 sm:gap-2.5 p-2.5 sm:p-4 rounded-xl border transition-transform duration-200 relative overflow-hidden select-none"
   >
     <div class="card-header flex items-center gap-2 sm:gap-3 min-w-0">
       <div class="card-icon-box w-7.5 h-7.5 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
