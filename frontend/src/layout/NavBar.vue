@@ -35,11 +35,6 @@
         </nav>
       </div>
 
-      <!-- 桌面端操作栏 -->
-      <div class="hidden md:flex items-center gap-3">
-        <ThemeToggle />
-      </div>
-
       <!-- 移动端操作栏 -->
       <div class="flex items-center gap-3 md:hidden">
         <ThemeToggle />
