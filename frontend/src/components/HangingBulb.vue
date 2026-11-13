@@ -82,11 +82,11 @@ import { ref } from "vue";
 const { isDark, toggleTheme } = useTheme();
 const isPulling = ref(false);
 
-const handlePull = () => {
+const handlePull = (event) => {
   if (isPulling.value) return;
 
   isPulling.value = true;
-  toggleTheme();
+  toggleTheme(event);
 
   // 现实拉动微回弹动效
   setTimeout(() => {

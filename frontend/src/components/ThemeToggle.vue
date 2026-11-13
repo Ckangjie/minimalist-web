@@ -5,7 +5,7 @@
     :class="{ 'is-dark': isDark }"
     :aria-label="isDark ? '切换至亮色模式' : '切换至暗色模式'"
     :title="isDark ? '切换至亮色模式' : '切换至暗色模式'"
-    @click="toggleTheme"
+    @click="toggleTheme($event)"
   >
     <div class="icon-wrapper">
       <!-- 太阳矢量图标 (Light Mode - 无边框无阴影纯净风格) -->
