@@ -657,13 +657,11 @@ export const TOOL_NAV_CATEGORIES = [
     items: [
       {
         id: "tool-uni-offline-pack",
-        title: "UniOfflinePack.exe",
+        title: "UniOfflinePack",
         url: "https://github.com/Ckangjie/uni-packer",
-        downloadUrl: "/resources/UniOfflinePack.exe",
-        downloadName: "UniOfflinePack.exe",
         repoUrl: "https://github.com/Ckangjie/uni-packer",
         desc: "零 Android Studio 依赖的 uni-app 本地离线打包工作台，支持环境一键自愈、证书自动嗅探与极速 APK 编译交付",
-        tag: "EXE",
+        tag: "开源工具",
         icon: "📦"
       },
       {
