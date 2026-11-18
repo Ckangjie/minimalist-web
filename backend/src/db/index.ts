@@ -27,8 +27,9 @@ export const getDb = (d1?: D1Database): any => {
   // Bun 本地开发运行支持
   if (typeof (globalThis as any).Bun !== "undefined") {
     if (!localDbInstance) {
-      const { Database } = require("bun:sqlite");
-      const { drizzle } = require("drizzle-orm/bun-sqlite");
+      const getModule = (name: string) => (new Function("m", "return require(m)"))(name);
+      const { Database } = getModule("bun:sqlite");
+      const { drizzle } = getModule("drizzle-orm/bun-sqlite");
       const dataDir = path.resolve(process.cwd(), "data");
       if (!fs.existsSync(dataDir)) {
         fs.mkdirSync(dataDir, { recursive: true });
