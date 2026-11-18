@@ -17,7 +17,7 @@
         <el-form-item prop="username">
           <el-input
             v-model.trim="loginForm.username"
-            placeholder="账号 (默认: admin)"
+            placeholder="账号"
             clearable
           >
             <template #prefix>
@@ -30,13 +30,41 @@
           <el-input
             v-model.trim="loginForm.password"
             type="password"
-            placeholder="密码 (默认: admin123)"
+            placeholder="密码"
             show-password
           >
             <template #prefix>
               <el-icon><Lock /></el-icon>
             </template>
           </el-input>
+        </el-form-item>
+
+        <el-form-item prop="code">
+          <div class="flex items-center gap-3 w-full">
+            <el-input
+              v-model.trim="loginForm.code"
+              placeholder="验证码"
+              class="flex-1"
+              clearable
+            >
+              <template #prefix>
+                <el-icon><Key /></el-icon>
+              </template>
+            </el-input>
+            <div
+              class="captcha-img h-40px flex items-center justify-center cursor-pointer select-none rounded border border-[#dcdfe6] overflow-hidden bg-[#f5f7fa] hover:opacity-90"
+              title="点击刷新验证码"
+              @click="refreshCaptcha"
+            >
+              <img
+                v-if="captchaImg"
+                :src="captchaImg"
+                alt="验证码"
+                class="h-full block"
+              />
+              <span v-else class="text-xs text-[#909399] px-2">加载中...</span>
+            </div>
+          </div>
         </el-form-item>
 
         <div class="flex items-center justify-between text-xs mb-4">
@@ -53,10 +81,6 @@
           {{ isLoading ? "登 录 中..." : "登 录" }}
         </el-button>
       </el-form>
-
-      <div class="login-footer text-center mt-6 text-xs text-[#909399]">
-        <span>测试提示：账号密码可直接使用 admin / admin123</span>
-      </div>
     </div>
   </div>
 </template>
@@ -65,8 +89,8 @@
 import { reactive, ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { ElMessage, type FormInstance, type FormRules } from "element-plus";
-import { User, Lock } from "@element-plus/icons-vue";
-import { login } from "@/api/auth";
+import { User, Lock, Key } from "@element-plus/icons-vue";
+import { login, getCodeImg } from "@/api/auth";
 
 const router = useRouter();
 const route = useRoute();
@@ -74,15 +98,30 @@ const route = useRoute();
 const loginFormRef = ref<FormInstance>();
 const isLoading = ref(false);
 const isRememberMe = ref(true);
+const captchaImg = ref("");
 
 const loginForm = reactive({
   username: "admin",
-  password: "admin123"
+  password: "",
+  code: "",
+  uuid: ""
 });
 
 const loginRules: FormRules = {
   username: [{ required: true, message: "请输入登录账号", trigger: "blur" }],
-  password: [{ required: true, message: "请输入登录密码", trigger: "blur" }]
+  password: [{ required: true, message: "请输入登录密码", trigger: "blur" }],
+  code: [{ required: true, message: "请输入验证码", trigger: "blur" }]
+};
+
+const refreshCaptcha = async () => {
+  try {
+    const res = await getCodeImg();
+    captchaImg.value = res.img;
+    loginForm.uuid = res.uuid;
+    loginForm.code = "";
+  } catch (error) {
+    console.error("获取验证码异常:", error);
+  }
 };
 
 const handleLogin = async () => {
@@ -98,7 +137,9 @@ const handleLogin = async () => {
   try {
     const res = await login({
       username: loginForm.username,
-      password: loginForm.password
+      password: loginForm.password,
+      code: loginForm.code,
+      uuid: loginForm.uuid
     });
 
     localStorage.setItem("admin_token", res.token);
@@ -108,18 +149,20 @@ const handleLogin = async () => {
     const redirect = (route.query.redirect as string) || "/dashboard";
     router.replace(redirect);
   } catch (error: any) {
-    ElMessage.error(error?.message ?? "登录失败，请检查账号密码");
+    ElMessage.error(error?.message ?? "登录失败，请检查账号密码及验证码");
+    refreshCaptcha();
   } finally {
     isLoading.value = false;
   }
 };
 
 onMounted(() => {
-  // 如果已登录直接跳转
   const token = localStorage.getItem("admin_token");
   if (token) {
     router.replace("/dashboard");
+    return;
   }
+  refreshCaptcha();
 });
 </script>
 

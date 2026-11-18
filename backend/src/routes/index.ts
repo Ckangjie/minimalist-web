@@ -9,6 +9,7 @@ import * as visitorController from "../controllers/visitorController";
 const apiRouter = new Hono<{ Bindings: Bindings }>();
 
 // 鉴权与管理员登录接口
+apiRouter.get("/captchaImage", authController.getCaptchaImage);
 apiRouter.post("/login", authController.login);
 apiRouter.get("/getInfo", authController.getUserInfo);
 apiRouter.post("/logout", authController.logout);

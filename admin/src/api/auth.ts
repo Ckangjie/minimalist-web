@@ -3,7 +3,22 @@ import request from "@/utils/request";
 export interface LoginParams {
   username: string;
   password: string;
+  code?: string;
+  uuid?: string;
 }
+
+export interface CaptchaResult {
+  uuid: string;
+  img: string;
+  captchaEnabled?: boolean;
+}
+
+/**
+ * 获取验证码图片
+ */
+export const getCodeImg = () => {
+  return request<CaptchaResult>("/api/captchaImage");
+};
 
 export interface LoginResult {
   token: string;

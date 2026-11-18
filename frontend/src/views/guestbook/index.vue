@@ -84,8 +84,16 @@
           </el-button>
         </div>
 
+        <!-- 首次/无数据时的轻量 loading 效果 -->
+        <div v-if="isLoading && commentList.length === 0" class="py-14 flex flex-col items-center justify-center gap-2.5 text-[var(--text-muted)]">
+          <el-icon class="is-loading" :size="20" color="var(--primary-color)">
+            <Loading />
+          </el-icon>
+          <span class="text-xs tracking-wide">留言加载中...</span>
+        </div>
+
         <!-- 异常提示 -->
-        <div v-if="hasError" class="py-12 text-center text-muted">
+        <div v-else-if="hasError" class="py-12 text-center text-muted">
           <p class="text-sm m-0 mb-3">{{ errorMessage }}</p>
           <el-button type="primary" size="small" @click="fetchComments">重新加载</el-button>
         </div>
@@ -97,6 +105,13 @@
 
         <!-- 留言流条目列表（彻底移除卡片，纯流式条目） -->
         <div v-else class="comment-stream flex flex-col gap-6">
+          <!-- 刷新中的微型小 loading 提示 -->
+          <div v-if="isLoading && commentList.length > 0" class="flex items-center justify-center gap-2 py-1 text-xs text-[var(--text-muted)] animate-pulse">
+            <el-icon class="is-loading" :size="13" color="var(--primary-color)">
+              <Loading />
+            </el-icon>
+            <span>正在刷新留言...</span>
+          </div>
           <article
             v-for="item in commentList"
             :key="item.id"
@@ -294,7 +309,8 @@ import { useVisitorUser } from "@/composables/useVisitorUser";
 import {
   ChatDotRound,
   ChatRound,
-  Refresh
+  Refresh,
+  Loading
 } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import { computed, onMounted, reactive, ref } from "vue";
