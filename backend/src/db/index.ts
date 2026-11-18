@@ -27,9 +27,12 @@ export const getDb = (d1?: D1Database): any => {
   // Bun 本地开发运行支持
   if (typeof (globalThis as any).Bun !== "undefined") {
     if (!localDbInstance) {
-      const getModule = (name: string) => (new Function("m", "return require(m)"))(name);
-      const { Database } = getModule("bun:sqlite");
-      const { drizzle } = getModule("drizzle-orm/bun-sqlite");
+      const bunRequire = (import.meta as any).require;
+      if (!bunRequire) {
+        throw new Error("Bun 运行时未找到 import.meta.require");
+      }
+      const { Database } = bunRequire("bun:sqlite");
+      const { drizzle } = bunRequire("drizzle-orm/bun-sqlite");
       const dataDir = path.resolve(process.cwd(), "data");
       if (!fs.existsSync(dataDir)) {
         fs.mkdirSync(dataDir, { recursive: true });
@@ -54,7 +57,7 @@ export const getDb = (d1?: D1Database): any => {
     return localDbInstance;
   }
 
-  throw new Error("未检测到数据库连接实例（Cloudflare D1 或 Bun SQLite）");
+  throw new Error("无法获取数据库连接：未检测到 Cloudflare D1 绑定或本地 SQLite 运行环境");
 };
 
 export { schema };

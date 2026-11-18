@@ -21,8 +21,9 @@ let cachedTransporter: any = null;
 const getTransporter = () => {
   if (cachedTransporter) return cachedTransporter;
   try {
-    const dynamicRequire = (mod: string) => (new Function("m", "return require(m)"))(mod);
-    const nodemailer = dynamicRequire("nodemailer");
+    const bunRequire = (import.meta as any).require;
+    if (!bunRequire) return null;
+    const nodemailer = bunRequire("nodemailer");
     if (!nodemailer || typeof nodemailer.createTransport !== "function") return null;
 
     cachedTransporter = nodemailer.createTransport({
@@ -48,20 +49,15 @@ export const sendNotificationEmail = async (to: string, subject: string, html: s
 
   try {
     const transporter = getTransporter();
-    if (transporter) {
-      const info = await transporter.sendMail({
-        from: `"${emailConfig.from.name}" <${emailConfig.from.address}>`,
-        to,
-        subject,
-        html
-      });
-      console.log(`[Mail] 邮件成功发送给 ${to}, messageId: ${info.messageId}`);
-      return info;
-    }
+    if (!transporter) return;
 
-    // 在 Cloudflare Workers 边缘运行环境中静默回退
-    console.log(`[Mail] (Cloudflare 边缘环境) 模拟发送邮件通知至: ${to}, 主题: ${subject}`);
+    await transporter.sendMail({
+      from: `"${emailConfig.from.name}" <${emailConfig.from.address}>`,
+      to,
+      subject,
+      html
+    });
   } catch (error) {
-    console.error(`[Mail] 发送邮件异常 (${to}):`, error);
+    console.error("邮件发送异常:", error);
   }
 };
