@@ -21,6 +21,9 @@ importers:
         specifier: ^4.5.0
         version: 4.6.5(vue@3.5.45(typescript@5.9.3))
     devDependencies:
+      '@cloudflare/workerd-linux-64':
+        specifier: ^1.20261116.1
+        version: 1.20261116.1
       '@vitejs/plugin-vue':
         specifier: ^5.2.0
         version: 5.2.4(vite@6.4.6(jiti@2.7.0)(sass@1.108.2))(vue@3.5.45(typescript@5.9.3))
@@ -86,6 +89,12 @@ packages:
     engines: {node: '>=16'}
     cpu: [arm64]
     os: [darwin]
+
+  '@cloudflare/workerd-linux-64@1.20261116.1':
+    resolution: {integrity: sha512-/HnEV29Ykg3t9X6llrnlOJ9+N+cXFNsuPTTdRiE1L/hXIkI39o1RZVjEgj3GtyWtpuhsJ1mNLrNshrEjCvzk0w==}
+    engines: {node: '>=16'}
+    cpu: [x64]
+    os: [linux]
 
   '@cloudflare/workerd-linux-arm64@1.20261117.1':
     resolution: {integrity: sha512-gxWngFojq41ULKNKb9rpWYvKotN5hT2I/xot+Bpy31cXzrwcTgtDLSMb2t75sW5BJxH7hihFvikgYb577kB3Zg==}
@@ -1602,6 +1611,8 @@ snapshots:
 
   '@cloudflare/workerd-darwin-arm64@1.20261117.1':
     optional: true
+
+  '@cloudflare/workerd-linux-64@1.20261116.1': {}
 
   '@cloudflare/workerd-linux-arm64@1.20261117.1':
     optional: true
