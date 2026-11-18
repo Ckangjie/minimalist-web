@@ -7,6 +7,12 @@
     </main>
 
     <AppFooter class="footer" />
+
+    <!-- 全局全站回到顶部组件（统一全局挂载一次，各路由通用） -->
+    <BackToTop />
+
+    <!-- PC 端全站拟物悬挂吊灯开关（全站各页面通用） -->
+    <HangingBulb />
   </div>
 </template>
 
@@ -14,6 +20,8 @@
 import { RouterView } from "vue-router";
 import AppFooter from "./AppFooter.vue";
 import AppHeader from "./AppHeader.vue";
+import BackToTop from "@/components/BackToTop.vue";
+import HangingBulb from "@/components/HangingBulb.vue";
 </script>
 
 <style lang="scss" scoped>

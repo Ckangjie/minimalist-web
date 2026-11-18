@@ -12,16 +12,16 @@
           <button
             type="button"
             class="mode-tab-btn flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all cursor-pointer"
-            :class="{ 'is-active': currentNavMode === 'system' }"
-            @click="switchNavMode('system')"
+            :class="{ 'is-active': isSystemActive }"
+            @click="handleModeSwitch('system')"
           >
             系统导航
           </button>
           <button
             type="button"
             class="mode-tab-btn flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all cursor-pointer"
-            :class="{ 'is-active': currentNavMode === 'bookmarks' }"
-            @click="switchNavMode('bookmarks')"
+            :class="{ 'is-active': isBookmarksActive }"
+            @click="handleModeSwitch('bookmarks')"
           >
             <span>收藏导航</span>
             <span
@@ -34,8 +34,8 @@
           <button
             type="button"
             class="mode-tab-btn flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all cursor-pointer"
-            :class="{ 'is-active': currentNavMode === 'tools' }"
-            @click="switchNavMode('tools')"
+            :class="{ 'is-active': isToolsActive }"
+            @click="handleModeSwitch('tools')"
           >
             <span>导航工具</span>
             <span
@@ -45,7 +45,95 @@
               {{ toolsCount }}
             </span>
           </button>
+          <button
+            type="button"
+            class="mode-tab-btn flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all cursor-pointer"
+            :class="{ 'is-active': isGuestbookActive }"
+            @click="navigateToGuestbook"
+          >
+            <span>留言板</span>
+          </button>
         </nav>
+      </div>
+
+      <!-- 桌面端右侧操作栏：展示游客用户信息（扁平无阴影，昵称固定不可修改） -->
+      <div class="hidden md:flex items-center gap-3">
+        <el-popover
+          placement="bottom-end"
+          :width="280"
+          trigger="click"
+          popper-class="visitor-profile-popover"
+        >
+          <template #reference>
+            <button
+              type="button"
+              class="visitor-capsule-btn flex items-center gap-1.5 px-2.5 py-1 rounded-full cursor-pointer transition-colors"
+              title="查看用户身份与通知邮箱"
+            >
+              <div
+                class="visitor-avatar-sm w-5.5 h-5.5 rounded-full flex items-center justify-center text-white text-[11px] font-bold"
+                :style="{ background: visitorUser?.avatarBg }"
+              >
+                {{ avatarText }}
+              </div>
+              <span class="visitor-nickname-text text-xs font-medium max-w-110px truncate">
+                {{ visitorUser?.nickname }}
+              </span>
+              <span class="text-[9px] opacity-40">▼</span>
+            </button>
+          </template>
+
+          <!-- 游客资料浮层（扁平无阴影，不可修改昵称） -->
+          <div class="visitor-card flex flex-col gap-3 p-1">
+            <div class="flex items-center gap-2.5 pb-2 border-b border-[var(--border-color)]">
+              <div
+                class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
+                :style="{ background: visitorUser?.avatarBg }"
+              >
+                {{ avatarText }}
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-xs font-bold text-[var(--text-primary)] truncate">
+                    {{ visitorUser?.nickname }}
+                  </span>
+                  <span class="text-[10px] px-1 py-0.2 rounded bg-[var(--bg-surface-soft)] text-[var(--text-muted)] flex-shrink-0">
+                    固定
+                  </span>
+                </div>
+                <div class="text-[10px] text-[var(--text-muted)] truncate mt-0.5" :title="visitorUser?.uuid">
+                  UUID: {{ visitorUser?.uuid?.slice(0, 8) }}...{{ visitorUser?.uuid?.slice(-4) }}
+                </div>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <div class="flex flex-col gap-1">
+                <label class="text-[11px] font-medium text-[var(--text-muted)]">通知邮箱 (选填)</label>
+                <el-input
+                  v-model.trim="tempEmail"
+                  size="small"
+                  maxlength="100"
+                  placeholder="name@example.com"
+                  clearable
+                />
+                <span class="text-[10px] text-[var(--text-muted)] opacity-80 leading-tight">
+                  用于在您的留言收到回复时接收邮件通知
+                </span>
+              </div>
+
+              <div class="flex justify-end pt-1">
+                <el-button
+                  type="primary"
+                  size="small"
+                  @click="handleSaveEmail"
+                >
+                  保存邮箱
+                </el-button>
+              </div>
+            </div>
+          </div>
+        </el-popover>
       </div>
 
       <!-- 移动端操作栏 -->
@@ -92,12 +180,12 @@
 
         <!-- 顶部固定操作与分类标题区：不随滚动，绝不顶出视口 -->
         <div class="mobile-drawer-top p-3 pb-2 flex flex-col gap-2 flex-shrink-0 border-b">
-          <!-- 移动端模式切换行（仅展示系统导航与导航工具） -->
-          <div class="mobile-mode-tabs flex p-1 bg-[var(--bg-surface-soft)] rounded-xl">
+          <!-- 移动端模式切换行（水平可滚动 Tabs，支持自动平滑滚动居中） -->
+          <div ref="mobileTabsRef" class="mobile-mode-tabs flex items-center p-1 bg-[var(--bg-surface-soft)] rounded-xl">
             <button
               type="button"
               class="mobile-mode-btn"
-              :class="{ 'is-active': currentNavMode === 'system' }"
+              :class="{ 'is-active': isSystemActive }"
               @click="handleMobileModeSwitch('system')"
             >
               <span>系统导航</span>
@@ -105,11 +193,28 @@
             <button
               type="button"
               class="mobile-mode-btn"
-              :class="{ 'is-active': currentNavMode === 'tools' }"
+              :class="{ 'is-active': isBookmarksActive }"
+              @click="handleMobileModeSwitch('bookmarks')"
+            >
+              <span>收藏导航</span>
+              <span v-if="customCount > 0" class="mode-count-tag">{{ customCount }}</span>
+            </button>
+            <button
+              type="button"
+              class="mobile-mode-btn"
+              :class="{ 'is-active': isToolsActive }"
               @click="handleMobileModeSwitch('tools')"
             >
               <span>导航工具</span>
               <span v-if="toolsCount > 0" class="mode-count-tag">{{ toolsCount }}</span>
+            </button>
+            <button
+              type="button"
+              class="mobile-mode-btn"
+              :class="{ 'is-active': isGuestbookActive }"
+              @click="handleMobileGuestbook"
+            >
+              <span>留言板</span>
             </button>
           </div>
 
@@ -131,7 +236,6 @@
             class="mobile-tools-prompt p-3 rounded-xl bg-[var(--bg-surface-soft)] border border-[var(--border-color)] flex flex-col gap-2"
           >
             <div class="flex items-center gap-1.5 text-xs font-bold text-[var(--text-primary)]">
-              <span>🧰</span>
               <span>自研导航工具</span>
             </div>
             <p class="text-[11px] text-[var(--text-muted)] leading-relaxed m-0">
@@ -170,16 +274,91 @@
 <script setup>
 import ThemeToggle from "@/components/ThemeToggle.vue";
 import { useBookmarks } from "@/composables/useBookmarks";
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { useVisitorUser } from "@/composables/useVisitorUser";
+import { ElMessage } from "element-plus";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+
+const route = useRoute();
+const router = useRouter();
+
+const { visitorUser, avatarText, updateEmail } = useVisitorUser();
+
+const tempEmail = ref(visitorUser.value?.email || "");
+
+watch(
+  () => visitorUser.value?.email,
+  (val) => {
+    tempEmail.value = val || "";
+  },
+  { immediate: true }
+);
+
+const handleSaveEmail = async () => {
+  const mail = tempEmail.value.trim();
+  if (mail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) {
+    ElMessage.warning("请输入合法的邮箱地址");
+    return;
+  }
+  await updateEmail(mail);
+  ElMessage.success("通知邮箱已更新");
+};
 
 const { currentNavMode, activeCategories, systemCategories, customCount, toolsCount, switchNavMode } = useBookmarks();
 
+const isGuestbookActive = computed(() => route.path === "/guestbook");
+const isSystemActive = computed(() => route.path === "/" && currentNavMode.value === "system");
+const isBookmarksActive = computed(() => route.path === "/" && currentNavMode.value === "bookmarks");
+const isToolsActive = computed(() => route.path === "/" && currentNavMode.value === "tools");
+
+const handleModeSwitch = (mode) => {
+  if (route.path !== "/") {
+    router.push("/");
+  }
+  switchNavMode(mode);
+};
+
+const navigateToGuestbook = () => {
+  router.push("/guestbook");
+};
+
+const mobileTabsRef = ref(null);
+
+// 移动端高亮 Tab 自动平滑居中滚动
+const scrollActiveTabIntoView = () => {
+  nextTick(() => {
+    if (!mobileTabsRef.value) return;
+    const activeTabEl = mobileTabsRef.value.querySelector(".mobile-mode-btn.is-active");
+    if (activeTabEl) {
+      const container = mobileTabsRef.value;
+      const tabLeft = activeTabEl.offsetLeft;
+      const tabWidth = activeTabEl.offsetWidth;
+      const containerWidth = container.offsetWidth;
+      const targetScrollLeft = tabLeft - (containerWidth - tabWidth) / 2;
+      container.scrollTo({
+        left: Math.max(0, targetScrollLeft),
+        behavior: "smooth"
+      });
+    }
+  });
+};
+
 // 移动端切换模式：切换到工具时自动收起抽屉直接浏览
 const handleMobileModeSwitch = (mode) => {
+  if (route.path !== "/") {
+    router.push("/");
+  }
   switchNavMode(mode);
+  scrollActiveTabIntoView();
   if (mode === "tools") {
     closeMenu();
   }
+};
+
+const handleMobileGuestbook = () => {
+  closeMenu();
+  router.push("/guestbook");
+  scrollActiveTabIntoView();
 };
 
 // 移动端子分类导航根据当前模式动态跟随
@@ -216,7 +395,24 @@ let manualScrollTimer = null;
 
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
+  if (isMenuOpen.value) {
+    scrollActiveTabIntoView();
+  }
 };
+
+watch(
+  () => route.path,
+  () => {
+    scrollActiveTabIntoView();
+  }
+);
+
+watch(
+  () => currentNavMode.value,
+  () => {
+    scrollActiveTabIntoView();
+  }
+);
 
 const closeMenu = () => {
   isMenuOpen.value = false;
@@ -479,30 +675,44 @@ onUnmounted(() => {
   }
 }
 
-/* 移动端模式切换分段按钮 */
+/* 移动端模式切换水平可滚动 Tabs */
 .mobile-mode-tabs {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   background-color: var(--bg-surface-soft);
   border: 1px solid var(--border-color);
   padding: 4px;
   border-radius: 12px;
   display: flex;
-  gap: 4px;
+  gap: 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   .mobile-mode-btn {
-    flex: 1;
+    flex: 0 0 auto;
+    white-space: nowrap;
     border: none;
     outline: none;
     background: transparent;
     color: var(--text-muted);
     font-size: 13px;
     font-weight: 500;
-    padding: 7px 4px;
+    padding: 7px 12px;
     border-radius: 8px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 5px;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
     &:hover {
@@ -564,4 +774,19 @@ onUnmounted(() => {
   }
 }
 
+.visitor-capsule-btn {
+  background-color: var(--bg-surface-soft);
+  border: 1px solid transparent;
+  color: var(--text-primary);
+  box-shadow: none !important;
+
+  &:hover {
+    background-color: var(--border-color);
+  }
+}
+
+.visitor-card {
+  color: var(--text-primary);
+  box-shadow: none !important;
+}
 </style>

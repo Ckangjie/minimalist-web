@@ -147,12 +147,6 @@
       </main>
     </div>
 
-    <!-- 回到顶部 -->
-    <BackToTop />
-
-    <!-- 右上角悬挂拟物开关灯泡（现实场景开/关灯交互） -->
-    <HangingBulb />
-
     <!-- 隐藏的本地文件输入器 -->
     <input
       ref="fileInputRef"
@@ -166,8 +160,6 @@
 
 <script setup>
 import { getUserInfo } from "@/api/user";
-import BackToTop from "@/components/BackToTop.vue";
-import HangingBulb from "@/components/HangingBulb.vue";
 import NavCard from "@/components/NavCard.vue";
 import SearchBar from "@/components/SearchBar.vue";
 import { useBookmarks } from "@/composables/useBookmarks";

@@ -19,16 +19,26 @@ export const request = async (url, options = {}) => {
     }
 
     const res = await fetch(url, config);
-    if (!res.ok) {
-      throw new Error(`网络请求异常: ${res.status}`);
+    let json;
+    try {
+      json = await res.json();
+    } catch {
+      // 非 JSON 格式
     }
 
-    const json = await res.json();
     if (json?.code === 200) {
       return json.data;
     }
 
-    throw new Error(json?.message ?? "业务处理异常");
+    if (json?.message) {
+      throw new Error(json.message);
+    }
+
+    if (!res.ok) {
+      throw new Error(`网络请求异常: ${res.status}`);
+    }
+
+    throw new Error("业务处理异常");
   } catch (error) {
     console.error("请求异常:", error);
     throw error;
@@ -36,4 +46,3 @@ export const request = async (url, options = {}) => {
 };
 
 export default request;
-
