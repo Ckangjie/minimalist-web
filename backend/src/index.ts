@@ -17,12 +17,52 @@ app.use(
   })
 );
 
-// 确保 Cloudflare D1 数据库新表结构自动初始化（解决线上缺少 guestbook_visitor 等新表报错）
+// 确保 Cloudflare D1 数据库全量表结构自动初始化（包含留言表、审核日志表、访客表与对应索引）
 app.use("/api/*", async (c, next) => {
   const d1 = c.env?.DB ?? c.env?.minimalist_db;
   if (d1 && !isD1Initialized && typeof (d1 as any).exec === "function") {
     try {
       await (d1 as any).exec(`
+        -- 留言表
+        CREATE TABLE IF NOT EXISTS guestbook_comment (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          root_id INTEGER,
+          reply_to_id INTEGER,
+          level INTEGER NOT NULL,
+          nickname TEXT NOT NULL,
+          content TEXT NOT NULL,
+          author_type TEXT NOT NULL,
+          admin_id INTEGER,
+          email TEXT,
+          status TEXT NOT NULL,
+          created_at TEXT NOT NULL DEFAULT (datetime('now')),
+          updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+          reviewed_at TEXT,
+          reviewed_by INTEGER,
+          deleted_at TEXT,
+          source_hash TEXT
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_root_status_time ON guestbook_comment (root_id, status, deleted_at, created_at, id);
+        CREATE INDEX IF NOT EXISTS idx_status_time ON guestbook_comment (status, deleted_at, created_at, id);
+        CREATE INDEX IF NOT EXISTS idx_source_time ON guestbook_comment (source_hash, created_at);
+
+        -- 审核操作日志表
+        CREATE TABLE IF NOT EXISTS guestbook_audit_log (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          comment_id INTEGER NOT NULL,
+          operator_id INTEGER NOT NULL,
+          action TEXT NOT NULL,
+          before_status TEXT,
+          after_status TEXT,
+          created_at TEXT NOT NULL DEFAULT (datetime('now')),
+          remark TEXT
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_audit_comment_time ON guestbook_audit_log (comment_id, created_at);
+        CREATE INDEX IF NOT EXISTS idx_audit_operator_time ON guestbook_audit_log (operator_id, created_at);
+
+        -- 访客用户表
         CREATE TABLE IF NOT EXISTS guestbook_visitor (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           uuid TEXT NOT NULL UNIQUE,
@@ -34,11 +74,12 @@ app.use("/api/*", async (c, next) => {
           created_at TEXT NOT NULL DEFAULT (datetime('now')),
           updated_at TEXT NOT NULL DEFAULT (datetime('now'))
         );
+
         CREATE INDEX IF NOT EXISTS idx_visitor_uuid ON guestbook_visitor (uuid);
       `);
       isD1Initialized = true;
     } catch (e) {
-      console.warn("D1 表结构自动初始化异常:", e);
+      console.warn("D1 全量表结构自动初始化异常:", e);
     }
   }
   await next();

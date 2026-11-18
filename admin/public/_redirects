@@ -1,0 +1,2 @@
+/api/* https://du1.ccwu.cc/api/:splat 200
+/* /index.html 200
