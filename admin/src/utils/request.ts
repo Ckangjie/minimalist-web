@@ -1,3 +1,5 @@
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string) || (import.meta.env.PROD ? "https://du1.ccwu.cc" : "");
+
 /**
  * 管理端统一网络请求封装
  */
@@ -22,7 +24,8 @@ export const request = async <T = any>(url: string, options: RequestInit = {}): 
       config.body = JSON.stringify(config.body);
     }
 
-    const res = await fetch(url, config);
+    const requestUrl = url.startsWith("http") ? url : `${API_BASE_URL}${url}`;
+    const res = await fetch(requestUrl, config);
     let json: any;
     try {
       json = await res.json();
