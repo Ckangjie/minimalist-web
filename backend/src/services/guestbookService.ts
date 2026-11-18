@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { eq, and, isNull, desc, asc, like, inArray, sql } from "drizzle-orm";
 import { schema } from "../db";
 import { sendNotificationEmail } from "../utils/mail";
+import { calculateVectorScore } from "../utils/vector";
 
 const { guestbookComment, guestbookAuditLog } = schema;
 
@@ -400,11 +401,54 @@ export const listManageComments = async (db: any, params: Record<string, any>) =
   if (params.authorType) {
     conditions.push(eq(guestbookComment.authorType, params.authorType));
   }
+  // 兼容单独的 nickname 与 content 模糊查询
   if (params.nickname) {
     conditions.push(like(guestbookComment.nickname, `%${params.nickname}%`));
   }
   if (params.content) {
     conditions.push(like(guestbookComment.content, `%${params.content}%`));
+  }
+
+  const keyword = (params.keyword ?? "").toString().trim();
+
+  // 若传入 keyword：执行融合向量空间模型 (VSM) 的余弦相似度检索与精确匹配排序
+  if (keyword) {
+    // 获取当前其他筛选条件下的候选记录
+    const candidates = await db
+      .select()
+      .from(guestbookComment)
+      .where(and(...conditions))
+      .orderBy(desc(guestbookComment.createdAt), desc(guestbookComment.id));
+
+    const scoredList: { comment: any; score: number }[] = [];
+
+    for (const item of candidates) {
+      const combinedDoc = `${item.nickname} ${item.content}`;
+      const score = calculateVectorScore(keyword, combinedDoc);
+      // 设定向量相似度/匹配阈值 (大于 0.08 即认为具备向量关联或包含关键词)
+      if (score >= 0.08) {
+        scoredList.push({ comment: item, score });
+      }
+    }
+
+    // 按向量相似度得分降序排列
+    scoredList.sort((a, b) => {
+      if (Math.abs(b.score - a.score) > 0.0001) {
+        return b.score - a.score;
+      }
+      return b.comment.id - a.comment.id;
+    });
+
+    const total = scoredList.length;
+    const paginated = scoredList.slice(offset, offset + pageSize).map((s) => s.comment);
+
+    return {
+      list: paginated,
+      total,
+      pageNum,
+      pageSize,
+      pages: Math.ceil(total / pageSize)
+    };
   }
 
   const totalCountResult = await db

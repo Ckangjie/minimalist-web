@@ -78,7 +78,7 @@
             :loading="isLoading"
             :icon="Refresh"
             class="!text-xs"
-            @click="fetchComments"
+            @click="fetchComments(true)"
           >
             刷新
           </el-button>
@@ -265,16 +265,23 @@
           </article>
         </div>
 
-        <!-- 底部轻量分页器 -->
-        <div v-if="totalPages > 1" class="flex justify-center mt-4">
-          <el-pagination
-            v-model:current-page="currentPage"
-            v-model:page-size="pageSize"
-            background
-            layout="prev, pager, next, jumper"
-            :total="totalCount"
-            @current-change="changePage"
-          />
+        <!-- 底部加载更多与触底提示 -->
+        <div v-if="commentList.length > 0" class="flex justify-center pt-2 pb-4">
+          <el-button
+            v-if="hasMore"
+            :loading="isLoadingMore"
+            round
+            class="px-6 !text-xs !bg-[var(--bg-surface-soft)] !border-[var(--border-color)] !text-[var(--text-regular)] hover:!text-[var(--primary-color)] hover:!border-[var(--primary-color)]"
+            @click="handleLoadMore"
+          >
+            加载更多留言（已加载 {{ commentList.length }} / {{ totalCount }}）
+          </el-button>
+
+          <div v-else class="text-xs text-[var(--text-muted)] flex items-center gap-2 select-none py-2">
+            <span class="opacity-30">————</span>
+            <span>已加载全部留言（共 {{ totalCount }} 条）</span>
+            <span class="opacity-30">————</span>
+          </div>
         </div>
       </section>
     </div>
@@ -298,6 +305,7 @@ const currentVisitorNickname = computed(() => visitorUser.value?.nickname || "�
 
 // 状态管理
 const isLoading = ref(false);
+const isLoadingMore = ref(false);
 const isSubmitting = ref(false);
 const hasError = ref(false);
 const errorMessage = ref("");
@@ -334,8 +342,8 @@ const canSubmitReply = computed(() => {
   return cLen >= 1 && cLen <= 200;
 });
 
-const totalPages = computed(() => {
-  return Math.ceil(totalCount.value / pageSize.value);
+const hasMore = computed(() => {
+  return commentList.value.length < totalCount.value;
 });
 
 // 展开/折叠辅助（抖音风格楼中楼）
@@ -353,31 +361,63 @@ const toggleRepliesExpand = (rootId) => {
   expandedRootIds.value = nextSet;
 };
 
-// 获取公开留言数据
-const fetchComments = async () => {
+// 格式化后端返回的公开留言
+const formatCommentItems = (rawList) => {
+  return (rawList ?? [])
+    .filter((item) => item.status === "approved" && !item.deletedAt)
+    .map((item) => ({
+      ...item,
+      replies: (item.replies ?? []).filter((r) => r.status === "approved" && !r.deletedAt)
+    }));
+};
+
+// 获取公开留言数据（首次加载或刷新，默认只请求第 1 页）
+const fetchComments = async (isRefresh = false) => {
+  if (isRefresh) {
+    currentPage.value = 1;
+  }
   isLoading.value = true;
   hasError.value = false;
   errorMessage.value = "";
 
   try {
     const res = await getOpenList({
-      pageNum: currentPage.value,
+      pageNum: 1,
       pageSize: pageSize.value
     });
 
-    const rawList = res?.list ?? [];
-    commentList.value = rawList
-      .filter((item) => item.status === "approved" && !item.deletedAt)
-      .map((item) => ({
-        ...item,
-        replies: (item.replies ?? []).filter((r) => r.status === "approved" && !r.deletedAt)
-      }));
+    currentPage.value = 1;
+    commentList.value = formatCommentItems(res?.list);
     totalCount.value = res?.total ?? 0;
   } catch (err) {
     hasError.value = true;
     errorMessage.value = err?.message ?? "加载公开留言失败，请重试";
   } finally {
     isLoading.value = false;
+  }
+};
+
+// 加载更多（下一页数据追加至列表末尾）
+const handleLoadMore = async () => {
+  if (isLoadingMore.value || !hasMore.value) return;
+
+  isLoadingMore.value = true;
+  const nextPage = currentPage.value + 1;
+
+  try {
+    const res = await getOpenList({
+      pageNum: nextPage,
+      pageSize: pageSize.value
+    });
+
+    const newItems = formatCommentItems(res?.list);
+    commentList.value = [...commentList.value, ...newItems];
+    totalCount.value = res?.total ?? 0;
+    currentPage.value = nextPage;
+  } catch (err) {
+    ElMessage.error(err?.message ?? "加载更多留言失败，请重试");
+  } finally {
+    isLoadingMore.value = false;
   }
 };
 
@@ -395,6 +435,7 @@ const handleSubmitRoot = async () => {
 
     ElMessage.success(res?.message ?? "留言已提交，审核通过后将公开展示");
     rootForm.content = "";
+    fetchComments(true);
   } catch (err) {
     ElMessage.error(err?.message ?? "提交留言失败，请检查后重试");
   } finally {
@@ -438,14 +479,6 @@ const handleSubmitReply = async () => {
   } finally {
     isSubmitting.value = false;
   }
-};
-
-// 切换页码
-const changePage = (page) => {
-  if (page < 1 || page > totalPages.value) return;
-  currentPage.value = page;
-  fetchComments();
-  window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
 onMounted(() => {

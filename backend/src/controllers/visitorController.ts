@@ -5,7 +5,8 @@ import {
   syncVisitorUser,
   getAdminVisitorList,
   deleteVisitorUser,
-  batchDeleteVisitorUsers
+  batchDeleteVisitorUsers,
+  getOnlineStatsData
 } from "../services/visitorService";
 
 const getDatabase = (c: Context) => {
@@ -30,6 +31,20 @@ export const syncVisitor = async (c: Context) => {
     return success(c, data, "同步成功");
   } catch (error: any) {
     return fail(c, error.message || "同步用户信息失败", 400);
+  }
+};
+
+/**
+ * 前台：获取当前在线用户与全站访客统计
+ */
+export const getOnlineStats = async (c: Context) => {
+  try {
+    const db = getDatabase(c);
+    const uuid = c.req.query("uuid");
+    const data = await getOnlineStatsData(db, uuid);
+    return success(c, data, "获取成功");
+  } catch (error: any) {
+    return fail(c, error.message || "获取在线统计失败", 500);
   }
 };
 

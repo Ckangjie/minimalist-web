@@ -38,6 +38,7 @@ apiRouter.get("/user", async (c) => {
 });
 
 // 前台公开接口（游客免登录）
+apiRouter.get("/stats/online", visitorController.getOnlineStats);
 apiRouter.post("/guestbook/visitor/sync", visitorController.syncVisitor);
 apiRouter.get("/guestbook/list", guestbookController.getOpenList);
 apiRouter.post("/guestbook", guestbookController.submitOpen);

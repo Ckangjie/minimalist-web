@@ -6,6 +6,43 @@ const formatDateTime = (date: Date = new Date()) => {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 };
 
+// 内存中维护近 5 分钟活跃会话（UUID -> timestamp）
+const activeSessions = new Map<string, number>();
+
+export const recordActiveSession = (uuid: string) => {
+  if (uuid) {
+    activeSessions.set(uuid, Date.now());
+  }
+};
+
+export const getOnlineCount = () => {
+  const now = Date.now();
+  const fiveMinutesAgo = now - 5 * 60 * 1000;
+  for (const [id, time] of activeSessions.entries()) {
+    if (time < fiveMinutesAgo) {
+      activeSessions.delete(id);
+    }
+  }
+  return Math.max(1, activeSessions.size);
+};
+
+export const getOnlineStatsData = async (db: any, currentUuid?: string) => {
+  if (currentUuid) {
+    recordActiveSession(currentUuid);
+  }
+  const onlineCount = getOnlineCount();
+
+  const totalRes = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(guestbookVisitor);
+  const totalVisitors = Number(totalRes?.[0]?.count ?? 0);
+
+  return {
+    onlineCount,
+    totalVisitors
+  };
+};
+
 /**
  * 前台：同步或注册浏览器唯一访客用户（固定昵称，不可随意篡改）
  */
@@ -19,6 +56,8 @@ export const syncVisitorUser = async (
   if (!uuid) {
     throw new Error("UUID 不能为空");
   }
+
+  recordActiveSession(uuid);
 
   // 1. 先查询数据库中该 uuid 是否已存在
   const existing = await db

@@ -3,22 +3,12 @@
     <!-- 若依经典筛选表单区 -->
     <el-card shadow="never" class="filter-card !rounded-xl border border-[#e4e7ed] flex-shrink-0">
       <el-form :inline="true" :model="searchParams" class="filter-form flex flex-wrap items-center">
-        <el-form-item label="发布昵称">
+        <el-form-item label="关键词">
           <el-input
-            v-model="searchParams.nickname"
-            placeholder="请输入发布昵称"
+            v-model="searchParams.keyword"
+            placeholder="支持内容/昵称向量语义检索"
             clearable
-            class="!w-44"
-            @keyup.enter="handleSearch"
-          />
-        </el-form-item>
-
-        <el-form-item label="留言内容">
-          <el-input
-            v-model="searchParams.content"
-            placeholder="搜索留言关键词"
-            clearable
-            class="!w-52"
+            class="!w-60"
             @keyup.enter="handleSearch"
           />
         </el-form-item>
@@ -433,8 +423,7 @@ const pageSize = ref(10);
 
 // 查询过滤条件
 const searchParams = reactive({
-  nickname: "",
-  content: "",
+  keyword: "",
   status: (route.query.status as string) || "",
   level: "" as string | number,
   authorType: ""
@@ -511,8 +500,7 @@ const fetchData = async () => {
     const res = await listManageComments({
       pageNum: currentPage.value,
       pageSize: pageSize.value,
-      nickname: searchParams.nickname.trim(),
-      content: searchParams.content.trim(),
+      keyword: searchParams.keyword.trim(),
       status: searchParams.status,
       level: searchParams.level,
       authorType: searchParams.authorType
@@ -532,8 +520,7 @@ const handleSearch = () => {
 };
 
 const handleReset = () => {
-  searchParams.nickname = "";
-  searchParams.content = "";
+  searchParams.keyword = "";
   searchParams.status = "";
   searchParams.level = "";
   searchParams.authorType = "";
