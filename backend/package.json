@@ -20,11 +20,13 @@
     "db:push": "bun x drizzle-kit push"
   },
   "dependencies": {
+    "drizzle-orm": "^0.36.0",
     "hono": "^4.6.0",
-    "drizzle-orm": "^0.36.0"
+    "nodemailer": "^10.6.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241101.0",
+    "@types/nodemailer": "^8.0.2",
     "bun-types": "^1.1.0",
     "drizzle-kit": "^0.27.0",
     "pm2": "^5.4.0",
