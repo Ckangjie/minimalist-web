@@ -323,6 +323,68 @@ export const updateFriendLink = async (db: any, id: number, body: any) => {
 };
 
 /**
+ * 后台：管理员直接创建友链
+ */
+export const createFriendLink = async (db: any, body: any) => {
+  const rawName = (body.name ?? "").toString().trim();
+  const rawUrl = (body.url ?? "").toString().trim();
+  const rawLogo = (body.logo ?? "").toString().trim();
+  const rawDescription = (body.description ?? "").toString().trim();
+  const rawEmail = (body.email ?? "").toString().trim();
+  const rawStatus = (body.status ?? "approved").toString().trim();
+  const rawSortOrder = typeof body.sortOrder === "number" ? body.sortOrder : 0;
+
+  if (!rawName || rawName.length < 2 || rawName.length > 40) {
+    throw new Error("网站名称长度需在 2 到 40 个字符之间");
+  }
+
+  if (!rawUrl || !/^https?:\/\/.+/i.test(rawUrl)) {
+    throw new Error("网站链接格式不正确，必须以 http:// 或 https:// 开头");
+  }
+
+  if (rawDescription && rawDescription.length > 200) {
+    throw new Error("网站描述长度不能超过 200 个字符");
+  }
+
+  if (rawEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail)) {
+    throw new Error("联系邮箱格式不正确");
+  }
+
+  // 检查链接是否已存在
+  const existing = await db
+    .select()
+    .from(friendLink)
+    .where(eq(friendLink.url, rawUrl))
+    .limit(1);
+
+  if (existing.length > 0) {
+    throw new Error("该网站链接已存在，请勿重复添加");
+  }
+
+  const safeName = sanitizeText(rawName);
+  const safeDesc = rawDescription ? sanitizeText(rawDescription) : null;
+  const nowTime = formatDateTime();
+
+  const insertRes = await db
+    .insert(friendLink)
+    .values({
+      name: safeName,
+      url: rawUrl,
+      logo: rawLogo || null,
+      description: safeDesc,
+      email: rawEmail || null,
+      status: rawStatus,
+      sortOrder: rawSortOrder,
+      createdAt: nowTime,
+      reviewedAt: rawStatus === "approved" ? nowTime : null
+    })
+    .returning({ id: friendLink.id });
+
+  const newId = insertRes[0]?.id;
+  return { id: newId, name: safeName, url: rawUrl, status: rawStatus };
+};
+
+/**
  * 后台：删除友链
  */
 export const deleteFriendLink = async (db: any, id: number) => {

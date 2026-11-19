@@ -58,6 +58,16 @@ export const updateFriendLink = (id: number, data: Partial<FriendLinkItem>) => {
 };
 
 /**
+ * 管理员直接新增友链
+ */
+export const createFriendLink = (data: Partial<FriendLinkItem>) => {
+  return request(`/api/admin/friend-links`, {
+    method: "POST",
+    body: data as any
+  });
+};
+
+/**
  * 删除友链
  */
 export const deleteFriendLink = (id: number) => {

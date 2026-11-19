@@ -92,6 +92,20 @@ export const updateInfo = async (c: Context) => {
 };
 
 /**
+ * 后台：管理员直接新增友链
+ */
+export const createLink = async (c: Context) => {
+  try {
+    const db = getDatabase(c);
+    const body = await c.req.json();
+    const result = await friendLinkService.createFriendLink(db, body);
+    return success(c, result, "添加友链成功");
+  } catch (error: any) {
+    return fail(c, error?.message ?? "添加友链失败");
+  }
+};
+
+/**
  * 后台：删除友链
  */
 export const remove = async (c: Context) => {

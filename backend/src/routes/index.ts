@@ -65,6 +65,7 @@ apiRouter.get("/guestbook/manage/audit-logs/:id", guestbookController.getAuditLo
 apiRouter.get("/friend-links", friendLinkController.getOpenList);
 apiRouter.post("/friend-links/apply", friendLinkController.apply);
 apiRouter.get("/admin/friend-links", friendLinkController.getManageList);
+apiRouter.post("/admin/friend-links", friendLinkController.createLink);
 apiRouter.put("/admin/friend-links/:id/status", friendLinkController.changeStatus);
 apiRouter.put("/admin/friend-links/:id", friendLinkController.updateInfo);
 apiRouter.delete("/admin/friend-links/:id", friendLinkController.remove);
