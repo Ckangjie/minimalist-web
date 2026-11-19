@@ -3,6 +3,7 @@ import { eq, and, isNull, desc, asc, like, inArray, sql } from "drizzle-orm";
 import { schema } from "../db";
 import { sendNotificationEmail } from "../utils/mail";
 import { calculateVectorScore } from "../utils/vector";
+import { sensitiveFilter } from "../utils/sensitiveFilter";
 
 const { guestbookComment, guestbookAuditLog } = schema;
 
@@ -219,6 +220,15 @@ export const submitOpenComment = async (
     throw new Error(`提交过于频繁，请稍后再试（提交频率限制为 ${limitSeconds} 秒）`);
   }
 
+  // 敏感词 DFA 规则分级判定
+  const filterResult = sensitiveFilter.checkContentAndNickname(content, nickname);
+  if (filterResult.action === "block") {
+    throw new Error("内容包含不合规字符，请规范文明发言");
+  }
+
+  // 若命中可疑/营销特征转为待审核，合规内容直接即时公开（approved）
+  const initialStatus = filterResult.action === "pending" ? "pending" : "approved";
+
   let finalLevel = 1;
   let finalRootId: number | null = null;
   let finalReplyToId: number | null = null;
@@ -281,7 +291,7 @@ export const submitOpenComment = async (
     avatar: avatar || null,
     authorType: "visitor",
     adminId: null,
-    status: "pending",
+    status: initialStatus,
     createdAt: nowTimeStr,
     updatedAt: nowTimeStr,
     sourceHash
@@ -332,7 +342,9 @@ export const submitOpenComment = async (
           </div>
 
           <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 12px; color: #94a3b8;">当前状态：待人工审核</span>
+            <span style="font-size: 12px; color: ${initialStatus === 'approved' ? '#16a34a' : '#d97706'}; font-weight: 600;">
+              当前状态：${initialStatus === 'approved' ? '已即时公开上屏' : `命中可疑词（${filterResult.matchedWords.join(', ')}），已转入待审核`}
+            </span>
           </div>
         </div>
       `;
@@ -342,8 +354,8 @@ export const submitOpenComment = async (
       console.error("[Mail] 发送站长通知邮件异常:", adminMailErr);
     }
 
-    // 2. 若为二级回复，异步触发邮件通知给被回复的用户（如果对方留了邮箱且不等于当前发信人）
-    if (finalReplyToId) {
+    // 2. 若为二级回复且即时通过，异步触发邮件通知给被回复的用户
+    if (finalReplyToId && initialStatus === "approved") {
       try {
         const targetList = await db
           .select()
@@ -381,7 +393,8 @@ export const submitOpenComment = async (
 
   return {
     id: insertedId,
-    message: "留言已提交，审核通过后将公开展示"
+    status: initialStatus,
+    message: initialStatus === "approved" ? "留言发表成功！" : "留言已提交，审核通过后将公开展示"
   };
 };
 

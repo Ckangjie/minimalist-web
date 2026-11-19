@@ -477,7 +477,7 @@ const handleSubmitRoot = async () => {
       email: visitorUser.value?.email || null
     });
 
-    ElMessage.success(res?.message ?? "留言已提交，审核通过后将公开展示");
+    ElMessage.success(res?.message ?? "留言发表成功！");
     rootForm.content = "";
     fetchComments(true);
   } catch (err) {
@@ -518,8 +518,13 @@ const handleSubmitReply = async () => {
       email: visitorUser.value?.email || null
     });
 
-    ElMessage.success(res?.message ?? "回复已提交，审核通过后将展示");
+    ElMessage.success(res?.message ?? "回复发表成功！");
+    const currentRoot = activeReplyRootId.value;
     cancelReplyBox();
+    await fetchComments(false);
+    if (currentRoot) {
+      expandedRootIds.value = new Set([...expandedRootIds.value, currentRoot]);
+    }
   } catch (err) {
     ElMessage.error(err?.message ?? "提交回复失败，请重试");
   } finally {
