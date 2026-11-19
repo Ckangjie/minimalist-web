@@ -53,6 +53,14 @@
           >
             <span>留言板</span>
           </button>
+          <button
+            type="button"
+            class="mode-tab-btn flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all cursor-pointer"
+            :class="{ 'is-active': isExploreActive }"
+            @click="navigateToExplore"
+          >
+            <span>探索好站</span>
+          </button>
         </nav>
       </div>
 
@@ -231,6 +239,14 @@
             >
               <span>留言板</span>
             </button>
+            <button
+              type="button"
+              class="mobile-mode-btn"
+              :class="{ 'is-active': isExploreActive }"
+              @click="handleMobileExplore"
+            >
+              <span>探索好站</span>
+            </button>
           </div>
 
           <!-- 子分类标题栏（系统导航模式下固定可见） -->
@@ -322,6 +338,7 @@ const handleSaveEmail = async () => {
 const { currentNavMode, activeCategories, systemCategories, customCount, toolsCount, switchNavMode } = useBookmarks();
 
 const isGuestbookActive = computed(() => route.path === "/guestbook");
+const isExploreActive = computed(() => route.path === "/explore");
 const isSystemActive = computed(() => route.path === "/" && currentNavMode.value === "system");
 const isBookmarksActive = computed(() => route.path === "/" && currentNavMode.value === "bookmarks");
 const isToolsActive = computed(() => route.path === "/" && currentNavMode.value === "tools");
@@ -335,6 +352,10 @@ const handleModeSwitch = (mode) => {
 
 const navigateToGuestbook = () => {
   router.push("/guestbook");
+};
+
+const navigateToExplore = () => {
+  router.push("/explore");
 };
 
 const mobileTabsRef = ref(null);
@@ -373,6 +394,12 @@ const handleMobileModeSwitch = (mode) => {
 const handleMobileGuestbook = () => {
   closeMenu();
   router.push("/guestbook");
+  scrollActiveTabIntoView();
+};
+
+const handleMobileExplore = () => {
+  closeMenu();
+  router.push("/explore");
   scrollActiveTabIntoView();
 };
 

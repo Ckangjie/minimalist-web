@@ -40,6 +40,15 @@ const routes: RouteRecordRaw[] = [
           parentIcon: "ChatDotRound",
           icon: "User"
         }
+      },
+      {
+        path: "friend-link",
+        name: "FriendLinkManage",
+        component: () => import("@/views/friendLink/index.vue"),
+        meta: {
+          title: "友链管理",
+          icon: "Link"
+        }
       }
     ]
   },

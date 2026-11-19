@@ -76,6 +76,23 @@ app.use("/api/*", async (c, next) => {
         );
 
         CREATE INDEX IF NOT EXISTS idx_visitor_uuid ON guestbook_visitor (uuid);
+
+        -- 友情链接表
+        CREATE TABLE IF NOT EXISTS friend_link (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          url TEXT NOT NULL,
+          logo TEXT,
+          description TEXT,
+          email TEXT,
+          status TEXT NOT NULL DEFAULT 'pending',
+          sort_order INTEGER NOT NULL DEFAULT 0,
+          reject_reason TEXT,
+          created_at TEXT NOT NULL DEFAULT (datetime('now')),
+          reviewed_at TEXT
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_friend_link_status_sort ON friend_link (status, sort_order, created_at);
       `);
       isD1Initialized = true;
     } catch (e) {

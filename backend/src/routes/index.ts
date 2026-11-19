@@ -5,6 +5,7 @@ import { success } from "../utils/response";
 import * as guestbookController from "../controllers/guestbookController";
 import * as authController from "../controllers/authController";
 import * as visitorController from "../controllers/visitorController";
+import * as friendLinkController from "../controllers/friendLinkController";
 
 const apiRouter = new Hono<{ Bindings: Bindings }>();
 
@@ -59,5 +60,13 @@ apiRouter.post("/guestbook/manage/batch-delete", guestbookController.batchRemove
 apiRouter.post("/guestbook/manage/reply", guestbookController.replyComment);
 apiRouter.put("/guestbook/manage/reply/:id", guestbookController.editReply);
 apiRouter.get("/guestbook/manage/audit-logs/:id", guestbookController.getAuditLogs);
+
+// 友情链接（探索好站）接口
+apiRouter.get("/friend-links", friendLinkController.getOpenList);
+apiRouter.post("/friend-links/apply", friendLinkController.apply);
+apiRouter.get("/admin/friend-links", friendLinkController.getManageList);
+apiRouter.put("/admin/friend-links/:id/status", friendLinkController.changeStatus);
+apiRouter.put("/admin/friend-links/:id", friendLinkController.updateInfo);
+apiRouter.delete("/admin/friend-links/:id", friendLinkController.remove);
 
 export default apiRouter;

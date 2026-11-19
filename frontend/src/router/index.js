@@ -14,6 +14,11 @@ const routes = [
         path: "guestbook",
         name: "Guestbook",
         component: () => import("@/views/guestbook/index.vue")
+      },
+      {
+        path: "explore",
+        name: "Explore",
+        component: () => import("@/views/explore/index.vue")
       }
     ]
   }

@@ -73,3 +73,23 @@ export const guestbookVisitor = sqliteTable("guestbook_visitor", {
 
 export type GuestbookVisitor = typeof guestbookVisitor.$inferSelect;
 export type NewGuestbookVisitor = typeof guestbookVisitor.$inferInsert;
+
+/**
+ * 友情链接表定义
+ */
+export const friendLink = sqliteTable("friend_link", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  url: text("url").notNull(),
+  logo: text("logo"),
+  description: text("description"),
+  email: text("email"),
+  status: text("status").default("pending").notNull(), // pending | approved | rejected | hidden
+  sortOrder: integer("sort_order").default(0).notNull(),
+  rejectReason: text("reject_reason"),
+  createdAt: text("created_at").default(sql`(datetime('now'))`).notNull(),
+  reviewedAt: text("reviewed_at")
+});
+
+export type FriendLink = typeof friendLink.$inferSelect;
+export type NewFriendLink = typeof friendLink.$inferInsert;
