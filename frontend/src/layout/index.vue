@@ -26,6 +26,8 @@ import HangingBulb from "@/components/HangingBulb.vue";
 
 <style lang="scss" scoped>
 .layout {
+  position: relative;
+  z-index: 1;
   flex: 1;
   min-height: 100%;
   display: flex;

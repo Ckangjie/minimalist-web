@@ -18,8 +18,8 @@
         </div>
       </header>
 
-      <!-- 发表新留言区（轻量扁平无卡片） -->
-      <section class="comment-create-box p-4 md:p-5 rounded-2xl bg-[var(--bg-surface-soft)] border border-[var(--border-color)] flex flex-col gap-3">
+      <!-- 发表新留言区（轻量扁平带适度层次阴影） -->
+      <section class="comment-create-box p-4 md:p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-color)] flex flex-col gap-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <img
@@ -68,8 +68,8 @@
         </div>
       </section>
 
-      <!-- 全部留言列表区（无卡片流式布局） -->
-      <section class="comment-list-section flex flex-col gap-6">
+      <!-- 全部留言列表区（独立卡片带适度层次阴影） -->
+      <section class="comment-list-section p-4 md:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-color)] flex flex-col gap-6">
         <div class="flex items-center justify-between pb-3 border-b border-[var(--border-color)]">
           <div class="flex items-center gap-2">
             <h2 class="text-base font-bold text-[var(--text-primary)] m-0">全部留言</h2>
@@ -550,11 +550,28 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .guestbook-page {
-  background-color: var(--bg-page);
+  background-color: transparent;
+}
+
+.comment-create-box {
+  box-shadow: var(--card-shadow);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
+  }
+}
+
+.comment-list-section {
+  box-shadow: var(--card-shadow);
+}
+
+.inline-reply-box {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .guestbook-textarea :deep(.el-textarea__inner) {
-  background-color: var(--bg-surface);
+  background-color: var(--bg-surface-soft);
   border-color: var(--border-color);
   color: var(--text-primary);
   border-radius: 12px;
@@ -562,6 +579,7 @@ onMounted(() => {
   font-size: 13px;
 
   &:focus {
+    background-color: var(--bg-surface);
     border-color: var(--primary-color);
   }
 }

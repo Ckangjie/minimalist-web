@@ -380,7 +380,7 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .hub-layout {
-  background-color: var(--bg-page);
+  background-color: transparent;
 }
 
 /* 侧边栏样式 */
