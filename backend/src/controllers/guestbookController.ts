@@ -123,6 +123,25 @@ export const removeComment = async (c: Context) => {
 };
 
 /**
+ * 后台：批量软删除留言
+ */
+export const batchRemoveComments = async (c: Context) => {
+  try {
+    const db = getDatabase(c);
+    const body = await c.req.json().catch(() => ({}));
+    const ids = Array.isArray(body.ids) ? body.ids.map(Number).filter(Boolean) : [];
+    if (ids.length === 0) {
+      return fail(c, "请选择要删除的留言ID列表", 400);
+    }
+    const operatorId = 1;
+    const result = await guestbookService.batchDeleteComments(db, ids, operatorId, body.remark);
+    return success(c, result, `成功删除 ${result.successCount} 条留言`);
+  } catch (error: any) {
+    return fail(c, error?.message ?? "批量删除留言失败");
+  }
+};
+
+/**
  * 后台：站长回复
  */
 export const replyComment = async (c: Context) => {

@@ -55,6 +55,7 @@ apiRouter.get("/guestbook/manage/list", guestbookController.getManageList);
 apiRouter.get("/guestbook/manage/:id", guestbookController.getManageDetail);
 apiRouter.put("/guestbook/manage/:id/status", guestbookController.changeStatus);
 apiRouter.delete("/guestbook/manage/:id", guestbookController.removeComment);
+apiRouter.post("/guestbook/manage/batch-delete", guestbookController.batchRemoveComments);
 apiRouter.post("/guestbook/manage/reply", guestbookController.replyComment);
 apiRouter.put("/guestbook/manage/reply/:id", guestbookController.editReply);
 apiRouter.get("/guestbook/manage/audit-logs/:id", guestbookController.getAuditLogs);

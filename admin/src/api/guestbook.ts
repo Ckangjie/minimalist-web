@@ -88,6 +88,16 @@ export const deleteComment = (id: number, remark?: string) => {
 };
 
 /**
+ * 批量软删除留言
+ */
+export const batchDeleteComments = (ids: number[], remark?: string) => {
+  return request("/api/guestbook/manage/batch-delete", {
+    method: "POST",
+    body: { ids, remark }
+  });
+};
+
+/**
  * 站长回复
  */
 export const adminReply = (targetId: number, content: string) => {

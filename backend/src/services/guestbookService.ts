@@ -695,6 +695,56 @@ export const deleteComment = async (db: any, id: number, operatorId = 1, remark 
 };
 
 /**
+ * 后台：批量软删除留言
+ */
+export const batchDeleteComments = async (
+  db: any,
+  ids: number[],
+  operatorId = 1,
+  remark = "批量删除"
+) => {
+  if (!ids || ids.length === 0) {
+    return { successCount: 0, deletedIds: [] };
+  }
+  const nowTimeStr = formatDateTime();
+
+  const targets = await db
+    .select()
+    .from(guestbookComment)
+    .where(and(inArray(guestbookComment.id, ids), isNull(guestbookComment.deletedAt)));
+
+  if (!targets || targets.length === 0) {
+    return { successCount: 0, deletedIds: [] };
+  }
+
+  const validIds: number[] = targets.map((t: any) => t.id);
+
+  await db
+    .update(guestbookComment)
+    .set({
+      deletedAt: nowTimeStr,
+      updatedAt: nowTimeStr
+    })
+    .where(inArray(guestbookComment.id, validIds));
+
+  const auditEntries = targets.map((t: any) => ({
+    commentId: t.id,
+    operatorId,
+    action: "batch_delete",
+    beforeStatus: t.status,
+    afterStatus: "deleted",
+    createdAt: nowTimeStr,
+    remark: remark || null
+  }));
+
+  if (auditEntries.length > 0) {
+    await db.insert(guestbookAuditLog).values(auditEntries);
+  }
+
+  return { successCount: validIds.length, deletedIds: validIds };
+};
+
+/**
  * 后台：站长回复
  */
 export const adminReplyComment = async (

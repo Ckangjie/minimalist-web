@@ -51,6 +51,17 @@
       <div class="flex items-center justify-between mb-3 flex-shrink-0">
         <div class="flex items-center gap-2">
           <el-button
+            type="danger"
+            plain
+            size="small"
+            :icon="Delete"
+            :loading="isBatchDeleting"
+            :disabled="selectedIds.length === 0"
+            @click="handleBatchDelete"
+          >
+            批量删除 ({{ selectedIds.length }})
+          </el-button>
+          <el-button
             type="primary"
             plain
             size="small"
@@ -73,7 +84,9 @@
           height="100%"
           style="width: 100%"
           class="ruoyi-table"
+          @selection-change="handleSelectionChange"
         >
+        <el-table-column type="selection" width="50" align="center" />
         <el-table-column prop="id" label="ID" width="70" align="center" />
 
         <el-table-column label="层级" width="95" align="center">
@@ -514,12 +527,13 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from "vue";
 import { useRoute } from "vue-router";
-import { ElMessage } from "element-plus";
-import { Search, Refresh } from "@element-plus/icons-vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { Search, Refresh, Delete } from "@element-plus/icons-vue";
 import {
   listManageComments,
   updateCommentStatus,
   deleteComment,
+  batchDeleteComments,
   adminReply,
   updateAdminReply,
   getManageDetail,
@@ -531,6 +545,8 @@ const route = useRoute();
 // 表格与状态
 const isLoading = ref(false);
 const isSubmitting = ref(false);
+const isBatchDeleting = ref(false);
+const selectedIds = ref<number[]>([]);
 const tableData = ref<GuestbookComment[]>([]);
 const totalCount = ref(0);
 const currentPage = ref(1);
@@ -695,6 +711,41 @@ const handleDelete = async (row: GuestbookComment) => {
     fetchData();
   } catch (error: any) {
     ElMessage.error(error?.message ?? "删除失败");
+  }
+};
+
+// 表格多选变化
+const handleSelectionChange = (selection: GuestbookComment[]) => {
+  selectedIds.value = selection.map((item) => item.id);
+};
+
+// 批量删除
+const handleBatchDelete = async () => {
+  if (selectedIds.value.length === 0 || isBatchDeleting.value) return;
+
+  try {
+    await ElMessageBox.confirm(
+      `确定要批量删除选中的 ${selectedIds.value.length} 条留言吗？删除后前台彻底不可见。`,
+      "批量删除确认",
+      {
+        confirmButtonText: "确定删除",
+        cancelButtonText: "取消",
+        type: "warning",
+        confirmButtonClass: "el-button--danger"
+      }
+    );
+
+    isBatchDeleting.value = true;
+    const res = await batchDeleteComments(selectedIds.value);
+    ElMessage.success(res?.message ?? `成功删除 ${selectedIds.value.length} 条留言`);
+    selectedIds.value = [];
+    fetchData();
+  } catch (error: any) {
+    if (error !== "cancel") {
+      ElMessage.error(error?.message ?? "批量删除失败");
+    }
+  } finally {
+    isBatchDeleting.value = false;
   }
 };
 
