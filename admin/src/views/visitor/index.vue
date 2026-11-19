@@ -245,13 +245,8 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.filter-card :deep(.el-card__body) {
-  padding: 12px 16px;
-}
-
-.filter-form :deep(.el-form-item) {
-  margin-bottom: 0 !important;
-  margin-right: 12px;
+.app-container {
+  height: 100%;
 }
 
 .table-card :deep(.el-card__body) {

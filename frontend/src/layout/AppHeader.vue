@@ -216,15 +216,6 @@
             <button
               type="button"
               class="mobile-mode-btn"
-              :class="{ 'is-active': isBookmarksActive }"
-              @click="handleMobileModeSwitch('bookmarks')"
-            >
-              <span>收藏导航</span>
-              <span v-if="customCount > 0" class="mode-count-tag">{{ customCount }}</span>
-            </button>
-            <button
-              type="button"
-              class="mobile-mode-btn"
               :class="{ 'is-active': isToolsActive }"
               @click="handleMobileModeSwitch('tools')"
             >
@@ -339,15 +330,39 @@ const { currentNavMode, activeCategories, systemCategories, customCount, toolsCo
 
 const isGuestbookActive = computed(() => route.path === "/guestbook");
 const isExploreActive = computed(() => route.path === "/explore");
-const isSystemActive = computed(() => route.path === "/" && currentNavMode.value === "system");
-const isBookmarksActive = computed(() => route.path === "/" && currentNavMode.value === "bookmarks");
-const isToolsActive = computed(() => route.path === "/" && currentNavMode.value === "tools");
+const isSystemActive = computed(() => route.path === "/" || route.path === "/system");
+const isBookmarksActive = computed(() => route.path === "/bookmarks");
+const isToolsActive = computed(() => route.path === "/tools");
+
+watch(
+  () => route.path,
+  (path) => {
+    if (path === "/bookmarks") {
+      switchNavMode("bookmarks");
+    } else if (path === "/tools") {
+      switchNavMode("tools");
+    } else if (path === "/" || path === "/system") {
+      switchNavMode("system");
+    }
+  },
+  { immediate: true }
+);
 
 const handleModeSwitch = (mode) => {
-  if (route.path !== "/") {
-    router.push("/");
-  }
   switchNavMode(mode);
+  if (mode === "system") {
+    if (route.path !== "/" && route.path !== "/system") {
+      router.push("/");
+    }
+  } else if (mode === "bookmarks") {
+    if (route.path !== "/bookmarks") {
+      router.push("/bookmarks");
+    }
+  } else if (mode === "tools") {
+    if (route.path !== "/tools") {
+      router.push("/tools");
+    }
+  }
 };
 
 const navigateToGuestbook = () => {
@@ -381,10 +396,20 @@ const scrollActiveTabIntoView = () => {
 
 // 移动端切换模式：切换到工具时自动收起抽屉直接浏览
 const handleMobileModeSwitch = (mode) => {
-  if (route.path !== "/") {
-    router.push("/");
-  }
   switchNavMode(mode);
+  if (mode === "system") {
+    if (route.path !== "/" && route.path !== "/system") {
+      router.push("/");
+    }
+  } else if (mode === "bookmarks") {
+    if (route.path !== "/bookmarks") {
+      router.push("/bookmarks");
+    }
+  } else if (mode === "tools") {
+    if (route.path !== "/tools") {
+      router.push("/tools");
+    }
+  }
   scrollActiveTabIntoView();
   if (mode === "tools") {
     closeMenu();

@@ -400,14 +400,15 @@ onMounted(() => {
 
 <style scoped>
 .app-container {
-  padding: 16px;
-  height: calc(100vh - 84px);
-  box-sizing: border-box;
+  height: 100%;
 }
 
-:deep(.el-card__body) {
+.table-card :deep(.el-card__body) {
   height: 100%;
   display: flex;
   flex-direction: column;
+  padding: 16px;
+  box-sizing: border-box;
+  min-height: 0;
 }
 </style>

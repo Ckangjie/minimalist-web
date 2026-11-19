@@ -8,7 +8,26 @@ const routes = [
       {
         path: "",
         name: "Home",
-        component: () => import("@/views/index/index.vue")
+        component: () => import("@/views/index/index.vue"),
+        meta: { navMode: "system" }
+      },
+      {
+        path: "system",
+        name: "SystemNav",
+        component: () => import("@/views/index/index.vue"),
+        meta: { navMode: "system" }
+      },
+      {
+        path: "bookmarks",
+        name: "Bookmarks",
+        component: () => import("@/views/index/index.vue"),
+        meta: { navMode: "bookmarks" }
+      },
+      {
+        path: "tools",
+        name: "Tools",
+        component: () => import("@/views/index/index.vue"),
+        meta: { navMode: "tools" }
       },
       {
         path: "guestbook",
@@ -21,6 +40,15 @@ const routes = [
         component: () => import("@/views/explore/index.vue")
       }
     ]
+  },
+  {
+    path: "/404",
+    name: "NotFound",
+    component: () => import("@/views/error/404.vue")
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    redirect: "/404"
   }
 ];
 

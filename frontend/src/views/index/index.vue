@@ -164,8 +164,11 @@ import NavCard from "@/components/NavCard.vue";
 import SearchBar from "@/components/SearchBar.vue";
 import { useBookmarks } from "@/composables/useBookmarks";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 const USER_NAME_STORAGE_KEY = "cached_user_name";
+const route = useRoute();
+const router = useRouter();
 
 const {
   currentNavMode,
@@ -178,6 +181,20 @@ const {
   clearCustomBookmarks
 } = useBookmarks();
 
+watch(
+  () => route.path,
+  (path) => {
+    if (path === "/bookmarks") {
+      switchNavMode("bookmarks");
+    } else if (path === "/tools") {
+      switchNavMode("tools");
+    } else if (path === "/" || path === "/system") {
+      switchNavMode("system");
+    }
+  },
+  { immediate: true }
+);
+
 const searchKeyword = ref("");
 const userName = ref(localStorage.getItem(USER_NAME_STORAGE_KEY) ?? "");
 const fileInputRef = ref(null);
@@ -188,8 +205,11 @@ const updateIsMobile = () => {
   if (typeof window !== "undefined") {
     isMobile.value = window.innerWidth < 768;
     // 移动端不展示收藏导航，若当前处于收藏模式则自动切回系统导航
-    if (isMobile.value && currentNavMode.value === "bookmarks") {
+    if (isMobile.value && (currentNavMode.value === "bookmarks" || route.path === "/bookmarks")) {
       switchNavMode("system");
+      if (route.path === "/bookmarks") {
+        router.replace("/");
+      }
     }
   }
 };

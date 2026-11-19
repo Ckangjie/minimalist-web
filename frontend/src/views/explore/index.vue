@@ -2,57 +2,54 @@
   <div class="explore-page flex-1 flex flex-col py-6 px-4 md:px-8">
     <div class="explore-container w-full max-w-1200px mx-auto flex flex-col gap-8">
       <!-- 页面头部简介区与申请触发按钮 -->
-      <header class="explore-header flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-          <div class="header-icon-badge flex items-center justify-center w-11 h-11 rounded-xl bg-[var(--primary-light)] text-[var(--primary-color)] flex-shrink-0">
-            <el-icon :size="24"><Compass /></el-icon>
-          </div>
-          <div>
-            <h1 class="text-xl md:text-2xl font-bold m-0 tracking-tight text-[var(--text-primary)]">
-              探索好站
-            </h1>
-            <p class="text-xs md:text-sm text-[var(--text-muted)] m-0 mt-0.5 leading-relaxed">
-              汇聚优质独立博客、开源项目与实用站点。欢迎站长提交申请，开放互联。
-            </p>
-          </div>
-        </div>
+      <header class="explore-header flex flex-col gap-2.5 sm:gap-3">
+        <div class="flex items-center justify-between gap-3">
+          <h1 class="text-lg sm:text-2xl font-bold m-0 tracking-tight text-[var(--text-primary)] truncate">
+            探索好站
+          </h1>
 
-        <div class="flex items-center gap-3">
           <el-button
             type="primary"
             round
+            size="small"
             :icon="Plus"
-            class="apply-trigger-btn"
+            class="apply-trigger-btn flex-shrink-0"
             @click="isApplyDialogOpen = true"
           >
             申请友链
           </el-button>
         </div>
+
+        <p class="text-xs sm:text-sm text-[var(--text-muted)] m-0 leading-relaxed">
+          汇聚优质独立博客、开源项目与实用站点。欢迎站长提交申请，开放互联。
+        </p>
       </header>
 
       <!-- 本站互联信息卡片（方便对方先添加本站） -->
-      <section class="site-info-box p-4 md:p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-color)] flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="flex flex-col gap-1.5 flex-1 min-w-0 text-xs">
-          <div class="flex items-center gap-2">
-            <span class="font-bold text-sm text-[var(--text-primary)]">本站信息提示</span>
-            <span class="text-[11px] text-[var(--text-muted)]">（申请前建议先将本站添加到您的友链中）</span>
+      <section class="site-info-box p-3.5 sm:p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-color)] flex flex-col gap-2.5 sm:gap-3">
+        <div class="flex items-center justify-between pb-2 border-b border-[var(--border-color)]">
+          <div class="flex items-center gap-1.5 min-w-0">
+            <span class="font-bold text-xs sm:text-sm text-[var(--text-primary)]">本站信息提示</span>
+            <span class="text-[11px] text-[var(--text-muted)] hidden sm:inline">（申请前建议先将本站添加到您的友链中）</span>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 pt-1 text-[var(--text-regular)]">
-            <div class="truncate"><b>名称：</b>Jie Hub</div>
-            <div class="truncate"><b>网址：</b>https://kj.du1.ccwu.cc</div>
-            <div class="truncate"><b>图标：</b>https://kj.du1.ccwu.cc/logo.svg</div>
-            <div class="truncate"><b>简介：</b>云端聚合导航与个人精选工具站</div>
-          </div>
+          <el-button
+            type="primary"
+            link
+            size="small"
+            :icon="CopyDocument"
+            class="copy-info-btn !p-0 !text-xs flex-shrink-0"
+            @click="handleCopySiteInfo"
+          >
+            复制本站信息
+          </el-button>
         </div>
 
-        <el-button
-          size="small"
-          :icon="CopyDocument"
-          class="copy-info-btn flex-shrink-0"
-          @click="handleCopySiteInfo"
-        >
-          复制本站信息
-        </el-button>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 text-xs text-[var(--text-regular)]">
+          <div class="truncate"><b>名称：</b>Jie Hub</div>
+          <div class="truncate"><b>网址：</b>https://du1.ccwu.cc/</div>
+          <div class="truncate"><b>图标：</b>https://du1.ccwu.cc/logo.svg</div>
+          <div class="truncate"><b>简介：</b>云端聚合导航与个人精选工具站</div>
+        </div>
       </section>
 
       <!-- 友链卡片展示墙 -->
@@ -90,19 +87,19 @@
           <p class="text-sm m-0">暂无已上架的友链，欢迎点击右上角申请成为首批入驻好站 ✨</p>
         </div>
 
-        <!-- 卡片网格列表 -->
-        <div v-else class="links-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <!-- 卡片网格列表：移动端双列紧凑自适应，PC端四列 -->
+        <div v-else class="links-grid grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4">
           <a
             v-for="item in linkList"
             :key="item.id"
             :href="item.url"
             target="_blank"
             rel="noopener noreferrer"
-            class="link-card flex flex-col p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-color)] transition-all cursor-pointer select-none relative group"
+            class="link-card flex flex-col p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-color)] transition-all cursor-pointer select-none relative group"
           >
-            <div class="flex items-center gap-3 min-w-0">
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
               <!-- Logo 或备用 Favicon / 首字母头像 -->
-              <div class="link-avatar-box w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden border border-[var(--border-color)] bg-[var(--bg-surface-soft)]">
+              <div class="link-avatar-box w-7.5 h-7.5 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden border border-[var(--border-color)] bg-[var(--bg-surface-soft)]">
                 <img
                   v-if="item.logo && !failedLogos.has(item.id)"
                   :src="item.logo"
@@ -115,13 +112,13 @@
                   v-else-if="getDomainFavicon(item.url) && !failedFavicons.has(item.id)"
                   :src="getDomainFavicon(item.url)"
                   :alt="item.name"
-                  class="w-6 h-6 object-contain"
+                  class="w-5 h-5 sm:w-6 sm:h-6 object-contain"
                   loading="lazy"
                   @error="handleFaviconError(item.id)"
                 />
                 <div
                   v-else
-                  class="w-full h-full flex items-center justify-center text-white font-bold text-sm"
+                  class="w-full h-full flex items-center justify-center text-white font-bold text-xs sm:text-sm"
                   :style="{ backgroundColor: getAvatarColor(item.name) }"
                 >
                   {{ (item.name || 'J').charAt(0).toUpperCase() }}
@@ -130,17 +127,17 @@
 
               <!-- 站点标题与外链图标 -->
               <div class="flex-1 min-w-0 flex items-center justify-between gap-1">
-                <h3 class="link-title font-bold text-sm m-0 text-[var(--text-primary)] truncate">
+                <h3 class="link-title font-bold text-xs sm:text-sm m-0 text-[var(--text-primary)] truncate">
                   {{ item.name }}
                 </h3>
-                <el-icon class="external-icon text-xs text-[var(--text-muted)] opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                <el-icon class="external-icon text-xs text-[var(--text-muted)] opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 hidden sm:inline-flex">
                   <TopRight />
                 </el-icon>
               </div>
             </div>
 
             <!-- 描述信息（选填兜底） -->
-            <p class="link-desc text-xs text-[var(--text-muted)] leading-relaxed m-0 mt-3 line-clamp-2 flex-1">
+            <p class="link-desc text-[11px] sm:text-xs text-[var(--text-muted)] leading-relaxed m-0 mt-2 sm:mt-3 line-clamp-2 flex-1">
               {{ item.description || "站长很神秘，暂无详细介绍" }}
             </p>
           </a>
@@ -152,7 +149,9 @@
     <el-dialog
       v-model="isApplyDialogOpen"
       title="申请互换友链"
-      width="480px"
+      width="92%"
+      style="max-width: 480px"
+      align-center
       append-to-body
       destroy-on-close
       class="apply-dialog"
@@ -164,7 +163,7 @@
         :rules="rules"
         label-position="top"
         size="default"
-        class="pt-1"
+        class="apply-form pt-1"
       >
         <el-form-item label="网站名称" prop="name">
           <el-input
@@ -209,12 +208,17 @@
       </el-form>
 
       <template #footer>
-        <div class="flex items-center justify-end gap-2">
-          <el-button :disabled="isSubmitting" @click="isApplyDialogOpen = false">
+        <div class="dialog-footer-actions">
+          <el-button
+            class="dialog-action-btn"
+            :disabled="isSubmitting"
+            @click="isApplyDialogOpen = false"
+          >
             取消
           </el-button>
           <el-button
             type="primary"
+            class="dialog-action-btn"
             :loading="isSubmitting"
             @click="handleSubmitApply"
           >
@@ -369,8 +373,8 @@ const copyTextToClipboard = async (text) => {
 
 const handleCopySiteInfo = async () => {
   const infoText = `网站名称：Jie Hub
-网站地址：https://kj.du1.ccwu.cc
-网站图标：https://kj.du1.ccwu.cc/logo.svg
+网站地址：https://du1.ccwu.cc/
+网站图标：https://du1.ccwu.cc/logo.svg
 网站描述：云端聚合导航与个人精选工具站`;
   const isSuccess = await copyTextToClipboard(infoText);
   if (isSuccess) {
@@ -433,6 +437,113 @@ onMounted(() => {
 
     .link-title {
       color: var(--primary-color);
+    }
+  }
+}
+</style>
+
+<style lang="scss">
+/* 友链申请弹窗（全局生效，穿透 append-to-body） */
+.el-overlay-dialog {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.apply-dialog {
+  width: 92% !important;
+  max-width: 480px !important;
+  height: auto !important;
+  min-height: unset !important;
+  max-height: 90vh !important;
+  margin: auto !important;
+  align-self: center !important;
+  flex: 0 0 auto !important;
+  border-radius: 16px !important;
+  overflow: hidden;
+
+  .el-dialog__header {
+    padding: 16px 20px 12px;
+    margin-right: 0;
+    border-bottom: 1px solid var(--border-color);
+
+    .el-dialog__title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+  }
+
+  .el-dialog__body {
+    padding: 16px 20px 8px;
+    max-height: calc(82vh - 120px);
+    overflow-y: auto;
+  }
+
+  .el-dialog__footer {
+    padding: 12px 20px 16px;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .dialog-footer-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  @media (max-width: 640px) {
+    width: 92% !important;
+    height: auto !important;
+    min-height: unset !important;
+    max-height: 85vh !important;
+    align-self: center !important;
+    flex: 0 0 auto !important;
+    border-radius: 14px !important;
+
+    .el-dialog__header {
+      padding: 14px 16px 10px;
+    }
+
+    .el-dialog__body {
+      padding: 12px 16px 6px;
+      max-height: 60vh;
+    }
+
+    .el-dialog__footer {
+      padding: 10px 16px 14px;
+    }
+
+    .apply-form {
+      .el-form-item {
+        margin-bottom: 12px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .el-form-item__label {
+          padding-bottom: 4px;
+          font-size: 12px;
+          line-height: 1.4;
+        }
+
+        .el-input__wrapper,
+        .el-textarea__inner {
+          font-size: 13px;
+        }
+      }
+    }
+
+    .dialog-footer-actions {
+      width: 100%;
+
+      .dialog-action-btn {
+        flex: 1;
+        margin-left: 0 !important;
+        height: 38px;
+        font-size: 14px;
+      }
     }
   }
 }

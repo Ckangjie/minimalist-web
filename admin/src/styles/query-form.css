@@ -1,0 +1,19 @@
+/* ========================================================
+   管理端 - 列表查询表单区域公共规范样式
+   仅应用于数据列表顶部的筛选/查询表单区域 (.filter-card & .filter-form)
+   ======================================================== */
+
+.filter-card .el-card__body {
+  padding: 12px 16px;
+  height: auto !important;
+  min-height: unset !important;
+}
+
+.filter-form .el-form-item {
+  margin-bottom: 0 !important;
+  margin-right: 12px;
+}
+
+.filter-form .el-form-item:last-child {
+  margin-right: 0;
+}

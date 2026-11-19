@@ -2,20 +2,13 @@
   <div class="guestbook-page flex-1 flex flex-col py-6 px-4 md:px-8">
     <div class="guestbook-container w-full max-w-860px mx-auto flex flex-col gap-8">
       <!-- 页面头部简介区（无卡片边框） -->
-      <header class="guestbook-header flex flex-col gap-2">
-        <div class="flex items-center gap-3">
-          <div class="header-icon-badge flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--primary-light)] text-[var(--primary-color)] flex-shrink-0">
-            <el-icon :size="22"><ChatDotRound /></el-icon>
-          </div>
-          <div>
-            <h1 class="text-xl md:text-2xl font-bold m-0 tracking-tight text-[var(--text-primary)]">
-              全站留言板
-            </h1>
-            <p class="text-xs md:text-sm text-[var(--text-muted)] m-0 mt-0.5 leading-relaxed">
-              欢迎留下您的宝贵建议、使用反馈与交流心得。所有留言人工审核后公开展示。
-            </p>
-          </div>
-        </div>
+      <header class="guestbook-header flex flex-col gap-1.5 sm:gap-2">
+        <h1 class="text-xl md:text-2xl font-bold m-0 tracking-tight text-[var(--text-primary)]">
+          全站留言板
+        </h1>
+        <p class="text-xs md:text-sm text-[var(--text-muted)] m-0 leading-relaxed">
+          欢迎留下您的宝贵建议、使用反馈与交流心得。所有留言人工审核后公开展示。
+        </p>
       </header>
 
       <!-- 发表新留言区（轻量扁平带适度层次阴影） -->
@@ -338,7 +331,6 @@
 import { getOpenList, submitComment } from "@/api/guestbook";
 import { useVisitorUser } from "@/composables/useVisitorUser";
 import {
-  ChatDotRound,
   ChatRound,
   Loading,
   Refresh

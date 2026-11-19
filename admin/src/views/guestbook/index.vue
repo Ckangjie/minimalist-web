@@ -820,19 +820,6 @@ onMounted(() => {
   height: 100%;
 }
 
-.filter-card :deep(.el-card__body) {
-  padding: 12px 16px;
-}
-
-.filter-form :deep(.el-form-item) {
-  margin-bottom: 0 !important;
-  margin-right: 12px;
-}
-
-.filter-form :deep(.el-form-item:last-child) {
-  margin-right: 0;
-}
-
 .table-card :deep(.el-card__body) {
   height: 100%;
   display: flex;
