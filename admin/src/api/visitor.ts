@@ -1,5 +1,18 @@
 import request from "@/utils/request";
 
+export interface VisitorItem {
+  id: number;
+  uuid: string;
+  nickname: string;
+  avatar?: string | null;
+  email?: string | null;
+  clientIp?: string | null;
+  userAgent?: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 /**
  * 获取访客用户列表
  */

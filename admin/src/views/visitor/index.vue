@@ -66,6 +66,26 @@
           <el-table-column type="selection" width="50" align="center" />
           <el-table-column prop="id" label="ID" width="70" align="center" />
 
+          <el-table-column label="头像" width="75" align="center">
+            <template #default="{ row }">
+              <el-avatar
+                v-if="row.avatar"
+                :size="36"
+                :src="row.avatar"
+                shape="circle"
+                class="border border-[#e4e7ed] bg-[#f8fafc]"
+              />
+              <el-avatar
+                v-else
+                :size="36"
+                shape="circle"
+                class="bg-[#409eff] text-white font-bold text-xs"
+              >
+                {{ row.nickname?.charAt(0) || "访" }}
+              </el-avatar>
+            </template>
+          </el-table-column>
+
           <el-table-column label="专属固定昵称" min-width="150">
             <template #default="{ row }">
               <div class="flex items-center gap-2">

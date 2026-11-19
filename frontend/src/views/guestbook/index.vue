@@ -22,9 +22,16 @@
       <section class="comment-create-box p-4 md:p-5 rounded-2xl bg-[var(--bg-surface-soft)] border border-[var(--border-color)] flex flex-col gap-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
+            <img
+              v-if="visitorUser?.avatar"
+              :src="visitorUser.avatar"
+              :alt="visitorUser?.nickname"
+              class="w-6 h-6 rounded-full object-cover flex-shrink-0 border border-[var(--border-color)] bg-[var(--bg-surface)] shadow-sm"
+            />
             <div
+              v-else
               class="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm"
-              :style="{ background: visitorUser?.avatarBg }"
+              :style="{ background: visitorUser?.avatarBg || '#3b82f6' }"
             >
               {{ avatarText }}
             </div>
@@ -32,9 +39,6 @@
             <span class="text-xs font-bold text-[var(--text-primary)]">{{ currentVisitorNickname }}</span>
             <span class="text-xs text-[var(--text-muted)]">身份发表</span>
           </div>
-          <span class="text-xs text-[var(--text-muted)]">
-            {{ rootForm.content.length }} / 200 字
-          </span>
         </div>
 
         <el-input
@@ -42,6 +46,7 @@
           type="textarea"
           :rows="3"
           maxlength="200"
+          show-word-limit
           placeholder="请畅所欲言，友好交流。换行可正常排版显示..."
           resize="none"
           :disabled="isSubmitting"
@@ -104,25 +109,26 @@
         </div>
 
         <!-- 留言流条目列表（彻底移除卡片，纯流式条目） -->
-        <div v-else class="comment-stream flex flex-col gap-6">
-          <!-- 刷新中的微型小 loading 提示 -->
-          <div v-if="isLoading && commentList.length > 0" class="flex items-center justify-center gap-2 py-1 text-xs text-[var(--text-muted)] animate-pulse">
-            <el-icon class="is-loading" :size="13" color="var(--primary-color)">
-              <Loading />
-            </el-icon>
-            <span>正在刷新留言...</span>
-          </div>
+        <div v-else class="comment-stream flex flex-col gap-5">
           <article
             v-for="item in commentList"
             :key="item.id"
-            class="comment-entry flex flex-col gap-2.5 border-b border-[var(--border-color)] last:border-b-0"
+            class="comment-entry flex flex-col gap-2.5"
           >
             <!-- 主留言作者与信息行 -->
             <div class="flex items-start justify-between gap-3">
               <div class="flex items-center gap-3">
-                <!-- 移动端隐藏头像，仅 PC 端展示 -->
+                <!-- 移动端保留头像（尺寸略小），PC 端完整展示 -->
+                <img
+                  v-if="item.avatar"
+                  :src="item.avatar"
+                  :alt="item.nickname"
+                  class="comment-author-avatar flex w-7 h-7 md:w-9 md:h-9 rounded-full object-cover flex-shrink-0 border border-[var(--border-color)] bg-[var(--bg-surface-soft)] shadow-sm"
+                  loading="lazy"
+                />
                 <div
-                  class="comment-author-avatar hidden md:flex w-9 h-9 rounded-full items-center justify-center text-white text-sm font-bold flex-shrink-0 shadow-sm"
+                  v-else
+                  class="comment-author-avatar flex w-7 h-7 md:w-9 md:h-9 rounded-full items-center justify-center text-white text-xs md:text-sm font-bold flex-shrink-0 shadow-sm"
                   :style="{ background: item.authorType === 'admin' ? '#ef4444' : '#3b82f6' }"
                 >
                   {{ item.nickname ? item.nickname.charAt(0).toUpperCase() : '访' }}
@@ -152,10 +158,12 @@
               </button>
             </div>
 
-            <!-- 主留言正文（纯文本换行展示，移动端无头像无需大缩进） -->
-            <div class="comment-content pl-0 md:pl-12 text-sm text-[var(--text-primary)] leading-relaxed whitespace-pre-wrap break-words">
+            <!-- 主留言正文（纯文本换行展示，左侧与昵称保持对齐） -->
+            <div class="comment-content pl-10 md:pl-12 text-sm text-[var(--text-primary)] leading-relaxed whitespace-pre-wrap break-words">
               {{ item.content }}
             </div>
+
+            <div :id="`guestbook-reply-${item.id}-${item.id}`" class="contents"></div>
 
             <!-- 抖音风格楼中楼回复区（无卡片包裹，默认折叠） -->
             <div
@@ -177,50 +185,57 @@
 
               <!-- 展开状态：楼中楼列表（格式严格为 A ▸ B：xxxx，无卡片） -->
               <div v-else class="expanded-thread flex flex-col gap-3 pt-1">
-                <div
-                  v-for="reply in item.replies"
-                  :key="reply.id"
-                  class="thread-reply-row flex items-start gap-2.5 text-xs group"
-                >
-                  <!-- 移动端隐藏楼中楼头像，仅 PC 端展示 -->
-                  <div
-                    class="thread-reply-avatar hidden md:flex w-6 h-6 rounded-full items-center justify-center text-white text-[10px] font-bold flex-shrink-0 mt-0.5"
-                    :style="{ background: reply.authorType === 'admin' ? '#ef4444' : '#8b5cf6' }"
-                  >
-                    {{ reply.nickname?.charAt(0)?.toUpperCase() || '访' }}
-                  </div>
-
-                  <div class="flex-1 min-w-0 leading-relaxed break-words">
-                    <!-- A ▸ B：xxxx 抖音右三角格式展示 -->
-                    <span class="font-bold text-[var(--text-primary)]">
-                      {{ reply.nickname }}
-                    </span>
-                    <span
-                      v-if="reply.authorType === 'admin'"
-                      class="inline-block px-1 py-0.2 mx-1 text-[10px] font-semibold text-white bg-red-500 rounded"
+                <template v-for="reply in item.replies" :key="reply.id">
+                  <div class="thread-reply-row flex items-start gap-2.5 text-xs group">
+                    <!-- 移动端保留楼中楼头像（尺寸略小），PC 端完整展示 -->
+                    <img
+                      v-if="reply.avatar"
+                      :src="reply.avatar"
+                      :alt="reply.nickname"
+                      class="thread-reply-avatar flex w-5 h-5 md:w-6 md:h-6 rounded-full object-cover flex-shrink-0 border border-[var(--border-color)] bg-[var(--bg-surface-soft)] mt-0.5"
+                      loading="lazy"
+                    />
+                    <div
+                      v-else
+                      class="thread-reply-avatar flex w-5 h-5 md:w-6 md:h-6 rounded-full items-center justify-center text-white text-[9px] md:text-[10px] font-bold flex-shrink-0 mt-0.5"
+                      :style="{ background: reply.authorType === 'admin' ? '#ef4444' : '#8b5cf6' }"
                     >
-                      站长
-                    </span>
-                    <span class="inline-flex items-center mx-1 text-[9px] text-[var(--text-muted)] select-none">▸</span>
-                    <span class="font-semibold text-[var(--primary-color)]">
-                      {{ reply.replyToNickname || item.nickname }}
-                    </span>
-                    <span class="font-bold text-[var(--text-primary)]"> ：</span>
-                    <span class="text-[var(--text-primary)] whitespace-pre-wrap">{{ reply.content }}</span>
+                      {{ reply.nickname?.charAt(0)?.toUpperCase() || '访' }}
+                    </div>
 
-                    <!-- 行内回复与时间 -->
-                    <div class="flex items-center gap-3 mt-1 text-[11px] text-[var(--text-muted)]">
-                      <time>{{ reply.createdAt }}</time>
-                      <button
-                        type="button"
-                        class="text-[11px] text-[var(--text-muted)] hover:text-[var(--primary-color)] border-none bg-transparent p-0 cursor-pointer"
-                        @click="openReplyBox(item.id, reply.id, reply.nickname)"
+                    <div class="flex-1 min-w-0 leading-relaxed break-words">
+                      <!-- A ▸ B：xxxx 抖音右三角格式展示 -->
+                      <span class="font-bold text-[var(--text-primary)]">
+                        {{ reply.nickname }}
+                      </span>
+                      <span
+                        v-if="reply.authorType === 'admin'"
+                        class="inline-block px-1 py-0.2 mx-1 text-[10px] font-semibold text-white bg-red-500 rounded"
                       >
-                        回复
-                      </button>
+                        站长
+                      </span>
+                      <span class="inline-flex items-center mx-1 text-[9px] text-[var(--text-muted)] select-none">▸</span>
+                      <span class="font-semibold text-[var(--primary-color)]">
+                        {{ reply.replyToNickname || item.nickname }}
+                      </span>
+                      <span class="font-bold text-[var(--text-primary)]"> ：</span>
+                      <span class="text-[var(--text-primary)] whitespace-pre-wrap">{{ reply.content }}</span>
+
+                      <!-- 行内回复与时间 -->
+                      <div class="flex items-center gap-3 mt-1 text-[11px] text-[var(--text-muted)]">
+                        <time>{{ reply.createdAt }}</time>
+                        <button
+                          type="button"
+                          class="text-[11px] text-[var(--text-muted)] hover:text-[var(--primary-color)] border-none bg-transparent p-0 cursor-pointer"
+                          @click="openReplyBox(item.id, reply.id, reply.nickname)"
+                        >
+                          回复
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
+                  <div :id="`guestbook-reply-${item.id}-${reply.id}`" class="contents"></div>
+                </template>
 
                 <!-- 展开后的收起按钮 -->
                 <div class="pt-0.5">
@@ -238,50 +253,65 @@
             </div>
 
             <!-- 内联回复输入区（扁平嵌入，无卡片框） -->
-            <div
+            <Teleport
               v-if="activeReplyRootId === item.id"
-              class="inline-reply-box ml-0 md:ml-12 mt-2 p-3.5 rounded-xl bg-[var(--bg-surface-soft)] border border-[var(--border-color)] flex flex-col gap-2.5"
+              :to="`#guestbook-reply-${item.id}-${activeReplyTargetId}`"
             >
-              <div class="flex items-center justify-between text-xs">
-                <span class="text-[var(--text-muted)]">
-                  回复 <span class="font-bold text-[var(--primary-color)]">@{{ activeReplyTargetNick }}</span>
-                  （以 <span class="font-semibold text-[var(--text-primary)]">{{ currentVisitorNickname }}</span> 身份）
-                </span>
-                <span class="text-[11px] text-[var(--text-muted)]">
-                  {{ replyForm.content.length }} / 200 字
-                </span>
-              </div>
+              <div
+                :class="activeReplyTargetId === item.id ? 'ml-0 md:ml-12' : 'ml-7.5 md:ml-8.5'"
+                class="inline-reply-box mt-2 p-3.5 rounded-xl bg-[var(--bg-surface-soft)] border border-[var(--border-color)] flex flex-col gap-2.5"
+              >
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-[var(--text-muted)]">
+                    回复 <span class="font-bold text-[var(--primary-color)]">@{{ activeReplyTargetNick }}</span>
+                    （以 <span class="font-semibold text-[var(--text-primary)]">{{ currentVisitorNickname }}</span> 身份）
+                  </span>
+                </div>
 
-              <el-input
-                v-model.trim="replyForm.content"
-                type="textarea"
-                :rows="2"
-                maxlength="200"
-                placeholder="友善回复，真诚沟通..."
-                resize="none"
-                :disabled="isSubmitting"
-              />
+                <el-input
+                  v-model.trim="replyForm.content"
+                  type="textarea"
+                  :rows="2"
+                  maxlength="200"
+                  show-word-limit
+                  placeholder="友善回复，真诚沟通..."
+                  resize="none"
+                  :disabled="isSubmitting"
+                  class="guestbook-textarea"
+                />
 
-              <div class="flex items-center justify-end gap-2 pt-0.5">
-                <el-button size="small" :disabled="isSubmitting" @click="cancelReplyBox">
-                  取消
-                </el-button>
-                <el-button
-                  type="primary"
-                  size="small"
-                  :loading="isSubmitting"
-                  :disabled="!canSubmitReply"
-                  @click="handleSubmitReply"
-                >
-                  发送回复
-                </el-button>
+                <div class="flex items-center justify-end gap-2 pt-0.5">
+                  <el-button size="small" :disabled="isSubmitting" @click="cancelReplyBox">
+                    取消
+                  </el-button>
+                  <el-button
+                    type="primary"
+                    size="small"
+                    :loading="isSubmitting"
+                    :disabled="!canSubmitReply"
+                    @click="handleSubmitReply"
+                  >
+                    发送回复
+                  </el-button>
+                </div>
               </div>
-            </div>
+            </Teleport>
           </article>
         </div>
 
         <!-- 底部加载更多与触底提示 -->
-        <div v-if="commentList.length > 0" class="flex justify-center pt-2 pb-4">
+        <div v-if="commentList.length > 0" class="flex flex-col items-center gap-2.5 pt-2 pb-4">
+          <!-- 刷新中的微型小 loading 提示（置于底部，彻底消除顶部布局跳动） -->
+          <div
+            v-if="isLoading"
+            class="flex items-center justify-center gap-2 py-1.5 text-xs text-[var(--text-muted)] animate-pulse"
+          >
+            <el-icon class="is-loading" :size="13" color="var(--primary-color)">
+              <Loading />
+            </el-icon>
+            <span>正在刷新留言...</span>
+          </div>
+
           <el-button
             v-if="hasMore"
             :loading="isLoadingMore"
@@ -292,7 +322,7 @@
             加载更多留言（已加载 {{ commentList.length }} / {{ totalCount }}）
           </el-button>
 
-          <div v-else class="text-xs text-[var(--text-muted)] flex items-center gap-2 select-none py-2">
+          <div v-else-if="!isLoading" class="text-xs text-[var(--text-muted)] flex items-center gap-2 select-none py-2">
             <span class="opacity-30">————</span>
             <span>已加载全部留言（共 {{ totalCount }} 条）</span>
             <span class="opacity-30">————</span>
@@ -371,6 +401,9 @@ const toggleRepliesExpand = (rootId) => {
   const nextSet = new Set(expandedRootIds.value);
   if (nextSet.has(rootId)) {
     nextSet.delete(rootId);
+    if (activeReplyRootId.value === rootId && activeReplyTargetId.value !== rootId) {
+      cancelReplyBox();
+    }
   } else {
     nextSet.add(rootId);
   }
@@ -445,6 +478,7 @@ const handleSubmitRoot = async () => {
   try {
     const res = await submitComment({
       nickname: currentVisitorNickname.value,
+      avatar: visitorUser.value?.avatar || null,
       content: rootForm.content.trim(),
       email: visitorUser.value?.email || null
     });
@@ -461,6 +495,7 @@ const handleSubmitRoot = async () => {
 
 // 打开内联回复输入框
 const openReplyBox = (rootId, targetId, targetNick) => {
+  if (isSubmitting.value) return;
   activeReplyRootId.value = rootId;
   activeReplyTargetId.value = targetId;
   activeReplyTargetNick.value = targetNick;
@@ -482,6 +517,7 @@ const handleSubmitReply = async () => {
   try {
     const res = await submitComment({
       nickname: currentVisitorNickname.value,
+      avatar: visitorUser.value?.avatar || null,
       content: replyForm.content.trim(),
       rootId: activeReplyRootId.value,
       replyToId: activeReplyTargetId.value,
@@ -520,6 +556,12 @@ onMounted(() => {
   }
 }
 
+.guestbook-textarea :deep(.el-input__count) {
+  background: transparent !important;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
 .toggle-thread-btn {
   &:hover {
     color: var(--primary-color);
@@ -527,7 +569,12 @@ onMounted(() => {
 }
 
 .comment-entry {
-  margin-bottom: 0;
-  padding-bottom: 0;
+  padding-bottom: 20px;
+  border-bottom: 1px dashed var(--border-color);
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
 }
 </style>

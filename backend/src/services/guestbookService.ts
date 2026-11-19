@@ -80,6 +80,7 @@ export const getOpenCommentList = async (db: any, params: Record<string, any>) =
       replyToId: guestbookComment.replyToId,
       level: guestbookComment.level,
       nickname: guestbookComment.nickname,
+      avatar: guestbookComment.avatar,
       content: guestbookComment.content,
       authorType: guestbookComment.authorType,
       status: guestbookComment.status,
@@ -109,6 +110,7 @@ export const getOpenCommentList = async (db: any, params: Record<string, any>) =
         replyToId: guestbookComment.replyToId,
         level: guestbookComment.level,
         nickname: guestbookComment.nickname,
+        avatar: guestbookComment.avatar,
         content: guestbookComment.content,
         authorType: guestbookComment.authorType,
         status: guestbookComment.status,
@@ -175,6 +177,7 @@ export const submitOpenComment = async (
   const rawEmail = (body.email ?? "").toString().trim();
   const rootId = body.rootId ? Number(body.rootId) : null;
   const replyToId = body.replyToId ? Number(body.replyToId) : null;
+  const avatar = typeof body.avatar === "string" ? body.avatar.trim() : null;
 
   if (nickname.length < 2 || nickname.length > 20) {
     throw new Error("昵称长度需在 2–20 个字符之间");
@@ -195,10 +198,9 @@ export const submitOpenComment = async (
     email = rawEmail;
   }
 
-  // 基础防刷频率控制：同一来源 60 秒内最多提交 1 次（本地开发调试限制为 3 秒）
+  // 基础防刷频率控制：限制前台评论频率为 5 秒一次
   const sourceHash = buildSourceHash(clientIp, userAgent);
-  const isDev = process.env.NODE_ENV !== "production";
-  const limitSeconds = isDev ? 3 : 60;
+  const limitSeconds = 5;
   const now = new Date();
   const secondsAgo = new Date(now.getTime() - limitSeconds * 1000);
   const secondsAgoStr = formatDateTime(secondsAgo);
@@ -276,6 +278,7 @@ export const submitOpenComment = async (
     nickname: safeNickname,
     content: safeContent,
     email,
+    avatar: avatar || null,
     authorType: "visitor",
     adminId: null,
     status: "pending",
@@ -465,8 +468,39 @@ export const listManageComments = async (db: any, params: Record<string, any>) =
     .limit(pageSize)
     .offset(offset);
 
+  // 批量统计每条评论下的有效回复数
+  const commentIds = comments.map((c: any) => c.id);
+  const replyCountMap = new Map<number, number>();
+  if (commentIds.length > 0) {
+    const repliesCountRes = await db
+      .select({
+        rootId: guestbookComment.rootId,
+        count: sql<number>`count(*)`
+      })
+      .from(guestbookComment)
+      .where(
+        and(
+          inArray(guestbookComment.rootId, commentIds),
+          eq(guestbookComment.level, 2),
+          isNull(guestbookComment.deletedAt)
+        )
+      )
+      .groupBy(guestbookComment.rootId);
+
+    for (const item of repliesCountRes) {
+      if (item.rootId) {
+        replyCountMap.set(Number(item.rootId), Number(item.count));
+      }
+    }
+  }
+
+  const listWithReplyCount = comments.map((c: any) => ({
+    ...c,
+    replyCount: replyCountMap.get(c.id) ?? 0
+  }));
+
   return {
-    list: comments,
+    list: listWithReplyCount,
     total,
     pageNum,
     pageSize,
@@ -475,7 +509,7 @@ export const listManageComments = async (db: any, params: Record<string, any>) =
 };
 
 /**
- * 后台：获取留言详情
+ * 后台：获取留言详情（包含回复列表）
  */
 export const getManageCommentDetail = async (db: any, id: number) => {
   const comments = await db
@@ -489,15 +523,35 @@ export const getManageCommentDetail = async (db: any, id: number) => {
     throw new Error("留言不存在");
   }
 
-  const auditLogs = await db
+  // 查询当前留言拥有的所有子回复
+  const replies = await db
     .select()
-    .from(guestbookAuditLog)
-    .where(eq(guestbookAuditLog.commentId, id))
-    .orderBy(desc(guestbookAuditLog.createdAt), desc(guestbookAuditLog.id));
+    .from(guestbookComment)
+    .where(
+      and(
+        eq(guestbookComment.rootId, comment.id),
+        eq(guestbookComment.level, 2),
+        isNull(guestbookComment.deletedAt)
+      )
+    )
+    .orderBy(asc(guestbookComment.createdAt), asc(guestbookComment.id));
+
+  // 建立被回复人昵称映射
+  const idToNick = new Map<number, string>();
+  idToNick.set(comment.id, comment.nickname);
+  for (const r of replies) {
+    idToNick.set(r.id, r.nickname);
+  }
+
+  const enrichedReplies = replies.map((r: any) => ({
+    ...r,
+    replyToNickname: r.replyToId ? idToNick.get(r.replyToId) || null : null
+  }));
 
   return {
     ...comment,
-    auditLogs
+    replyCount: enrichedReplies.length,
+    replies: enrichedReplies
   };
 };
 

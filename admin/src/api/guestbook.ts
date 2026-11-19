@@ -9,6 +9,9 @@ export interface GuestbookComment {
   content: string;
   authorType: "visitor" | "admin";
   adminId: number | null;
+  avatar?: string | null;
+  replyCount?: number;
+  replyToNickname?: string | null;
   status: "pending" | "approved" | "rejected" | "hidden";
   createdAt: string;
   updatedAt: string;
@@ -55,7 +58,9 @@ export const listManageComments = (params: Record<string, any>) => {
  * 查询单条留言详情
  */
 export const getManageDetail = (id: number) => {
-  return request<GuestbookComment & { auditLogs: AuditLog[] }>(`/api/guestbook/manage/${id}`);
+  return request<GuestbookComment & { auditLogs?: AuditLog[]; replies?: GuestbookComment[] }>(
+    `/api/guestbook/manage/${id}`
+  );
 };
 
 /**

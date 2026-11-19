@@ -70,9 +70,17 @@
               class="visitor-capsule-btn flex items-center gap-1.5 px-2.5 py-1 rounded-full cursor-pointer transition-colors"
               title="查看用户身份与通知邮箱"
             >
+              <img
+                v-if="visitorUser?.avatar"
+                :src="visitorUser.avatar"
+                :alt="visitorUser?.nickname"
+                class="visitor-avatar-sm w-5.5 h-5.5 rounded-full object-cover flex-shrink-0 border border-[var(--border-color)] bg-[var(--bg-surface-soft)]"
+                loading="lazy"
+              />
               <div
+                v-else
                 class="visitor-avatar-sm w-5.5 h-5.5 rounded-full flex items-center justify-center text-white text-[11px] font-bold"
-                :style="{ background: visitorUser?.avatarBg }"
+                :style="{ background: visitorUser?.avatarBg || '#3b82f6' }"
               >
                 {{ avatarText }}
               </div>
@@ -86,9 +94,16 @@
           <!-- 游客资料浮层（扁平无阴影，不可修改昵称） -->
           <div class="visitor-card flex flex-col gap-3 p-1">
             <div class="flex items-center gap-2.5 pb-2 border-b border-[var(--border-color)]">
+              <img
+                v-if="visitorUser?.avatar"
+                :src="visitorUser.avatar"
+                :alt="visitorUser?.nickname"
+                class="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-[var(--border-color)] bg-[var(--bg-surface-soft)]"
+              />
               <div
+                v-else
                 class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
-                :style="{ background: visitorUser?.avatarBg }"
+                :style="{ background: visitorUser?.avatarBg || '#3b82f6' }"
               >
                 {{ avatarText }}
               </div>

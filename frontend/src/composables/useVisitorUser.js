@@ -11,7 +11,7 @@ const PREFIXES = [
   "代码诗人", "追光者", "云游侠", "守夜人", "星际漫步"
 ];
 
-// 头像渐变配色方案
+// 头像渐变配色方案（作为兜底底色）
 const AVATAR_GRADIENTS = [
   "linear-gradient(135deg, #3b82f6, #8b5cf6)",
   "linear-gradient(135deg, #10b981, #06b6d4)",
@@ -20,6 +20,26 @@ const AVATAR_GRADIENTS = [
   "linear-gradient(135deg, #0ea5e9, #3b82f6)",
   "linear-gradient(135deg, #84cc16, #10b981)"
 ];
+
+// DiceBear 在线头像风格池：支持卡通、插画、真实人物肖像、抽象、几何等风格
+export const DICEBEAR_STYLES = [
+  // 卡通 (Cartoon)
+  "adventurer", "bottts", "fun-emoji",
+  // 插画 (Illustration)
+  "lorelei", "notionists", "open-peeps", "avataaars",
+  // 真实人物/肖像 (Real person / Portrait)
+  "personas", "micah",
+  // 抽象 (Abstract)
+  "shapes", "glass",
+  // 几何 (Geometric)
+  "identicon", "rings"
+];
+
+export const generateDiceBearAvatar = (seed) => {
+  const style = DICEBEAR_STYLES[Math.floor(Math.random() * DICEBEAR_STYLES.length)];
+  const safeSeed = encodeURIComponent(seed || Math.random().toString(36).slice(2));
+  return `https://api.dicebear.com/9.x/${style}/svg?seed=${safeSeed}`;
+};
 
 // 生成标准 UUID
 const getOrCreateUUID = () => {
@@ -78,23 +98,26 @@ const initVisitorState = () => {
       uuid,
       nickname: cachedUser.nickname,
       email: cachedUser.email || "",
+      avatar: cachedUser.avatar || generateDiceBearAvatar(uuid),
       avatarBg
     };
   } else {
-    // 默认生成一个初始昵称供注册时使用
+    // 默认生成初始昵称与随机 DiceBear 头像供初次注册使用
     const prefix = PREFIXES[hash % PREFIXES.length];
     const suffix = 1000 + (hash % 9000);
     const initialNick = `${prefix}_${suffix}`;
+    const initialAvatar = generateDiceBearAvatar(uuid);
 
     visitorState.value = {
       uuid,
       nickname: initialNick,
       email: "",
+      avatar: initialAvatar,
       avatarBg
     };
   }
 
-  // 异步与后端数据库表保持一致，锁定服务端永久分配的固定昵称
+  // 异步与后端数据库表保持一致，锁定服务端永久分配的固定昵称与专属头像
   syncWithServer();
 };
 
@@ -108,6 +131,7 @@ const syncWithServer = async () => {
       body: {
         uuid: visitorState.value.uuid,
         defaultNickname: visitorState.value.nickname,
+        avatar: visitorState.value.avatar || "",
         email: visitorState.value.email || ""
       }
     });
@@ -115,13 +139,17 @@ const syncWithServer = async () => {
     if (res && res.nickname) {
       visitorState.value.nickname = res.nickname;
       visitorState.value.email = res.email || "";
+      if (res.avatar) {
+        visitorState.value.avatar = res.avatar;
+      }
       try {
         localStorage.setItem(
           USER_CACHE_KEY,
           JSON.stringify({
             uuid: visitorState.value.uuid,
             nickname: res.nickname,
-            email: res.email || ""
+            email: res.email || "",
+            avatar: visitorState.value.avatar
           })
         );
       } catch (e) {
@@ -150,7 +178,8 @@ export const useVisitorUser = () => {
         JSON.stringify({
           uuid: visitorState.value.uuid,
           nickname: visitorState.value.nickname,
-          email: cleanEmail
+          email: cleanEmail,
+          avatar: visitorState.value.avatar
         })
       );
     } catch (e) {
@@ -164,6 +193,7 @@ export const useVisitorUser = () => {
         body: {
           uuid: visitorState.value.uuid,
           defaultNickname: visitorState.value.nickname,
+          avatar: visitorState.value.avatar || "",
           email: cleanEmail
         }
       });

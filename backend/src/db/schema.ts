@@ -24,6 +24,7 @@ export const guestbookComment = sqliteTable("guestbook_comment", {
   authorType: text("author_type").notNull(), // visitor | admin
   adminId: integer("admin_id"),
   email: text("email"),
+  avatar: text("avatar"),
   status: text("status").notNull(), // pending | approved | rejected | hidden
   createdAt: text("created_at").default(sql`(datetime('now'))`).notNull(),
   updatedAt: text("updated_at").default(sql`(datetime('now'))`).notNull(),
@@ -61,6 +62,7 @@ export const guestbookVisitor = sqliteTable("guestbook_visitor", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   uuid: text("uuid").notNull().unique(),
   nickname: text("nickname").notNull(),
+  avatar: text("avatar"),
   email: text("email"),
   clientIp: text("client_ip"),
   userAgent: text("user_agent"),

@@ -84,13 +84,31 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="发布昵称" width="140">
+        <el-table-column label="发布用户" min-width="160">
           <template #default="{ row }">
-            <div class="flex items-center gap-1.5 flex-wrap">
-              <span class="font-medium text-xs text-[#303133]">{{ row.nickname }}</span>
-              <el-tag v-if="row.authorType === 'admin'" type="danger" size="small" effect="dark">
-                站长
-              </el-tag>
+            <div class="flex items-center gap-2">
+              <el-avatar
+                v-if="row.avatar"
+                :size="28"
+                :src="row.avatar"
+                shape="circle"
+                class="flex-shrink-0 border border-[#e4e7ed] bg-[#f8fafc]"
+              />
+              <el-avatar
+                v-else
+                :size="28"
+                shape="circle"
+                :class="row.authorType === 'admin' ? 'bg-[#f56c6c]' : 'bg-[#409eff]'"
+                class="flex-shrink-0 text-white font-bold text-xs"
+              >
+                {{ row.nickname?.charAt(0) || "访" }}
+              </el-avatar>
+              <div class="flex items-center gap-1.5 flex-wrap min-w-0">
+                <span class="font-medium text-xs text-[#303133] truncate">{{ row.nickname }}</span>
+                <el-tag v-if="row.authorType === 'admin'" type="danger" size="small" effect="dark">
+                  站长
+                </el-tag>
+              </div>
             </div>
           </template>
         </el-table-column>
@@ -204,14 +222,15 @@
                 编辑
               </el-button>
 
-              <!-- 审计日志 -->
+              <!-- 针对有回复内容的评论展示详情按钮 -->
               <el-button
-                type="info"
+                v-if="row.replyCount && row.replyCount > 0"
+                type="primary"
                 link
                 size="small"
-                @click="openAuditLogsDialog(row)"
+                @click="openDetailDrawer(row)"
               >
-                日志
+                详情
               </el-button>
 
               <!-- 软删除 -->
@@ -355,43 +374,121 @@
       </template>
     </el-dialog>
 
-    <!-- 审核操作日志弹窗 -->
-    <el-dialog
-      v-model="isLogsDialogVisible"
-      :title="`留言 #${currentActiveRow?.id} 审核与管理审计日志`"
-      width="580px"
+    <!-- 留言与具体回复详情抽屉 -->
+    <el-drawer
+      v-model="isDetailDrawerVisible"
+      :title="`留言详情 (ID: #${detailData?.id ?? ''})`"
+      size="560px"
       destroy-on-close
     >
-      <div v-loading="isLoadingLogs" class="max-h-380px overflow-y-auto pr-2">
-        <div v-if="currentAuditLogs.length === 0" class="text-xs text-center text-[#909399] py-8">
-          暂无操作日志记录
-        </div>
-        <el-timeline v-else>
-          <el-timeline-item
-            v-for="log in currentAuditLogs"
-            :key="log.id"
-            :timestamp="log.createdAt"
-            placement="top"
-          >
-            <div class="text-xs flex flex-col gap-1.5 p-2 rounded bg-[#f8f9fb] border border-[#e4e7ed]">
-              <div class="flex items-center gap-2">
-                <el-tag size="small" type="info">{{ log.action }}</el-tag>
-                <span class="text-[#303133] font-medium">管理员ID: {{ log.operatorId }}</span>
-              </div>
-              <div v-if="log.beforeStatus || log.afterStatus" class="text-[#606266]">
-                状态变更：{{ log.beforeStatus ?? "新建" }} ➔ <b>{{ log.afterStatus }}</b>
-              </div>
-              <div v-if="log.remark" class="text-[#909399] italic">
-                备注说明：{{ log.remark }}
+      <div v-loading="isLoadingDetail" class="flex flex-col gap-4 text-xs">
+        <!-- 主留言卡片 -->
+        <div class="p-4 rounded-xl bg-[#f8f9fb] border border-[#e4e7ed] flex flex-col gap-2.5">
+          <div class="flex items-center justify-between pb-2 border-b border-[#e4e7ed]">
+            <div class="flex items-center gap-2.5">
+              <el-avatar
+                v-if="detailData?.avatar"
+                :size="34"
+                :src="detailData.avatar"
+                shape="circle"
+                class="border border-[#e4e7ed] bg-white flex-shrink-0"
+              />
+              <el-avatar
+                v-else
+                :size="34"
+                shape="circle"
+                :class="detailData?.authorType === 'admin' ? 'bg-[#f56c6c]' : 'bg-[#409eff]'"
+                class="text-white font-bold text-xs flex-shrink-0"
+              >
+                {{ detailData?.nickname?.charAt(0) || "访" }}
+              </el-avatar>
+              <div class="flex flex-col">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="font-bold text-[#303133] text-sm">{{ detailData?.nickname }}</span>
+                  <el-tag v-if="detailData?.authorType === 'admin'" type="danger" size="small" effect="dark">
+                    站长
+                  </el-tag>
+                  <el-tag :type="getStatusTagType(detailData?.status)" size="small">
+                    {{ getStatusLabel(detailData?.status) }}
+                  </el-tag>
+                </div>
+                <span class="text-[11px] text-[#909399] mt-0.5">{{ detailData?.createdAt }}</span>
               </div>
             </div>
-          </el-timeline-item>
-        </el-timeline>
+            <div v-if="detailData?.email" class="text-[11px] text-[#409eff]">
+              {{ detailData.email }}
+            </div>
+          </div>
+
+          <div class="text-[#303133] text-sm leading-relaxed whitespace-pre-wrap break-words py-1">
+            {{ detailData?.content }}
+          </div>
+        </div>
+
+        <!-- 回复列表部分 -->
+        <div class="flex flex-col gap-2.5 pt-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-[#303133] text-sm">
+              回复内容列表 ({{ detailData?.replies?.length ?? 0 }})
+            </span>
+          </div>
+
+          <div v-if="!detailData?.replies || detailData.replies.length === 0" class="text-center text-[#909399] py-8">
+            暂无回复内容
+          </div>
+
+          <div v-else class="flex flex-col gap-3">
+            <div
+              v-for="reply in detailData.replies"
+              :key="reply.id"
+              class="p-3.5 rounded-xl border border-[#ebeef5] bg-white flex flex-col gap-2 shadow-sm"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <el-avatar
+                    v-if="reply.avatar"
+                    :size="26"
+                    :src="reply.avatar"
+                    shape="circle"
+                    class="border border-[#e4e7ed] bg-[#f8fafc] flex-shrink-0"
+                  />
+                  <el-avatar
+                    v-else
+                    :size="26"
+                    shape="circle"
+                    :class="reply.authorType === 'admin' ? 'bg-[#f56c6c]' : 'bg-[#8b5cf6]'"
+                    class="text-white font-bold text-[10px] flex-shrink-0"
+                  >
+                    {{ reply.nickname?.charAt(0) || "访" }}
+                  </el-avatar>
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-bold text-[#303133]">{{ reply.nickname }}</span>
+                    <el-tag v-if="reply.authorType === 'admin'" type="danger" size="small" effect="dark">
+                      站长
+                    </el-tag>
+                    <span v-if="reply.replyToNickname" class="text-[#909399]">
+                      回复 <span class="font-semibold text-[#409eff]">@{{ reply.replyToNickname }}</span>
+                    </span>
+                  </div>
+                </div>
+                <el-tag :type="getStatusTagType(reply.status)" size="small">
+                  {{ getStatusLabel(reply.status) }}
+                </el-tag>
+              </div>
+
+              <div class="text-[#303133] text-xs leading-relaxed whitespace-pre-wrap break-words pl-8">
+                {{ reply.content }}
+              </div>
+
+              <div class="flex items-center justify-between pl-8 pt-1 text-[11px] text-[#909399]">
+                <span>{{ reply.createdAt }}</span>
+                <span>#{{ reply.id }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <template #footer>
-        <el-button @click="isLogsDialogVisible = false">关闭</el-button>
-      </template>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 
@@ -406,9 +503,8 @@ import {
   deleteComment,
   adminReply,
   updateAdminReply,
-  getAuditLogs,
-  type GuestbookComment,
-  type AuditLog
+  getManageDetail,
+  type GuestbookComment
 } from "@/api/guestbook";
 
 const route = useRoute();
@@ -443,10 +539,10 @@ const replyContent = ref("");
 const isEditDialogVisible = ref(false);
 const editContent = ref("");
 
-// 日志弹窗
-const isLogsDialogVisible = ref(false);
-const isLoadingLogs = ref(false);
-const currentAuditLogs = ref<AuditLog[]>([]);
+// 留言详情与回复抽屉
+const isDetailDrawerVisible = ref(false);
+const isLoadingDetail = ref(false);
+const detailData = ref<any>(null);
 
 // 派生校验与文本
 const canSubmitReply = computed(() => {
@@ -627,19 +723,20 @@ const submitEditReply = async () => {
   }
 };
 
-// 审计日志弹窗
-const openAuditLogsDialog = async (row: GuestbookComment) => {
-  currentActiveRow.value = row;
-  currentAuditLogs.value = [];
-  isLogsDialogVisible.value = true;
-  isLoadingLogs.value = true;
+// 打开留言详情与回复列表抽屉
+const openDetailDrawer = async (row: GuestbookComment) => {
+  detailData.value = { ...row };
+  isDetailDrawerVisible.value = true;
+  isLoadingDetail.value = true;
   try {
-    const logs = await getAuditLogs(row.id);
-    currentAuditLogs.value = logs ?? [];
+    const res = await getManageDetail(row.id);
+    if (res) {
+      detailData.value = res;
+    }
   } catch (error: any) {
-    ElMessage.error(error?.message ?? "获取日志失败");
+    ElMessage.error(error?.message ?? "获取详情失败");
   } finally {
-    isLoadingLogs.value = false;
+    isLoadingDetail.value = false;
   }
 };
 
