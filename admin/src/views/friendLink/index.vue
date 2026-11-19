@@ -235,25 +235,37 @@
     </el-dialog>
 
     <!-- 新增 / 编辑友链弹窗 -->
-    <el-dialog v-model="isEditDialogOpen" :title="dialogTitle" width="500px" destroy-on-close>
-      <el-form ref="editFormRef" :model="editForm" label-position="top" size="default">
-        <el-form-item label="网站名称" required>
+    <el-dialog
+      v-model="isEditDialogOpen"
+      :title="dialogTitle"
+      width="500px"
+      destroy-on-close
+      @closed="handleDialogClosed"
+    >
+      <el-form
+        ref="editFormRef"
+        :model="editForm"
+        :rules="formRules"
+        label-position="top"
+        size="default"
+      >
+        <el-form-item label="网站名称" prop="name">
           <el-input v-model.trim="editForm.name" maxlength="40" placeholder="例如：Jie Hub" />
         </el-form-item>
-        <el-form-item label="网站网址" required>
+        <el-form-item label="网站网址" prop="url">
           <el-input v-model.trim="editForm.url" placeholder="必须包含协议，如：https://example.com" />
         </el-form-item>
-        <el-form-item label="Logo 链接 (选填)">
+        <el-form-item label="Logo 链接 (选填)" prop="logo">
           <el-input v-model.trim="editForm.logo" placeholder="图片 URL，例如：https://example.com/logo.png" />
         </el-form-item>
-        <el-form-item label="网站描述 (选填)">
+        <el-form-item label="网站描述 (选填)" prop="description">
           <el-input v-model.trim="editForm.description" type="textarea" :rows="3" maxlength="200" placeholder="简短介绍站点特色（选填）" />
         </el-form-item>
-        <el-form-item label="联系邮箱 (选填)">
+        <el-form-item label="联系邮箱 (选填)" prop="email">
           <el-input v-model.trim="editForm.email" placeholder="用于通知审核结果（选填）" />
         </el-form-item>
         <div class="grid grid-cols-2 gap-4">
-          <el-form-item label="审核状态">
+          <el-form-item label="审核状态" prop="status">
             <el-select v-model="editForm.status" class="w-full">
               <el-option label="已通过 (展示)" value="approved" />
               <el-option label="待审核" value="pending" />
@@ -261,7 +273,7 @@
               <el-option label="已隐藏" value="hidden" />
             </el-select>
           </el-form-item>
-          <el-form-item label="排序权重 (数字越大越靠前)">
+          <el-form-item label="排序权重 (数字越大越靠前)" prop="sortOrder">
             <el-input-number v-model="editForm.sortOrder" :min="0" :max="999" class="!w-full" />
           </el-form-item>
         </div>
@@ -279,9 +291,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, nextTick } from "vue";
 import { Search, Refresh, TopRight, Plus } from "@element-plus/icons-vue";
-import { ElMessage } from "element-plus";
+import { ElMessage, type FormInstance, type FormRules } from "element-plus";
 import {
   listManageFriendLinks,
   updateFriendLinkStatus,
@@ -309,6 +321,7 @@ const rejectReason = ref("");
 
 const isEditDialogOpen = ref(false);
 const dialogTitle = ref("新增友链");
+const editFormRef = ref<FormInstance>();
 const editForm = reactive<Partial<FriendLinkItem>>({
   id: 0,
   name: "",
@@ -319,6 +332,43 @@ const editForm = reactive<Partial<FriendLinkItem>>({
   sortOrder: 0,
   status: "approved"
 });
+
+const formRules: FormRules = {
+  name: [
+    { required: true, message: "请输入网站名称", trigger: "blur" },
+    { min: 2, max: 40, message: "长度在 2 到 40 个字符之间", trigger: "blur" }
+  ],
+  url: [
+    { required: true, message: "请输入网站网址", trigger: "blur" },
+    {
+      validator: (_, val, cb) => {
+        if (!val) {
+          cb(new Error("请输入网站网址"));
+        } else if (!/^https?:\/\/.+/i.test(val)) {
+          cb(new Error("网址必须以 http:// 或 https:// 开头"));
+        } else {
+          cb();
+        }
+      },
+      trigger: "blur"
+    }
+  ],
+  description: [
+    { max: 200, message: "描述不能超过 200 个字符", trigger: "blur" }
+  ],
+  email: [
+    {
+      validator: (_, val, cb) => {
+        if (val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+          cb(new Error("邮箱格式不正确"));
+        } else {
+          cb();
+        }
+      },
+      trigger: "blur"
+    }
+  ]
+};
 
 const fetchData = async () => {
   isLoading.value = true;
@@ -389,6 +439,9 @@ const openAddDialog = () => {
   editForm.status = "approved";
   dialogTitle.value = "新增友链";
   isEditDialogOpen.value = true;
+  nextTick(() => {
+    editFormRef.value?.clearValidate();
+  });
 };
 
 const openEditDialog = (row: FriendLinkItem) => {
@@ -402,35 +455,36 @@ const openEditDialog = (row: FriendLinkItem) => {
   editForm.status = row.status ?? "approved";
   dialogTitle.value = "编辑友链信息";
   isEditDialogOpen.value = true;
+  nextTick(() => {
+    editFormRef.value?.clearValidate();
+  });
+};
+
+const handleDialogClosed = () => {
+  editFormRef.value?.resetFields();
 };
 
 const confirmSave = async () => {
-  const name = editForm.name?.trim();
-  const url = editForm.url?.trim();
-  if (!name) {
-    ElMessage.warning("请输入网站名称");
-    return;
-  }
-  if (!url || !/^https?:\/\/.+/i.test(url)) {
-    ElMessage.warning("网站网址格式不正确，必须以 http:// 或 https:// 开头");
-    return;
-  }
-  isSubmitting.value = true;
-  try {
-    if (editForm.id) {
-      await updateFriendLink(editForm.id, editForm);
-      ElMessage.success("修改成功");
-    } else {
-      await createFriendLink(editForm);
-      ElMessage.success("新增友链成功");
+  if (!editFormRef.value) return;
+  await editFormRef.value.validate(async (valid) => {
+    if (!valid) return;
+    isSubmitting.value = true;
+    try {
+      if (editForm.id) {
+        await updateFriendLink(editForm.id, editForm);
+        ElMessage.success("修改成功");
+      } else {
+        await createFriendLink(editForm);
+        ElMessage.success("新增友链成功");
+      }
+      isEditDialogOpen.value = false;
+      fetchData();
+    } catch (err: any) {
+      ElMessage.error(err?.message || "保存失败");
+    } finally {
+      isSubmitting.value = false;
     }
-    isEditDialogOpen.value = false;
-    fetchData();
-  } catch (err: any) {
-    ElMessage.error(err?.message || "保存失败");
-  } finally {
-    isSubmitting.value = false;
-  }
+  });
 };
 
 const handleDelete = async (row: FriendLinkItem) => {
