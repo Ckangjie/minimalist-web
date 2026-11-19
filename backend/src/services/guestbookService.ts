@@ -509,7 +509,7 @@ export const listManageComments = async (db: any, params: Record<string, any>) =
 };
 
 /**
- * 后台：获取留言详情（包含回复列表）
+ * 后台：获取留言详情（包含回复列表及所属主楼信息）
  */
 export const getManageCommentDetail = async (db: any, id: number) => {
   const comments = await db
@@ -523,21 +523,38 @@ export const getManageCommentDetail = async (db: any, id: number) => {
     throw new Error("留言不存在");
   }
 
-  // 查询当前留言拥有的所有子回复
-  const replies = await db
-    .select()
-    .from(guestbookComment)
-    .where(
-      and(
-        eq(guestbookComment.rootId, comment.id),
-        eq(guestbookComment.level, 2),
-        isNull(guestbookComment.deletedAt)
-      )
-    )
-    .orderBy(asc(guestbookComment.createdAt), asc(guestbookComment.id));
+  let rootComment: any = null;
+  const targetRootId = comment.level === 2 ? comment.rootId : comment.id;
+
+  if (comment.level === 2 && comment.rootId) {
+    const rootRes = await db
+      .select()
+      .from(guestbookComment)
+      .where(eq(guestbookComment.id, comment.rootId))
+      .limit(1);
+    rootComment = rootRes?.[0] || null;
+  }
+
+  // 查询所属楼层拥有的所有子回复
+  const replies = targetRootId
+    ? await db
+        .select()
+        .from(guestbookComment)
+        .where(
+          and(
+            eq(guestbookComment.rootId, targetRootId),
+            eq(guestbookComment.level, 2),
+            isNull(guestbookComment.deletedAt)
+          )
+        )
+        .orderBy(asc(guestbookComment.createdAt), asc(guestbookComment.id))
+    : [];
 
   // 建立被回复人昵称映射
   const idToNick = new Map<number, string>();
+  if (rootComment) {
+    idToNick.set(rootComment.id, rootComment.nickname);
+  }
   idToNick.set(comment.id, comment.nickname);
   for (const r of replies) {
     idToNick.set(r.id, r.nickname);
@@ -550,6 +567,7 @@ export const getManageCommentDetail = async (db: any, id: number) => {
 
   return {
     ...comment,
+    rootComment,
     replyCount: enrichedReplies.length,
     replies: enrichedReplies
   };

@@ -258,29 +258,23 @@
               :to="`#guestbook-reply-${item.id}-${activeReplyTargetId}`"
             >
               <div
-                :class="activeReplyTargetId === item.id ? 'ml-0 md:ml-12' : 'ml-7.5 md:ml-8.5'"
+                :class="{ 'md:ml-12': activeReplyTargetId === item.id }"
                 class="inline-reply-box mt-2 p-3.5 rounded-xl bg-[var(--bg-surface-soft)] border border-[var(--border-color)] flex flex-col gap-2.5"
               >
-                <div class="flex items-center justify-between text-xs">
-                  <span class="text-[var(--text-muted)]">
-                    回复 <span class="font-bold text-[var(--primary-color)]">@{{ activeReplyTargetNick }}</span>
-                    （以 <span class="font-semibold text-[var(--text-primary)]">{{ currentVisitorNickname }}</span> 身份）
-                  </span>
-                </div>
-
                 <el-input
                   v-model.trim="replyForm.content"
                   type="textarea"
                   :rows="2"
                   maxlength="200"
                   show-word-limit
-                  placeholder="友善回复，真诚沟通..."
+                  :placeholder="`@${activeReplyTargetNick}`"
+                  :aria-label="`回复 @${activeReplyTargetNick}`"
                   resize="none"
                   :disabled="isSubmitting"
                   class="guestbook-textarea"
                 />
 
-                <div class="flex items-center justify-end gap-2 pt-0.5">
+                <div class="flex items-center justify-end pt-0.5">
                   <el-button size="small" :disabled="isSubmitting" @click="cancelReplyBox">
                     取消
                   </el-button>
@@ -339,8 +333,8 @@ import { useVisitorUser } from "@/composables/useVisitorUser";
 import {
   ChatDotRound,
   ChatRound,
-  Refresh,
-  Loading
+  Loading,
+  Refresh
 } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import { computed, onMounted, reactive, ref } from "vue";

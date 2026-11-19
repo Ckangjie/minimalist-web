@@ -2,22 +2,11 @@
   <div class="dashboard-container flex flex-col gap-4">
     <!-- 欢迎卡片 -->
     <el-card shadow="never" class="!rounded-xl border border-[#e4e7ed]">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-4">
-          <el-avatar :size="54" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
-          <div>
-            <h2 class="text-lg font-bold text-[#303133] m-0">早安，管理员！祝您今天工作愉快</h2>
-            <p class="text-xs text-[#909399] mt-1 m-0">Jie Hub 若依管理系统 · 全站留言板统一运营与审核控制台</p>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <el-button type="primary" @click="router.push('/guestbook')">
-            进入留言审核
-          </el-button>
-          <el-button @click="router.push('/visitor')">
-            访客用户管理
-          </el-button>
+      <div class="flex items-center gap-4">
+        <el-avatar :size="54" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
+        <div>
+          <h2 class="text-lg font-bold text-[#303133] m-0">早安，管理员！祝您今天工作愉快</h2>
+          <p class="text-xs text-[#909399] mt-1 m-0">Jie Hub 若依管理系统 · 全站留言板统一运营与审核控制台</p>
         </div>
       </div>
     </el-card>
@@ -138,12 +127,6 @@
         <div class="flex flex-wrap gap-3">
           <el-button @click="router.push('/guestbook')">
             查看全部留言
-          </el-button>
-          <el-button type="warning" plain @click="router.push('/guestbook?status=pending')">
-            筛选待审核项
-          </el-button>
-          <el-button type="success" plain @click="router.push('/guestbook?status=approved')">
-            查看已通过公开项
           </el-button>
           <el-button type="primary" plain @click="router.push('/visitor')">
             管理访客用户

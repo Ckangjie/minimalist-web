@@ -222,9 +222,9 @@
                 编辑
               </el-button>
 
-              <!-- 针对有回复内容的评论展示详情按钮 -->
+              <!-- 针对有回复内容的一级留言或二级回复展示详情按钮 -->
               <el-button
-                v-if="row.replyCount && row.replyCount > 0"
+                v-if="(row.replyCount && row.replyCount > 0) || row.level === 2"
                 type="primary"
                 link
                 size="small"
@@ -377,12 +377,24 @@
     <!-- 留言与具体回复详情抽屉 -->
     <el-drawer
       v-model="isDetailDrawerVisible"
-      :title="`留言详情 (ID: #${detailData?.id ?? ''})`"
+      :title="detailData?.level === 2 ? `二级回复详情 (ID: #${detailData?.id ?? ''})` : `留言详情 (ID: #${detailData?.id ?? ''})`"
       size="560px"
       destroy-on-close
     >
       <div v-loading="isLoadingDetail" class="flex flex-col gap-4 text-xs">
-        <!-- 主留言卡片 -->
+        <!-- 所属一级主楼信息（针对二级回复时呈现） -->
+        <div v-if="detailData?.level === 2 && detailData?.rootComment" class="p-3 rounded-xl bg-[#eef4fe] border border-[#d0e0fb] flex flex-col gap-1.5">
+          <div class="flex items-center gap-1.5 text-[11px] text-[#606266]">
+            <el-tag size="small" type="primary">所属一级主留言 #{{ detailData.rootComment.id }}</el-tag>
+            <span class="font-bold text-[#303133]">{{ detailData.rootComment.nickname }}</span>
+            <span class="text-[#909399]">{{ detailData.rootComment.createdAt }}</span>
+          </div>
+          <div class="text-[#303133] text-xs line-clamp-2 pl-1">
+            {{ detailData.rootComment.content }}
+          </div>
+        </div>
+
+        <!-- 当前查看留言/回复详情卡片 -->
         <div class="p-4 rounded-xl bg-[#f8f9fb] border border-[#e4e7ed] flex flex-col gap-2.5">
           <div class="flex items-center justify-between pb-2 border-b border-[#e4e7ed]">
             <div class="flex items-center gap-2.5">
@@ -405,6 +417,9 @@
               <div class="flex flex-col">
                 <div class="flex items-center gap-1.5 flex-wrap">
                   <span class="font-bold text-[#303133] text-sm">{{ detailData?.nickname }}</span>
+                  <el-tag size="small" :type="detailData?.level === 1 ? 'primary' : 'success'">
+                    {{ detailData?.level === 1 ? "一级留言" : "二级回复" }}
+                  </el-tag>
                   <el-tag v-if="detailData?.authorType === 'admin'" type="danger" size="small" effect="dark">
                     站长
                   </el-tag>
@@ -429,7 +444,7 @@
         <div class="flex flex-col gap-2.5 pt-2">
           <div class="flex items-center justify-between">
             <span class="font-bold text-[#303133] text-sm">
-              回复内容列表 ({{ detailData?.replies?.length ?? 0 }})
+              {{ detailData?.level === 2 ? "同楼互动回复列表" : "子回复列表" }} ({{ detailData?.replies?.length ?? 0 }})
             </span>
           </div>
 
@@ -441,7 +456,8 @@
             <div
               v-for="reply in detailData.replies"
               :key="reply.id"
-              class="p-3.5 rounded-xl border border-[#ebeef5] bg-white flex flex-col gap-2 shadow-sm"
+              class="p-3.5 rounded-xl border bg-white flex flex-col gap-2 shadow-sm transition-all"
+              :class="reply.id === detailData?.id ? 'border-[#409eff] bg-[#f0f7ff]' : 'border-[#ebeef5]'"
             >
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
@@ -463,6 +479,9 @@
                   </el-avatar>
                   <div class="flex items-center gap-1.5 flex-wrap">
                     <span class="font-bold text-[#303133]">{{ reply.nickname }}</span>
+                    <el-tag v-if="reply.id === detailData?.id" size="small" type="primary" effect="dark">
+                      当前项
+                    </el-tag>
                     <el-tag v-if="reply.authorType === 'admin'" type="danger" size="small" effect="dark">
                       站长
                     </el-tag>
