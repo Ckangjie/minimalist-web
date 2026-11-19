@@ -168,7 +168,7 @@
             <!-- 抖音风格楼中楼回复区（无卡片包裹，默认折叠） -->
             <div
               v-if="item.replies && item.replies.length > 0"
-              class="sub-replies-block pl-0 md:pl-12 flex flex-col gap-2"
+              class="sub-replies-block pl-10 md:pl-12 flex flex-col gap-2"
             >
               <!-- 折叠状态：点击展开更多 -->
               <div v-if="!isRepliesExpanded(item.id)">
@@ -214,7 +214,14 @@
                       >
                         站长
                       </span>
-                      <span class="inline-flex items-center mx-1 text-[9px] text-[var(--text-muted)] select-none">▸</span>
+                      <svg
+                        class="inline-block mx-1 w-2 h-2 text-[var(--text-muted)] align-middle"
+                        viewBox="0 0 12 12"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M3 2.8Q3 1.8 3.9 2.3L9 5.3Q10.1 6 9 6.7L3.9 9.7Q3 10.2 3 9.2Z" />
+                      </svg>
                       <span class="font-semibold text-[var(--primary-color)]">
                         {{ reply.replyToNickname || item.nickname }}
                       </span>
