@@ -477,7 +477,9 @@ const handleSubmitRoot = async () => {
       email: visitorUser.value?.email || null
     });
 
-    ElMessage.success(res?.message ?? "留言发表成功！");
+    if (res?.status === "pending") {
+      ElMessage.info("留言已提交，审核通过后展示");
+    }
     rootForm.content = "";
     fetchComments(true);
   } catch (err) {
@@ -518,7 +520,9 @@ const handleSubmitReply = async () => {
       email: visitorUser.value?.email || null
     });
 
-    ElMessage.success(res?.message ?? "回复发表成功！");
+    if (res?.status === "pending") {
+      ElMessage.info("回复已提交，审核通过后展示");
+    }
     const currentRoot = activeReplyRootId.value;
     cancelReplyBox();
     await fetchComments(false);
