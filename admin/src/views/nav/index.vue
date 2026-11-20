@@ -8,40 +8,38 @@
           <el-button size="small" type="primary" plain :icon="Plus" @click="openAddCategory">新增分类</el-button>
         </div>
       </template>
-      <div class="flex-1 min-h-0 overflow-y-auto">
-        <div v-loading="isCatLoading">
-          <div
-            v-for="cat in categories"
-            :key="cat.id"
-            class="category-item flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer mb-1 transition-all"
-            :class="{ 'is-active': selectedCatId === cat.id }"
-            @click="selectCategory(cat)"
-          >
-            <div class="flex items-center gap-2 min-w-0">
-              <span class="text-base flex-shrink-0">{{ cat.icon || '📁' }}</span>
-              <div class="min-w-0">
-                <div class="text-sm font-medium truncate">{{ cat.name }}</div>
-                <div class="text-xs text-gray-400 truncate">{{ cat.slug }}</div>
-              </div>
-            </div>
-            <div class="flex items-center gap-1 flex-shrink-0 ml-2">
-              <el-tag size="small" type="info" class="!text-xs">{{ cat.itemCount ?? 0 }}</el-tag>
-              <el-button size="small" link type="primary" :icon="Edit" @click.stop="openEditCategory(cat)" />
-              <el-popconfirm
-                title="确定删除该分类及其全部条目？"
-                confirm-button-text="删除"
-                cancel-button-text="取消"
-                confirm-button-type="danger"
-                @confirm="handleDeleteCategory(cat)"
-              >
-                <template #reference>
-                  <el-button size="small" link type="danger" :icon="Delete" @click.stop />
-                </template>
-              </el-popconfirm>
+      <div v-loading="isCatLoading" class="flex-1 min-h-0 overflow-y-auto">
+        <div
+          v-for="cat in categories"
+          :key="cat.id"
+          class="category-item flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer mb-1 transition-all"
+          :class="{ 'is-active': selectedCatId === cat.id }"
+          @click="selectCategory(cat)"
+        >
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-base flex-shrink-0">{{ cat.icon || '📁' }}</span>
+            <div class="min-w-0">
+              <div class="text-sm font-medium truncate">{{ cat.name }}</div>
+              <div class="text-xs text-gray-400 truncate">{{ cat.slug }}</div>
             </div>
           </div>
-          <el-empty v-if="!isCatLoading && categories.length === 0" description="暂无分类" :image-size="60" />
+          <div class="flex items-center gap-1 flex-shrink-0 ml-2">
+            <el-tag size="small" type="info" class="!text-xs">{{ cat.itemCount ?? 0 }}</el-tag>
+            <el-button size="small" link type="primary" :icon="Edit" @click.stop="openEditCategory(cat)" />
+            <el-popconfirm
+              title="确定删除该分类及其全部条目？"
+              confirm-button-text="删除"
+              cancel-button-text="取消"
+              confirm-button-type="danger"
+              @confirm="handleDeleteCategory(cat)"
+            >
+              <template #reference>
+                <el-button size="small" link type="danger" :icon="Delete" @click.stop />
+              </template>
+            </el-popconfirm>
+          </div>
         </div>
+        <el-empty v-if="!isCatLoading && categories.length === 0" description="暂无分类" :image-size="60" />
       </div>
     </el-card>
 
