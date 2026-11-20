@@ -23,20 +23,16 @@
           <div class="flex items-center gap-1 flex-shrink-0 ml-2">
             <el-tag type="info" class="!text-xs">{{ cat.itemCount ?? 0 }}</el-tag>
             <el-button link type="primary" :icon="Edit" @click.stop="openEditCategory(cat)" />
-            <!-- 当分类下存在子条目时禁用删除并提示，只有为空时才允许删除 -->
-            <el-tooltip
+            <!-- 当分类下存在子条目时禁用删除，只有为空时才允许删除 -->
+            <el-button
               v-if="(cat.itemCount ?? 0) > 0"
-              content="该分类下仍有子条目，无法删除"
-              placement="top"
-            >
-              <el-button
-                link
-                type="info"
-                :icon="Delete"
-                class="!cursor-not-allowed opacity-40 hover:opacity-40"
-                @click.stop="handleBlockedDeleteCategory(cat)"
-              />
-            </el-tooltip>
+              link
+              type="info"
+              :icon="Delete"
+              disabled
+              class="!cursor-not-allowed opacity-40 hover:opacity-40"
+              @click.stop
+            />
             <el-popconfirm
               v-else
               title="确定删除该分类？"
@@ -563,15 +559,8 @@ const confirmSaveCategory = async () => {
   });
 };
 
-const handleBlockedDeleteCategory = (cat: NavCategory) => {
-  ElMessage.warning(`分类【${cat.name}】下仍有 ${cat.itemCount ?? 0} 个子条目，无法删除。请先转移或清空子条目。`);
-};
-
 const handleDeleteCategory = async (cat: NavCategory) => {
-  if ((cat.itemCount ?? 0) > 0) {
-    handleBlockedDeleteCategory(cat);
-    return;
-  }
+  if ((cat.itemCount ?? 0) > 0) return;
   try {
     await deleteNavCategory(cat.id);
     ElMessage.success("删除成功");
