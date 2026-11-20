@@ -127,9 +127,9 @@
 </template>
 
 <script setup lang="ts">
+import { ChatDotRound, Document, Grid, House, Link, User } from "@element-plus/icons-vue";
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { House, ChatDotRound, Document, User, Link, Grid } from "@element-plus/icons-vue";
 
 defineProps<{
   isCollapse: boolean;
@@ -138,7 +138,7 @@ defineProps<{
 const route = useRoute();
 const router = useRouter();
 
-const appTitle = (import.meta.env.VITE_APP_TITLE as string) || "Jie Hub 若依后台";
+const appTitle = (import.meta.env.VITE_APP_TITLE as string);
 
 const iconMap: Record<string, any> = {
   House,
