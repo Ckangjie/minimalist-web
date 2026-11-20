@@ -2,7 +2,7 @@
   <a
     :href="cardTargetUrl || undefined"
     target="_blank"
-    rel="noopener noreferrer"
+    rel="noopener"
     class="nav-card flex flex-col gap-2 sm:gap-2.5 p-2.5 sm:p-4 rounded-xl border transition-transform duration-200 relative overflow-hidden select-none"
     @click="handleCardClick"
   >
@@ -54,7 +54,7 @@
         v-if="hasRepo"
         :href="repoUrl"
         target="_blank"
-        rel="noopener noreferrer"
+        rel="noopener"
         class="card-github-btn flex items-center justify-center rounded-lg transition-all"
         title="跳转 GitHub 仓库"
         @click.stop
@@ -81,6 +81,7 @@
 <script setup>
 import { ElMessage } from "element-plus";
 import { computed, ref } from "vue";
+import { appendSiteRef } from "@/utils/url";
 
 const props = defineProps({
   item: {
@@ -138,14 +139,16 @@ const downloadUrl = computed(() => {
 
 // 计算仓库地址（仅当明确提供 repoUrl 或 url 指向 github 时生效）
 const repoUrl = computed(() => {
+  let target = "";
   if (props.item.repoUrl) {
-    return props.item.repoUrl;
+    target = props.item.repoUrl;
+  } else {
+    const url = props.item.url ?? "";
+    if (url.includes("github.com")) {
+      target = url;
+    }
   }
-  const url = props.item.url ?? "";
-  if (url.includes("github.com")) {
-    return url;
-  }
-  return "";
+  return target ? appendSiteRef(target) : "";
 });
 
 // 是否展示 GitHub 仓库入口
@@ -171,7 +174,7 @@ const cardTargetUrl = computed(() => {
   if (isFile) {
     return "";
   }
-  return rawUrl;
+  return appendSiteRef(rawUrl);
 });
 
 // 计算下载保存文件名

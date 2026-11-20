@@ -92,9 +92,9 @@
           <a
             v-for="item in linkList"
             :key="item.id"
-            :href="item.url"
+            :href="appendSiteRef(item.url)"
             target="_blank"
-            rel="noopener noreferrer"
+            rel="noopener"
             class="link-card flex flex-col p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-color)] transition-all cursor-pointer select-none relative group"
           >
             <div class="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -242,6 +242,7 @@ import {
 } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import { getFriendLinks, applyFriendLink } from "@/api/friendLink";
+import { appendSiteRef } from "@/utils/url";
 
 const isLoading = ref(false);
 const isSubmitting = ref(false);
