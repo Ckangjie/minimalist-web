@@ -121,14 +121,16 @@
           </section>
         </div>
 
-        <!-- 数据加载中占位（仅在无数据且正在从 API 加载时显示） -->
-        <section
-          v-else-if="isSystemNavLoading && !hasResults"
-          class="empty-state flex flex-col items-center justify-center py-20 px-4 rounded-2xl border border-dashed gap-3"
+        <!-- 数据加载中占位（保持与友链、留言模块一致的轻量风格） -->
+        <div
+          v-else-if="isNavLoading && !hasResults"
+          class="py-16 flex flex-col items-center justify-center gap-2.5 text-[var(--text-muted)]"
         >
-          <div class="text-3xl animate-spin">⏳</div>
-          <p class="empty-text text-sm m-0 text-muted">正在同步云端导航数据...</p>
-        </section>
+          <el-icon class="is-loading" :size="20" color="var(--primary-color)">
+            <Loading />
+          </el-icon>
+          <span class="text-xs tracking-wide">导航数据载入中...</span>
+        </div>
 
         <!-- 收藏导航为空时的专属引导空状态（仅桌面端展示） -->
         <section
@@ -171,6 +173,7 @@
 import NavCard from "@/components/NavCard.vue";
 import SearchBar from "@/components/SearchBar.vue";
 import { useBookmarks } from "@/composables/useBookmarks";
+import { Loading } from "@element-plus/icons-vue";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
@@ -184,11 +187,17 @@ const {
   customCount,
   toolsCount,
   isSystemNavLoading,
+  isToolNavLoading,
   fetchSystemNav,
   switchNavMode,
   importFromFile,
   clearCustomBookmarks
 } = useBookmarks();
+
+// 是否处于云端 API 加载中
+const isNavLoading = computed(() => {
+  return currentNavMode.value === "tools" ? isToolNavLoading.value : isSystemNavLoading.value;
+});
 
 watch(
   () => route.path,
