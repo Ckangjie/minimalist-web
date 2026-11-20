@@ -44,8 +44,15 @@
           >
             新增友链
           </el-button>
-          <el-button size="small" :icon="Refresh" :loading="isLoading" @click="fetchData">
-            刷新
+          <el-button
+            type="primary"
+            plain
+            size="small"
+            :icon="Refresh"
+            :loading="isLoading"
+            @click="fetchData"
+          >
+            刷新数据
           </el-button>
           <span class="text-xs text-gray-400">（共 {{ total }} 条记录）</span>
         </div>

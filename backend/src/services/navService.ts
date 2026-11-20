@@ -1,4 +1,4 @@
-import { eq, and, or, like, asc, sql, inArray } from "drizzle-orm";
+import { eq, ne, and, or, like, asc, sql, inArray } from "drizzle-orm";
 import { schema } from "../db";
 
 const { navCategory, navItem } = schema;
@@ -15,7 +15,45 @@ const formatDateTime = (date = new Date()): string => {
 };
 
 /**
- * 前台：获取所有可见分类及其可见条目
+ * 默认自研导航工具预设数据
+ */
+export const DEFAULT_TOOL_NAV = [
+  {
+    id: "nav-tools",
+    slug: "nav-tools",
+    name: "导航工具",
+    icon: "🧰",
+    description: "自研工具资源包与开源项目集合，支持离线包直接下载与 GitHub 仓库直达",
+    items: [
+      {
+        id: "tool-uni-offline-pack",
+        slug: "tool-uni-offline-pack",
+        title: "UniOfflinePack",
+        url: "https://github.com/Ckangjie/uni-packer",
+        repoUrl: "https://github.com/Ckangjie/uni-packer",
+        desc: "零 Android Studio 依赖的 uni-app 本地离线打包工作台，支持环境一键自愈、证书自动嗅探与极速 APK 编译交付",
+        tag: "开源工具",
+        icon: "📦"
+      },
+      {
+        id: "tool-bookmark-desk",
+        slug: "tool-bookmark-desk",
+        title: "BookmarkDesk",
+        url: "https://github.com/Ckangjie/bookmark-desk",
+        downloadUrl: "/resources/BookmarkDesk.zip",
+        downloadName: "BookmarkDesk.zip",
+        repoUrl: "https://github.com/Ckangjie/bookmark-desk",
+        desc: "书签管家 BookmarkDesk 是一个本地书签工作台。打开扩展即可在独立标签页里查看、搜索和整理导入的浏览器书签",
+        tag: "ZIP",
+        isZip: true,
+        icon: "📑"
+      }
+    ]
+  }
+];
+
+/**
+ * 前台：获取所有可见系统分类及其可见条目（排除自研工具分类）
  */
 export const getPublicNavCategories = async (db: any) => {
   const categories = await db
@@ -28,7 +66,7 @@ export const getPublicNavCategories = async (db: any) => {
       sortOrder: navCategory.sortOrder
     })
     .from(navCategory)
-    .where(eq(navCategory.isVisible, true))
+    .where(and(eq(navCategory.isVisible, true), ne(navCategory.slug, "nav-tools")))
     .orderBy(asc(navCategory.sortOrder), asc(navCategory.id));
 
   if (categories.length === 0) return [];
@@ -74,6 +112,84 @@ export const getPublicNavCategories = async (db: any) => {
     dbId: c.id,
     items: itemMap.get(c.id) ?? []
   }));
+};
+
+/**
+ * 前台：获取自研工具分类及其可见条目
+ */
+export const getPublicToolCategories = async (db: any) => {
+  const categories = await db
+    .select({
+      id: navCategory.id,
+      slug: navCategory.slug,
+      name: navCategory.name,
+      icon: navCategory.icon,
+      description: navCategory.description,
+      sortOrder: navCategory.sortOrder
+    })
+    .from(navCategory)
+    .where(and(eq(navCategory.isVisible, true), eq(navCategory.slug, "nav-tools")))
+    .orderBy(asc(navCategory.sortOrder), asc(navCategory.id));
+
+  if (categories.length === 0) {
+    return DEFAULT_TOOL_NAV;
+  }
+
+  const categoryIds = categories.map((c: any) => c.id);
+
+  const items = await db
+    .select({
+      id: navItem.id,
+      categoryId: navItem.categoryId,
+      slug: navItem.slug,
+      title: navItem.title,
+      url: navItem.url,
+      desc: navItem.desc,
+      tag: navItem.tag,
+      icon: navItem.icon,
+      sortOrder: navItem.sortOrder
+    })
+    .from(navItem)
+    .where(eq(navItem.isVisible, true))
+    .orderBy(asc(navItem.sortOrder), asc(navItem.id));
+
+  const itemMap = new Map<number, any[]>();
+  for (const item of items) {
+    if (!categoryIds.includes(item.categoryId)) continue;
+    if (!itemMap.has(item.categoryId)) itemMap.set(item.categoryId, []);
+
+    const isGithub = item.url?.includes("github.com");
+    const isZip = item.tag?.toUpperCase() === "ZIP";
+
+    itemMap.get(item.categoryId)!.push({
+      id: item.slug || String(item.id),
+      dbId: item.id,
+      slug: item.slug,
+      title: item.title,
+      url: item.url,
+      repoUrl: isGithub ? item.url : undefined,
+      downloadUrl: isZip ? (item.url.endsWith(".zip") ? item.url : `/resources/${item.title}.zip`) : undefined,
+      downloadName: isZip ? `${item.title}.zip` : undefined,
+      isZip,
+      desc: item.desc,
+      tag: item.tag,
+      icon: item.icon,
+      sortOrder: item.sortOrder
+    });
+  }
+
+  const result = categories.map((c: any) => ({
+    ...c,
+    id: c.slug || String(c.id),
+    dbId: c.id,
+    items: itemMap.get(c.id) ?? []
+  }));
+
+  if (result.length > 0 && result[0].items.length === 0) {
+    return DEFAULT_TOOL_NAV;
+  }
+
+  return result;
 };
 
 /**

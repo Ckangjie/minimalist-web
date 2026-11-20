@@ -22,6 +22,19 @@ export const getPublicList = async (c: Context) => {
 };
 
 /**
+ * 前台：获取可见自研工具分类及条目
+ */
+export const getPublicTools = async (c: Context) => {
+  try {
+    const db = getDatabase(c);
+    const list = await navService.getPublicToolCategories(db);
+    return success(c, list, "查询成功");
+  } catch (error: any) {
+    return fail(c, error?.message ?? "获取导航工具失败");
+  }
+};
+
+/**
  * 后台：分页查询分类列表
  */
 export const getManageCategoryList = async (c: Context) => {

@@ -114,3 +114,13 @@ CREATE TABLE IF NOT EXISTS nav_item (
 
 CREATE INDEX IF NOT EXISTS idx_nav_item_category ON nav_item (category_id, sort_order);
 CREATE INDEX IF NOT EXISTS idx_nav_category_sort ON nav_category (sort_order, id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_nav_item_cat_slug ON nav_item (category_id, slug);
+
+-- 默认自研导航工具初始分类与条目
+INSERT OR IGNORE INTO nav_category (slug, name, icon, description, sort_order, is_visible)
+VALUES ('nav-tools', '导航工具', '🧰', '自研工具资源包与开源项目集合，支持离线包直接下载与 GitHub 仓库直达', 99, 1);
+
+INSERT OR IGNORE INTO nav_item (category_id, slug, title, url, desc, tag, icon, sort_order, is_visible)
+VALUES 
+  ((SELECT id FROM nav_category WHERE slug = 'nav-tools'), 'tool-uni-offline-pack', 'UniOfflinePack', 'https://github.com/Ckangjie/uni-packer', '零 Android Studio 依赖的 uni-app 本地离线打包工作台，支持环境一键自愈、证书自动嗅探与极速 APK 编译交付', '开源工具', '📦', 1, 1),
+  ((SELECT id FROM nav_category WHERE slug = 'nav-tools'), 'tool-bookmark-desk', 'BookmarkDesk', 'https://github.com/Ckangjie/bookmark-desk', '书签管家 BookmarkDesk 是一个本地书签工作台。打开扩展即可在独立标签页里查看、搜索和整理导入的浏览器书签', 'ZIP', '📑', 2, 1);

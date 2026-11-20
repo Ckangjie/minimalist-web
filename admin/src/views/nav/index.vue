@@ -8,7 +8,7 @@
           <el-button size="small" type="primary" plain :icon="Plus" @click="openAddCategory">新增分类</el-button>
         </div>
       </template>
-      <div v-loading="isCatLoading" class="flex-1 min-h-0 overflow-y-auto">
+      <div v-loading="isCatLoading" class="flex-1 min-h-0 overflow-y-auto flex flex-col">
         <div
           v-for="cat in categories"
           :key="cat.id"
@@ -39,7 +39,9 @@
             </el-popconfirm>
           </div>
         </div>
-        <el-empty v-if="!isCatLoading && categories.length === 0" description="暂无分类" :image-size="60" />
+        <div v-if="!isCatLoading && categories.length === 0" class="flex-1 flex items-center justify-center">
+          <el-empty description="暂无分类" :image-size="60" class="compact-empty" />
+        </div>
       </div>
     </el-card>
 
@@ -103,13 +105,15 @@
               批量导入
             </el-button>
             <el-button
+              type="primary"
+              plain
               size="small"
               :icon="Refresh"
               :loading="isItemLoading"
               :disabled="!selectedCatId"
               @click="fetchItems()"
             >
-              刷新
+              刷新数据
             </el-button>
             <span class="text-xs text-gray-400">（共 {{ itemTotal }} 条记录）</span>
           </div>
@@ -118,17 +122,18 @@
           </div>
         </div>
 
-        <div v-if="!selectedCatId" class="flex-1 flex flex-col items-center justify-center gap-3">
-          <el-empty description="请点击左侧分类查看其导航条目" :image-size="80" />
-          <el-button
-            size="small"
-            type="warning"
-            plain
-            :icon="Upload"
-            @click="isImportDialogOpen = true"
-          >
-            批量导入导航数据
-          </el-button>
+        <div v-if="!selectedCatId" class="flex-1 flex flex-col items-center justify-center">
+          <el-empty description="请点击左侧分类查看其导航条目" :image-size="70" class="compact-empty">
+            <el-button
+              size="small"
+              type="warning"
+              plain
+              :icon="Upload"
+              @click="isImportDialogOpen = true"
+            >
+              批量导入导航数据
+            </el-button>
+          </el-empty>
         </div>
 
         <div v-else class="flex-1 min-h-0 flex flex-col">
@@ -742,5 +747,22 @@ onMounted(() => {
   background-color: #ecf5ff;
   border-color: #b3d8ff;
   color: #409eff;
+}
+
+:deep(.compact-empty) {
+  padding: 12px 0;
+}
+
+:deep(.compact-empty .el-empty__description) {
+  margin-top: 8px;
+}
+
+:deep(.compact-empty .el-empty__description p) {
+  font-size: 13px;
+  color: #909399;
+}
+
+:deep(.compact-empty .el-empty__bottom) {
+  margin-top: 10px;
 }
 </style>

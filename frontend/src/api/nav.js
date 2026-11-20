@@ -7,3 +7,11 @@ import request from "@/utils/request";
 export const getPublicNav = () => {
   return request("/api/nav");
 };
+
+/**
+ * 获取前台自研导航工具分类及条目列表
+ * @returns {Promise<Array>} 导航工具分类数组
+ */
+export const getPublicTools = () => {
+  return request("/api/nav/tools");
+};

@@ -1,4 +1,4 @@
-import { getPublicNav } from "@/api/nav";
+import { getPublicNav, getPublicTools } from "@/api/nav";
 import {
   exportBookmarksToHtml,
   parseBookmarksFromHtml
@@ -44,6 +44,7 @@ const TOOL_NAV_CATEGORIES = [
 const CUSTOM_STORAGE_KEY = "jie_hub_custom_bookmarks";
 const MODE_STORAGE_KEY = "jie_hub_nav_mode";
 const NAV_CACHE_KEY = "jie_hub_system_nav_cache";
+const TOOL_CACHE_KEY = "jie_hub_tool_nav_cache";
 const NAV_CACHE_TTL = 5 * 60 * 1000; // 5分钟缓存
 
 // 顶层导航模式仅保存在当前页签的会话中。
@@ -55,6 +56,48 @@ const customCategories = ref(loadCustomCategories());
 // 系统导航：优先读取 sessionStorage 缓存，无缓存默认为空数组，异步从 API 实时加载
 const systemCategories = ref(loadSystemNavCache() ?? []);
 const isSystemNavLoading = ref(false);
+
+// 导航工具：优先读取缓存，无缓存回退至预设结构，异步从 API 实时加载
+const toolCategories = ref(loadToolNavCache() ?? TOOL_NAV_CATEGORIES);
+const isToolNavLoading = ref(false);
+
+function loadToolNavCache() {
+  try {
+    const raw = sessionStorage.getItem(TOOL_CACHE_KEY);
+    if (!raw) return null;
+    const { data, ts } = JSON.parse(raw);
+    if (Date.now() - ts < NAV_CACHE_TTL && Array.isArray(data) && data.length > 0) {
+      return data;
+    }
+  } catch {
+    // 忽略
+  }
+  return null;
+}
+
+function saveToolNavCache(data) {
+  try {
+    sessionStorage.setItem(TOOL_CACHE_KEY, JSON.stringify({ data, ts: Date.now() }));
+  } catch {
+    // 忽略
+  }
+}
+
+async function fetchToolNav() {
+  if (isToolNavLoading.value) return;
+  isToolNavLoading.value = true;
+  try {
+    const data = await getPublicTools();
+    if (Array.isArray(data) && data.length > 0) {
+      toolCategories.value = data;
+      saveToolNavCache(data);
+    }
+  } catch (err) {
+    console.warn("[NavHub] 从 API 加载导航工具失败:", err);
+  } finally {
+    isToolNavLoading.value = false;
+  }
+}
 
 function loadSystemNavCache() {
   try {
@@ -96,6 +139,7 @@ async function fetchSystemNav() {
 
 // 应用启动时立即异步拉取
 fetchSystemNav();
+fetchToolNav();
 
 function loadInitialMode() {
   try {
@@ -147,7 +191,7 @@ export function useBookmarks() {
       return customCategories.value;
     }
     if (currentNavMode.value === "tools") {
-      return TOOL_NAV_CATEGORIES;
+      return toolCategories.value;
     }
     return systemCategories.value;
   });
@@ -159,7 +203,7 @@ export function useBookmarks() {
 
   // 导航工具内的资源总数
   const toolsCount = computed(() => {
-    return TOOL_NAV_CATEGORIES.reduce((sum, c) => sum + (c.items?.length || 0), 0);
+    return toolCategories.value.reduce((sum, c) => sum + (c.items?.length || 0), 0);
   });
 
   // 切换顶级导航大类
@@ -280,12 +324,14 @@ export function useBookmarks() {
     currentNavMode,
     activeCategories,
     systemCategories,
-    toolCategories: TOOL_NAV_CATEGORIES,
+    toolCategories,
     customCategories,
     customCount,
     toolsCount,
     isSystemNavLoading,
+    isToolNavLoading,
     fetchSystemNav,
+    fetchToolNav,
     switchNavMode,
     importFromFile,
     clearCustomBookmarks

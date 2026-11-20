@@ -73,6 +73,7 @@ apiRouter.delete("/admin/friend-links/:id", friendLinkController.remove);
 
 // 导航数据接口
 apiRouter.get("/nav", navController.getPublicList);
+apiRouter.get("/nav/tools", navController.getPublicTools);
 apiRouter.get("/admin/nav/categories", navController.getManageCategoryList);
 apiRouter.post("/admin/nav/categories", navController.createCategory);
 apiRouter.put("/admin/nav/categories/:id", navController.updateCategory);
