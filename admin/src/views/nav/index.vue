@@ -286,7 +286,7 @@
           <el-input v-model.trim="itemForm.url" placeholder="必须以 https 或 http 开头" />
         </el-form-item>
         <el-form-item label="描述 (选填)">
-          <el-input v-model.trim="itemForm.desc" type="textarea" :rows="2" maxlength="200" />
+          <el-input v-model.trim="itemForm.desc" type="textarea" :rows="2" maxlength="200" placeholder="简短描述该条目功能或特色" />
         </el-form-item>
         <el-form-item label="标签 (选填)">
           <el-input v-model.trim="itemForm.tag" maxlength="10" placeholder="如：代码" />
