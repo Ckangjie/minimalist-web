@@ -16,12 +16,9 @@
           :class="{ 'is-active': selectedCatId === cat.id }"
           @click="selectCategory(cat)"
         >
-          <div class="flex items-center gap-2 min-w-0">
-            <span class="text-base flex-shrink-0">{{ cat.icon || '📁' }}</span>
-            <div class="min-w-0">
-              <div class="text-sm font-medium truncate">{{ cat.name }}</div>
-              <div class="text-xs text-gray-400 truncate">{{ cat.slug }}</div>
-            </div>
+          <div class="min-w-0">
+            <div class="text-sm font-medium truncate">{{ cat.name }}</div>
+            <div class="text-xs text-gray-400 truncate">{{ cat.slug }}</div>
           </div>
           <div class="flex items-center gap-1 flex-shrink-0 ml-2">
             <el-tag size="small" type="info" class="!text-xs">{{ cat.itemCount ?? 0 }}</el-tag>
@@ -116,9 +113,6 @@
               刷新数据
             </el-button>
             <span class="text-xs text-gray-400">（共 {{ itemTotal }} 条记录）</span>
-          </div>
-          <div v-if="selectedCat" class="text-xs text-gray-400">
-            当前分类：<span class="font-medium text-gray-700">「{{ selectedCat.name }}」</span>
           </div>
         </div>
 
