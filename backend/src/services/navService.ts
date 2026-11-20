@@ -61,7 +61,6 @@ export const getPublicNavCategories = async (db: any) => {
       id: navCategory.id,
       slug: navCategory.slug,
       name: navCategory.name,
-      icon: navCategory.icon,
       description: navCategory.description,
       sortOrder: navCategory.sortOrder
     })
@@ -82,7 +81,6 @@ export const getPublicNavCategories = async (db: any) => {
       url: navItem.url,
       desc: navItem.desc,
       tag: navItem.tag,
-      icon: navItem.icon,
       sortOrder: navItem.sortOrder
     })
     .from(navItem)
@@ -101,7 +99,6 @@ export const getPublicNavCategories = async (db: any) => {
       url: item.url,
       desc: item.desc,
       tag: item.tag,
-      icon: item.icon,
       sortOrder: item.sortOrder
     });
   }
@@ -123,7 +120,6 @@ export const getPublicToolCategories = async (db: any) => {
       id: navCategory.id,
       slug: navCategory.slug,
       name: navCategory.name,
-      icon: navCategory.icon,
       description: navCategory.description,
       sortOrder: navCategory.sortOrder
     })
@@ -146,7 +142,6 @@ export const getPublicToolCategories = async (db: any) => {
       url: navItem.url,
       desc: navItem.desc,
       tag: navItem.tag,
-      icon: navItem.icon,
       sortOrder: navItem.sortOrder
     })
     .from(navItem)
@@ -173,7 +168,6 @@ export const getPublicToolCategories = async (db: any) => {
       isZip,
       desc: item.desc,
       tag: item.tag,
-      icon: item.icon,
       sortOrder: item.sortOrder
     });
   }
@@ -256,7 +250,6 @@ export const createCategory = async (db: any, body: any) => {
     .values({
       slug,
       name,
-      icon: body.icon ?? null,
       description: body.description ?? null,
       sortOrder: typeof body.sortOrder === "number" ? body.sortOrder : 0,
       isVisible: body.isVisible !== false,
@@ -282,7 +275,6 @@ export const updateCategory = async (db: any, id: number, body: any) => {
   const updates: any = { updatedAt: formatDateTime() };
   if (typeof body.slug === "string" && body.slug.trim()) updates.slug = body.slug.trim();
   if (typeof body.name === "string" && body.name.trim()) updates.name = body.name.trim();
-  if (typeof body.icon !== "undefined") updates.icon = body.icon ?? null;
   if (typeof body.description !== "undefined") updates.description = body.description ?? null;
   if (typeof body.sortOrder === "number") updates.sortOrder = body.sortOrder;
   if (typeof body.isVisible === "boolean") updates.isVisible = body.isVisible;
@@ -366,7 +358,6 @@ export const createItem = async (db: any, body: any) => {
       url,
       desc: body.desc ?? null,
       tag: body.tag ?? null,
-      icon: body.icon ?? null,
       sortOrder: typeof body.sortOrder === "number" ? body.sortOrder : 0,
       isVisible: body.isVisible !== false,
       createdAt: nowTime,
@@ -394,7 +385,6 @@ export const updateItem = async (db: any, id: number, body: any) => {
   if (typeof body.url === "string" && body.url.trim()) updates.url = body.url.trim();
   if (typeof body.desc !== "undefined") updates.desc = body.desc ?? null;
   if (typeof body.tag !== "undefined") updates.tag = body.tag ?? null;
-  if (typeof body.icon !== "undefined") updates.icon = body.icon ?? null;
   if (typeof body.sortOrder === "number") updates.sortOrder = body.sortOrder;
   if (typeof body.isVisible === "boolean") updates.isVisible = body.isVisible;
   if (typeof body.categoryId === "number") updates.categoryId = body.categoryId;
@@ -451,7 +441,6 @@ export const batchImportNav = async (db: any, categories: any[]) => {
         .update(navCategory)
         .set({
           name: catName,
-          icon: cat.icon ?? existing[0].icon,
           description: cat.description ?? existing[0].description,
           sortOrder: sortIdx,
           updatedAt: nowTime
@@ -463,7 +452,6 @@ export const batchImportNav = async (db: any, categories: any[]) => {
         .values({
           slug: catSlug,
           name: catName,
-          icon: cat.icon ?? null,
           description: cat.description ?? null,
           sortOrder: sortIdx,
           isVisible: true,
@@ -498,7 +486,6 @@ export const batchImportNav = async (db: any, categories: any[]) => {
             url: itemUrl,
             desc: item.desc ?? existingItem[0].desc,
             tag: item.tag ?? existingItem[0].tag,
-            icon: item.icon ?? existingItem[0].icon,
             sortOrder: itemIdx,
             updatedAt: nowTime
           })
@@ -511,7 +498,6 @@ export const batchImportNav = async (db: any, categories: any[]) => {
           url: itemUrl,
           desc: item.desc ?? null,
           tag: item.tag ?? null,
-          icon: item.icon ?? null,
           sortOrder: itemIdx,
           isVisible: true,
           createdAt: nowTime,

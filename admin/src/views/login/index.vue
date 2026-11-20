@@ -11,7 +11,6 @@
         ref="loginFormRef"
         :model="loginForm"
         :rules="loginRules"
-        size="large"
         @keyup.enter="handleLogin"
       >
         <el-form-item prop="username">

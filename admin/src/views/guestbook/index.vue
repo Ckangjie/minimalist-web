@@ -15,24 +15,19 @@
 
         <el-form-item label="审核状态">
           <el-select v-model="searchParams.status" placeholder="全部状态" clearable class="!w-32">
-            <el-option label="待审核" value="pending" />
-            <el-option label="已通过" value="approved" />
-            <el-option label="已拒绝" value="rejected" />
-            <el-option label="已隐藏" value="hidden" />
+            <el-option v-for="option in moderationStatusOptions" :key="option.value" v-bind="option" />
           </el-select>
         </el-form-item>
 
         <el-form-item label="留言层级">
           <el-select v-model="searchParams.level" placeholder="全部层级" clearable class="!w-28">
-            <el-option label="一级留言" :value="1" />
-            <el-option label="二级回复" :value="2" />
+            <el-option v-for="option in levelOptions" :key="option.value" v-bind="option" />
           </el-select>
         </el-form-item>
 
         <el-form-item label="发布身份">
           <el-select v-model="searchParams.authorType" placeholder="全部身份" clearable class="!w-28">
-            <el-option label="游客" value="visitor" />
-            <el-option label="站长" value="admin" />
+            <el-option v-for="option in authorTypeOptions" :key="option.value" v-bind="option" />
           </el-select>
         </el-form-item>
 
@@ -53,7 +48,6 @@
           <el-button
             type="danger"
             plain
-            size="small"
             :icon="Delete"
             :loading="isBatchDeleting"
             :disabled="selectedIds.length === 0"
@@ -64,7 +58,6 @@
           <el-button
             type="primary"
             plain
-            size="small"
             :icon="Refresh"
             :loading="isLoading"
             @click="fetchData"
@@ -91,7 +84,7 @@
 
         <el-table-column label="层级" width="95" align="center">
           <template #default="{ row }">
-            <el-tag :type="row.level === 1 ? 'primary' : 'success'" size="small">
+            <el-tag :type="row.level === 1 ? 'primary' : 'success'">
               {{ row.level === 1 ? "一级留言" : "二级回复" }}
             </el-tag>
           </template>
@@ -118,7 +111,7 @@
               </el-avatar>
               <div class="flex items-center gap-1.5 flex-wrap min-w-0">
                 <span class="font-medium text-xs text-[#303133] truncate">{{ row.nickname }}</span>
-                <el-tag v-if="row.authorType === 'admin'" type="danger" size="small" effect="dark">
+                <el-tag v-if="row.authorType === 'admin'" type="danger" effect="dark">
                   站长
                 </el-tag>
               </div>
@@ -129,7 +122,7 @@
         <el-table-column label="留言内容" min-width="260">
           <template #default="{ row }">
             <div class="text-xs text-[#303133] leading-relaxed whitespace-pre-wrap break-words py-1">
-              <el-tag v-if="row.level === 2 && row.rootId" size="small" type="info" class="mr-1">
+              <el-tag v-if="row.level === 2 && row.rootId" type="info" class="mr-1">
                 楼 #{{ row.rootId }}
               </el-tag>
               {{ row.content }}
@@ -139,7 +132,7 @@
 
         <el-table-column label="审核状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="getStatusTagType(row.status)" size="small">
+            <el-tag :type="getStatusTagType(row.status)">
               {{ getStatusLabel(row.status) }}
             </el-tag>
           </template>
@@ -165,7 +158,6 @@
                 <el-button
                   type="success"
                   link
-                  size="small"
                   @click="handleQuickStatus(row, 'approve')"
                 >
                   通过
@@ -173,7 +165,6 @@
                 <el-button
                   type="danger"
                   link
-                  size="small"
                   @click="openStatusDialog(row, 'reject')"
                 >
                   拒绝
@@ -185,7 +176,6 @@
                 <el-button
                   type="primary"
                   link
-                  size="small"
                   @click="openReplyDialog(row)"
                 >
                   回复
@@ -193,7 +183,6 @@
                 <el-button
                   type="warning"
                   link
-                  size="small"
                   @click="openStatusDialog(row, 'hide')"
                 >
                   隐藏
@@ -205,7 +194,6 @@
                 <el-button
                   type="success"
                   link
-                  size="small"
                   @click="handleQuickStatus(row, 'approve')"
                 >
                   重新通过
@@ -217,7 +205,6 @@
                 <el-button
                   type="success"
                   link
-                  size="small"
                   @click="handleQuickStatus(row, 'restore')"
                 >
                   恢复展示
@@ -229,7 +216,6 @@
                 v-if="row.authorType === 'admin'"
                 type="info"
                 link
-                size="small"
                 @click="openEditDialog(row)"
               >
                 编辑
@@ -240,7 +226,6 @@
                 v-if="(row.replyCount && row.replyCount > 0) || row.level === 2"
                 type="primary"
                 link
-                size="small"
                 @click="openDetailDrawer(row)"
               >
                 详情
@@ -255,7 +240,7 @@
                 @confirm="handleDelete(row)"
               >
                 <template #reference>
-                  <el-button type="danger" link size="small">删除</el-button>
+                  <el-button type="danger" link>删除</el-button>
                 </template>
               </el-popconfirm>
             </div>
@@ -273,8 +258,8 @@
           background
           layout="total, sizes, prev, pager, next, jumper"
           :total="totalCount"
-          @size-change="fetchData"
-          @current-change="fetchData"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
         />
       </div>
     </el-card>
@@ -398,7 +383,7 @@
         <!-- 所属一级主楼信息（针对二级回复时呈现） -->
         <div v-if="detailData?.level === 2 && detailData?.rootComment" class="p-3 rounded-xl bg-[#eef4fe] border border-[#d0e0fb] flex flex-col gap-1.5">
           <div class="flex items-center gap-1.5 text-[11px] text-[#606266]">
-            <el-tag size="small" type="primary">所属一级主留言 #{{ detailData.rootComment.id }}</el-tag>
+            <el-tag type="primary">所属一级主留言 #{{ detailData.rootComment.id }}</el-tag>
             <span class="font-bold text-[#303133]">{{ detailData.rootComment.nickname }}</span>
             <span class="text-[#909399]">{{ detailData.rootComment.createdAt }}</span>
           </div>
@@ -430,13 +415,13 @@
               <div class="flex flex-col">
                 <div class="flex items-center gap-1.5 flex-wrap">
                   <span class="font-bold text-[#303133] text-sm">{{ detailData?.nickname }}</span>
-                  <el-tag size="small" :type="detailData?.level === 1 ? 'primary' : 'success'">
+                  <el-tag :type="detailData?.level === 1 ? 'primary' : 'success'">
                     {{ detailData?.level === 1 ? "一级留言" : "二级回复" }}
                   </el-tag>
-                  <el-tag v-if="detailData?.authorType === 'admin'" type="danger" size="small" effect="dark">
+                  <el-tag v-if="detailData?.authorType === 'admin'" type="danger" effect="dark">
                     站长
                   </el-tag>
-                  <el-tag :type="getStatusTagType(detailData?.status)" size="small">
+                  <el-tag :type="getStatusTagType(detailData?.status)">
                     {{ getStatusLabel(detailData?.status) }}
                   </el-tag>
                 </div>
@@ -492,10 +477,10 @@
                   </el-avatar>
                   <div class="flex items-center gap-1.5 flex-wrap">
                     <span class="font-bold text-[#303133]">{{ reply.nickname }}</span>
-                    <el-tag v-if="reply.id === detailData?.id" size="small" type="primary" effect="dark">
+                    <el-tag v-if="reply.id === detailData?.id" type="primary" effect="dark">
                       当前项
                     </el-tag>
-                    <el-tag v-if="reply.authorType === 'admin'" type="danger" size="small" effect="dark">
+                    <el-tag v-if="reply.authorType === 'admin'" type="danger" effect="dark">
                       站长
                     </el-tag>
                     <span v-if="reply.replyToNickname" class="text-[#909399]">
@@ -503,7 +488,7 @@
                     </span>
                   </div>
                 </div>
-                <el-tag :type="getStatusTagType(reply.status)" size="small">
+                <el-tag :type="getStatusTagType(reply.status)">
                   {{ getStatusLabel(reply.status) }}
                 </el-tag>
               </div>
@@ -525,7 +510,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Search, Refresh, Delete } from "@element-plus/icons-vue";
@@ -539,25 +524,50 @@ import {
   getManageDetail,
   type GuestbookComment
 } from "@/api/guestbook";
+import { usePagination } from "@/hooks/usePagination";
+import { moderationStatusOptions } from "@/constants/moderation";
 
 const route = useRoute();
+const levelOptions = [
+  { label: "一级留言", value: 1 },
+  { label: "二级回复", value: 2 }
+];
+const authorTypeOptions = [
+  { label: "游客", value: "visitor" },
+  { label: "站长", value: "admin" }
+];
 
 // 表格与状态
-const isLoading = ref(false);
 const isSubmitting = ref(false);
 const isBatchDeleting = ref(false);
 const selectedIds = ref<number[]>([]);
-const tableData = ref<GuestbookComment[]>([]);
-const totalCount = ref(0);
-const currentPage = ref(1);
-const pageSize = ref(10);
 
-// 查询过滤条件
-const searchParams = reactive({
-  keyword: "",
-  status: (route.query.status as string) || "",
-  level: "" as string | number,
-  authorType: ""
+const {
+  isLoading,
+  total: totalCount,
+  tableData,
+  pageNum: currentPage,
+  pageSize,
+  searchParams,
+  fetchData,
+  handleSearch,
+  handleReset,
+  handleSizeChange,
+  handleCurrentChange,
+  handleDeleteRefresh
+} = usePagination<GuestbookComment>({
+  fetchApi: (params) =>
+    listManageComments({
+      ...params,
+      keyword: params.keyword?.trim()
+    }),
+  defaultParams: {
+    keyword: "",
+    status: (route.query.status as string) || "",
+    level: "" as string | number,
+    authorType: ""
+  },
+  errorMessage: "获取留言列表失败"
 });
 
 // 状态审核弹窗
@@ -624,41 +634,6 @@ const getStatusTagType = (status: string) => {
   return map[status] ?? "info";
 };
 
-// 获取列表数据
-const fetchData = async () => {
-  isLoading.value = true;
-  try {
-    const res = await listManageComments({
-      pageNum: currentPage.value,
-      pageSize: pageSize.value,
-      keyword: searchParams.keyword.trim(),
-      status: searchParams.status,
-      level: searchParams.level,
-      authorType: searchParams.authorType
-    });
-    tableData.value = res?.list ?? [];
-    totalCount.value = res?.total ?? 0;
-  } catch (error: any) {
-    ElMessage.error(error?.message ?? "获取留言列表失败");
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-const handleSearch = () => {
-  currentPage.value = 1;
-  fetchData();
-};
-
-const handleReset = () => {
-  searchParams.keyword = "";
-  searchParams.status = "";
-  searchParams.level = "";
-  searchParams.authorType = "";
-  currentPage.value = 1;
-  fetchData();
-};
-
 // 快捷直接操作（不需要写备注）
 const handleQuickStatus = async (
   row: GuestbookComment,
@@ -708,9 +683,9 @@ const handleDelete = async (row: GuestbookComment) => {
   try {
     await deleteComment(row.id);
     ElMessage.success("删除成功");
-    fetchData();
-  } catch (error: any) {
-    ElMessage.error(error?.message ?? "删除失败");
+    handleDeleteRefresh();
+  } catch (err: any) {
+    ElMessage.error(err?.message ?? "删除失败");
   }
 };
 
@@ -735,11 +710,12 @@ const handleBatchDelete = async () => {
       }
     );
 
+    const deleteCount = selectedIds.value.length;
     isBatchDeleting.value = true;
     const res = await batchDeleteComments(selectedIds.value);
     ElMessage.success(res?.message ?? `成功删除 ${selectedIds.value.length} 条留言`);
     selectedIds.value = [];
-    fetchData();
+    handleDeleteRefresh(deleteCount);
   } catch (error: any) {
     if (error !== "cancel") {
       ElMessage.error(error?.message ?? "批量删除失败");
@@ -809,10 +785,6 @@ const openDetailDrawer = async (row: GuestbookComment) => {
     isLoadingDetail.value = false;
   }
 };
-
-onMounted(() => {
-  fetchData();
-});
 </script>
 
 <style scoped>

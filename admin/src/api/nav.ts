@@ -4,7 +4,6 @@ export interface NavCategory {
   id: number;
   slug: string;
   name: string;
-  icon: string | null;
   description: string | null;
   sortOrder: number;
   isVisible: boolean;
@@ -21,7 +20,6 @@ export interface NavItem {
   url: string;
   desc: string | null;
   tag: string | null;
-  icon: string | null;
   sortOrder: number;
   isVisible: boolean;
   createdAt: string;

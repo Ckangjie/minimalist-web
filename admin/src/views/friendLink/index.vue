@@ -15,10 +15,7 @@
 
         <el-form-item label="审核状态">
           <el-select v-model="searchParams.status" placeholder="全部状态" clearable class="!w-32">
-            <el-option label="待审核" value="pending" />
-            <el-option label="已通过" value="approved" />
-            <el-option label="已拒绝" value="rejected" />
-            <el-option label="已隐藏" value="hidden" />
+            <el-option v-for="option in moderationStatusOptions" :key="option.value" v-bind="option" />
           </el-select>
         </el-form-item>
 
@@ -38,7 +35,6 @@
           <el-button
             type="primary"
             plain
-            size="small"
             :icon="Plus"
             @click="openAddDialog"
           >
@@ -47,7 +43,6 @@
           <el-button
             type="primary"
             plain
-            size="small"
             :icon="Refresh"
             :loading="isLoading"
             @click="fetchData"
@@ -116,10 +111,10 @@
 
           <el-table-column label="状态" width="100" align="center">
             <template #default="{ row }">
-              <el-tag v-if="row.status === 'pending'" type="warning" size="small">待审核</el-tag>
-              <el-tag v-else-if="row.status === 'approved'" type="success" size="small">已通过</el-tag>
-              <el-tag v-else-if="row.status === 'rejected'" type="danger" size="small">已拒绝</el-tag>
-              <el-tag v-else-if="row.status === 'hidden'" type="info" size="small">已隐藏</el-tag>
+              <el-tag v-if="row.status === 'pending'" type="warning">待审核</el-tag>
+              <el-tag v-else-if="row.status === 'approved'" type="success">已通过</el-tag>
+              <el-tag v-else-if="row.status === 'rejected'" type="danger">已拒绝</el-tag>
+              <el-tag v-else-if="row.status === 'hidden'" type="info">已隐藏</el-tag>
             </template>
           </el-table-column>
 
@@ -135,7 +130,6 @@
                   <el-button
                     type="success"
                     link
-                    size="small"
                     @click="handleStatusChange(row, 'approved')"
                   >
                     通过
@@ -143,7 +137,6 @@
                   <el-button
                     type="danger"
                     link
-                    size="small"
                     @click="openRejectDialog(row)"
                   >
                     拒绝
@@ -155,7 +148,6 @@
                   <el-button
                     type="warning"
                     link
-                    size="small"
                     @click="handleStatusChange(row, 'hidden')"
                   >
                     下架
@@ -167,7 +159,6 @@
                   <el-button
                     type="success"
                     link
-                    size="small"
                     @click="handleStatusChange(row, 'approved')"
                   >
                     上架
@@ -177,7 +168,6 @@
                 <el-button
                   type="primary"
                   link
-                  size="small"
                   @click="openEditDialog(row)"
                 >
                   编辑
@@ -191,7 +181,7 @@
                   @confirm="handleDelete(row)"
                 >
                   <template #reference>
-                    <el-button type="danger" link size="small">
+                    <el-button type="danger" link>
                       删除
                     </el-button>
                   </template>
@@ -211,8 +201,8 @@
           :page-sizes="[10, 20, 50]"
           background
           layout="total, sizes, prev, pager, next, jumper"
-          @size-change="fetchData"
-          @current-change="fetchData"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
         />
       </div>
     </el-card>
@@ -254,7 +244,6 @@
         :model="editForm"
         :rules="formRules"
         label-position="top"
-        size="default"
       >
         <el-form-item label="网站名称" prop="name">
           <el-input v-model.trim="editForm.name" maxlength="40" placeholder="例如：Jie Hub" />
@@ -274,10 +263,7 @@
         <div class="grid grid-cols-2 gap-4">
           <el-form-item label="审核状态" prop="status">
             <el-select v-model="editForm.status" class="w-full">
-              <el-option label="已通过 (展示)" value="approved" />
-              <el-option label="待审核" value="pending" />
-              <el-option label="已拒绝" value="rejected" />
-              <el-option label="已隐藏" value="hidden" />
+              <el-option v-for="option in editStatusOptions" :key="option.value" v-bind="option" />
             </el-select>
           </el-form-item>
           <el-form-item label="排序权重 (数字越大越靠前)" prop="sortOrder">
@@ -298,7 +284,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, nextTick } from "vue";
+import { ref, reactive, nextTick } from "vue";
 import { Search, Refresh, TopRight, Plus } from "@element-plus/icons-vue";
 import { ElMessage, type FormInstance, type FormRules } from "element-plus";
 import {
@@ -309,17 +295,34 @@ import {
   deleteFriendLink,
   type FriendLinkItem
 } from "@/api/friendLink";
+import { usePagination } from "@/hooks/usePagination";
+import { moderationStatusOptions } from "@/constants/moderation";
 
-const isLoading = ref(false);
+const editStatusOptions = [
+  { label: "已通过 (展示)", value: "approved" },
+  ...moderationStatusOptions.filter((option) => option.value !== "approved")
+];
+
 const isSubmitting = ref(false);
-const total = ref(0);
-const tableData = ref<FriendLinkItem[]>([]);
 
-const searchParams = reactive({
-  keyword: "",
-  status: "",
-  pageNum: 1,
-  pageSize: 10
+const {
+  isLoading,
+  tableData,
+  total,
+  searchParams,
+  fetchData,
+  handleSearch,
+  handleReset,
+  handleSizeChange,
+  handleCurrentChange,
+  handleDeleteRefresh
+} = usePagination<FriendLinkItem>({
+  fetchApi: listManageFriendLinks,
+  defaultParams: {
+    keyword: "",
+    status: ""
+  },
+  errorMessage: "获取友链列表失败"
 });
 
 const isRejectDialogOpen = ref(false);
@@ -375,33 +378,6 @@ const formRules: FormRules = {
       trigger: "blur"
     }
   ]
-};
-
-const fetchData = async () => {
-  isLoading.value = true;
-  try {
-    const res: any = await listManageFriendLinks(searchParams);
-    if (res && res.list) {
-      tableData.value = res.list;
-      total.value = res.total;
-    }
-  } catch (err: any) {
-    ElMessage.error(err?.message || "获取友链列表失败");
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-const handleSearch = () => {
-  searchParams.pageNum = 1;
-  fetchData();
-};
-
-const handleReset = () => {
-  searchParams.keyword = "";
-  searchParams.status = "";
-  searchParams.pageNum = 1;
-  fetchData();
 };
 
 const handleStatusChange = async (row: FriendLinkItem, newStatus: string) => {
@@ -498,15 +474,11 @@ const handleDelete = async (row: FriendLinkItem) => {
   try {
     await deleteFriendLink(row.id);
     ElMessage.success("删除成功");
-    fetchData();
+    handleDeleteRefresh();
   } catch (err: any) {
     ElMessage.error(err?.message || "删除失败");
   }
 };
-
-onMounted(() => {
-  fetchData();
-});
 </script>
 
 <style scoped>

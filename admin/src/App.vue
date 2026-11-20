@@ -1,5 +1,5 @@
 <template>
-  <el-config-provider :message="messageConfig">
+  <el-config-provider :message="messageConfig" size="default">
     <router-view />
   </el-config-provider>
 </template>

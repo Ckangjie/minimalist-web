@@ -30,7 +30,6 @@
           <el-button
             type="danger"
             plain
-            size="small"
             :icon="Delete"
             :disabled="selectedIds.length === 0"
             @click="handleBatchDelete"
@@ -40,7 +39,6 @@
           <el-button
             type="primary"
             plain
-            size="small"
             :icon="Refresh"
             :loading="isLoading"
             @click="fetchData"
@@ -90,7 +88,7 @@
             <template #default="{ row }">
               <div class="flex items-center gap-2">
                 <span class="font-bold text-[#303133]">{{ row.nickname }}</span>
-                <el-tag size="small" type="info" effect="plain" round>不可改</el-tag>
+                <el-tag type="info" effect="plain" round>不可改</el-tag>
               </div>
             </template>
           </el-table-column>
@@ -99,7 +97,7 @@
             <template #default="{ row }">
               <div class="flex items-center gap-2 font-mono text-xs text-[#606266]">
                 <span>{{ row.uuid }}</span>
-                <el-link type="primary" :underline="false" class="text-xs" @click="copyText(row.uuid)">
+                <el-link type="primary" underline="never" class="text-xs" @click="copyText(row.uuid)">
                   复制
                 </el-link>
               </div>
@@ -127,7 +125,7 @@
                 @confirm="handleDelete(row)"
               >
                 <template #reference>
-                  <el-button link type="danger" size="small">
+                  <el-button link type="danger">
                     删除
                   </el-button>
                 </template>
@@ -146,9 +144,8 @@
           :total="totalCount"
           layout="total, sizes, prev, pager, next, jumper"
           background
-          size="small"
-          @size-change="fetchData"
-          @current-change="fetchData"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
         />
       </div>
     </el-card>
@@ -156,55 +153,42 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from "vue";
+import { ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Search, Refresh, Delete } from "@element-plus/icons-vue";
-import { getVisitorList, deleteVisitor, batchDeleteVisitors } from "@/api/visitor";
+import { getVisitorList, deleteVisitor, batchDeleteVisitors, type VisitorItem } from "@/api/visitor";
+import { usePagination } from "@/hooks/usePagination";
 
-const isLoading = ref(false);
-const totalCount = ref(0);
-const tableData = ref<any[]>([]);
 const selectedIds = ref<number[]>([]);
 
-const searchParams = reactive({
-  keyword: "",
-  pageNum: 1,
-  pageSize: 10
+const {
+  isLoading,
+  total: totalCount,
+  tableData,
+  searchParams,
+  fetchData,
+  handleSearch,
+  handleReset,
+  handleSizeChange,
+  handleCurrentChange,
+  handleDeleteRefresh
+} = usePagination<VisitorItem>({
+  fetchApi: getVisitorList,
+  defaultParams: {
+    keyword: ""
+  },
+  errorMessage: "获取访客用户列表失败"
 });
 
 const handleSelectionChange = (selection: any[]) => {
   selectedIds.value = selection.map((item) => item.id);
 };
 
-const fetchData = async () => {
-  isLoading.value = true;
-  try {
-    const res: any = await getVisitorList(searchParams);
-    tableData.value = res?.list ?? [];
-    totalCount.value = res?.total ?? 0;
-  } catch (err: any) {
-    ElMessage.error(err?.message ?? "获取访客用户列表失败");
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-const handleSearch = () => {
-  searchParams.pageNum = 1;
-  fetchData();
-};
-
-const handleReset = () => {
-  searchParams.keyword = "";
-  searchParams.pageNum = 1;
-  fetchData();
-};
-
 const handleDelete = async (row: any) => {
   try {
     await deleteVisitor(row.id);
     ElMessage.success("用户已删除");
-    fetchData();
+    handleDeleteRefresh();
   } catch (err: any) {
     ElMessage.error(err?.message ?? "删除失败");
   }
@@ -224,10 +208,11 @@ const handleBatchDelete = async () => {
       }
     );
 
+    const deleteCount = selectedIds.value.length;
     await batchDeleteVisitors(selectedIds.value);
     ElMessage.success("批量删除成功");
     selectedIds.value = [];
-    fetchData();
+    handleDeleteRefresh(deleteCount);
   } catch (e) {
     // 取消
   }
@@ -238,10 +223,6 @@ const copyText = (text: string) => {
   navigator.clipboard.writeText(text);
   ElMessage.success("UUID 已复制到剪贴板");
 };
-
-onMounted(() => {
-  fetchData();
-});
 </script>
 
 <style scoped>

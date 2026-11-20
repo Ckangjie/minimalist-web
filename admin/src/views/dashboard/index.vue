@@ -68,9 +68,9 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="text-sm font-bold text-[#303133]">访问用户情况统计</span>
-            <el-tag size="small" type="info">共 {{ visitorStats.total }} 位唯一设备访客</el-tag>
+            <el-tag type="info">共 {{ visitorStats.total }} 位唯一设备访客</el-tag>
           </div>
-          <el-button type="primary" link size="small" @click="router.push('/visitor')">
+          <el-button type="primary" link @click="router.push('/visitor')">
             查看全部访客明细 →
           </el-button>
         </div>
@@ -79,7 +79,6 @@
       <el-table
         :data="visitorStats.recentList"
         stripe
-        size="small"
         class="w-full"
         v-loading="isVisitorLoading"
         empty-text="暂无访问用户记录"
@@ -111,8 +110,8 @@
         <el-table-column prop="createdAt" label="首次访问时间" min-width="160" />
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag v-if="row.status === 'active'" size="small" type="success">正常</el-tag>
-            <el-tag v-else size="small" type="danger">禁用</el-tag>
+            <el-tag v-if="row.status === 'active'" type="success">正常</el-tag>
+            <el-tag v-else type="danger">禁用</el-tag>
           </template>
         </el-table-column>
       </el-table>

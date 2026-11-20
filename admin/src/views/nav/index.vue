@@ -5,7 +5,7 @@
       <template #header>
         <div class="flex items-center justify-between">
           <span class="font-bold text-sm">导航分类</span>
-          <el-button size="small" type="primary" plain :icon="Plus" @click="openAddCategory">新增分类</el-button>
+          <el-button type="primary" plain :icon="Plus" @click="openAddCategory">新增分类</el-button>
         </div>
       </template>
       <div v-loading="isCatLoading" class="flex-1 min-h-0 overflow-y-auto flex flex-col">
@@ -21,8 +21,8 @@
             <div class="text-xs text-gray-400 truncate">{{ cat.slug }}</div>
           </div>
           <div class="flex items-center gap-1 flex-shrink-0 ml-2">
-            <el-tag size="small" type="info" class="!text-xs">{{ cat.itemCount ?? 0 }}</el-tag>
-            <el-button size="small" link type="primary" :icon="Edit" @click.stop="openEditCategory(cat)" />
+            <el-tag type="info" class="!text-xs">{{ cat.itemCount ?? 0 }}</el-tag>
+            <el-button link type="primary" :icon="Edit" @click.stop="openEditCategory(cat)" />
             <el-popconfirm
               title="确定删除该分类及其全部条目？"
               confirm-button-text="删除"
@@ -31,7 +31,7 @@
               @confirm="handleDeleteCategory(cat)"
             >
               <template #reference>
-                <el-button size="small" link type="danger" :icon="Delete" @click.stop />
+                <el-button link type="danger" :icon="Delete" @click.stop />
               </template>
             </el-popconfirm>
           </div>
@@ -74,7 +74,6 @@
             <el-button
               type="primary"
               plain
-              size="small"
               :icon="Plus"
               :disabled="!selectedCatId"
               @click="openAddItem"
@@ -84,7 +83,6 @@
             <el-button
               type="danger"
               plain
-              size="small"
               :icon="Delete"
               :loading="isBatchDeleting"
               :disabled="selectedIds.length === 0"
@@ -93,7 +91,6 @@
               批量删除 ({{ selectedIds.length }})
             </el-button>
             <el-button
-              size="small"
               type="warning"
               plain
               :icon="Upload"
@@ -104,7 +101,6 @@
             <el-button
               type="primary"
               plain
-              size="small"
               :icon="Refresh"
               :loading="isItemLoading"
               :disabled="!selectedCatId"
@@ -119,7 +115,6 @@
         <div v-if="!selectedCatId" class="flex-1 flex flex-col items-center justify-center">
           <el-empty description="请点击左侧分类查看其导航条目" :image-size="70" class="compact-empty">
             <el-button
-              size="small"
               type="warning"
               plain
               :icon="Upload"
@@ -162,18 +157,18 @@
               </el-table-column>
               <el-table-column prop="tag" label="标签" width="80" align="center">
                 <template #default="{ row }">
-                  <el-tag v-if="row.tag" size="small">{{ row.tag }}</el-tag>
+                  <el-tag v-if="row.tag">{{ row.tag }}</el-tag>
                   <span v-else class="text-gray-400">—</span>
                 </template>
               </el-table-column>
               <el-table-column label="可见" width="70" align="center">
                 <template #default="{ row }">
-                  <el-tag :type="row.isVisible ? 'success' : 'info'" size="small">{{ row.isVisible ? '显示' : '隐藏' }}</el-tag>
+                  <el-tag :type="row.isVisible ? 'success' : 'info'">{{ row.isVisible ? '显示' : '隐藏' }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column label="操作" width="120" fixed="right" align="center">
                 <template #default="{ row }">
-                  <el-button type="primary" link size="small" @click="openEditItem(row)">编辑</el-button>
+                  <el-button type="primary" link @click="openEditItem(row)">编辑</el-button>
                   <el-popconfirm
                     title="确定删除该条目？"
                     confirm-button-text="删除"
@@ -182,7 +177,7 @@
                     @confirm="handleDeleteItem(row)"
                   >
                     <template #reference>
-                      <el-button type="danger" link size="small">删除</el-button>
+                      <el-button type="danger" link>删除</el-button>
                     </template>
                   </el-popconfirm>
                 </template>
@@ -222,9 +217,6 @@
         <el-form-item label="分类名称" prop="name">
           <el-input v-model.trim="catForm.name" maxlength="30" placeholder="如：开发工具" />
         </el-form-item>
-        <el-form-item label="Emoji 图标 (选填)">
-          <el-input v-model.trim="catForm.icon" maxlength="10" placeholder="如：🛠️" />
-        </el-form-item>
         <el-form-item label="分类描述 (选填)">
           <el-input v-model.trim="catForm.description" type="textarea" :rows="2" maxlength="100" placeholder="简短描述该分类" />
         </el-form-item>
@@ -254,6 +246,16 @@
       @closed="itemFormRef?.resetFields()"
     >
       <el-form ref="itemFormRef" :model="itemForm" :rules="itemRules" label-position="top">
+        <el-form-item label="所属分类" prop="categoryId">
+          <el-select v-model="itemForm.categoryId" placeholder="请选择所属分类" class="!w-full">
+            <el-option
+              v-for="cat in categories"
+              :key="cat.id"
+              :label="cat.name"
+              :value="cat.id"
+            />
+          </el-select>
+        </el-form-item>
         <el-form-item label="条目标识 (slug)" prop="slug">
           <el-input v-model.trim="itemForm.slug" placeholder="英文连字符格式，如：github" maxlength="50" />
         </el-form-item>
@@ -261,19 +263,14 @@
           <el-input v-model.trim="itemForm.title" maxlength="50" placeholder="如：GitHub" />
         </el-form-item>
         <el-form-item label="链接地址" prop="url">
-          <el-input v-model.trim="itemForm.url" placeholder="必须以 https:// 或 http:// 开头" />
+          <el-input v-model.trim="itemForm.url" placeholder="必须以 https 或 http 开头" />
         </el-form-item>
         <el-form-item label="描述 (选填)">
           <el-input v-model.trim="itemForm.desc" type="textarea" :rows="2" maxlength="200" />
         </el-form-item>
-        <div class="grid grid-cols-2 gap-4">
-          <el-form-item label="标签 (选填)">
-            <el-input v-model.trim="itemForm.tag" maxlength="10" placeholder="如：代码" />
-          </el-form-item>
-          <el-form-item label="图标 (选填)">
-            <el-input v-model.trim="itemForm.icon" maxlength="100" placeholder="Emoji 或图片链接" />
-          </el-form-item>
-        </div>
+        <el-form-item label="标签 (选填)">
+          <el-input v-model.trim="itemForm.tag" maxlength="10" placeholder="如：代码" />
+        </el-form-item>
         <div class="grid grid-cols-2 gap-4">
           <el-form-item label="排序权重">
             <el-input-number v-model="itemForm.sortOrder" :min="0" :max="999" class="!w-full" />
@@ -296,12 +293,12 @@
       <div class="flex flex-col gap-3">
         <el-alert type="info" show-icon :closable="false">
           <template #title>
-            粘贴标准的导航分类 JSON 数组（含 id/slug、name、icon、items 等字段），或上传 JSON 文件。对已存在 slug 的分类/条目执行更新，新 slug 自动插入。
+            粘贴标准的导航分类 JSON 数组（含 id/slug、name、items 等字段），或上传 JSON 文件。对已存在 slug 的分类/条目执行更新，新 slug 自动插入。
           </template>
         </el-alert>
         <div class="flex items-center gap-2">
-          <el-button size="small" :icon="Upload" @click="triggerFileInput">上传 JSON 文件</el-button>
-          <el-button size="small" @click="loadExampleJson">填入示例模板</el-button>
+          <el-button :icon="Upload" @click="triggerFileInput">上传 JSON 文件</el-button>
+          <el-button @click="loadExampleJson">填入示例模板</el-button>
           <span class="text-xs text-gray-400">或在下方直接粘贴 JSON</span>
           <input ref="fileInputRef" type="file" accept=".json" style="display:none" @change="handleFileSelected" />
         </div>
@@ -309,7 +306,7 @@
           v-model="importJson"
           type="textarea"
           :rows="12"
-          placeholder='[{"id":"dev-tools","name":"开发工具","icon":"🛠️","description":"...","items":[{"id":"github","title":"GitHub","url":"https://github.com","desc":"...","tag":"代码"}]}]'
+          placeholder='[{"id":"dev-tools","name":"开发工具","description":"...","items":[{"id":"github","title":"GitHub","url":"https://github.com","desc":"...","tag":"代码"}]}]'
           class="font-mono text-xs"
         />
       </div>
@@ -324,7 +321,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, nextTick } from "vue";
+import { ref, reactive, toRef, onMounted, nextTick } from "vue";
 import { Search, Refresh, Plus, Edit, Delete, Upload } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from "element-plus";
 import {
@@ -332,6 +329,7 @@ import {
   getNavItems, createNavItem, updateNavItem, deleteNavItem, batchDeleteNavItems, batchImportNav,
   type NavCategory, type NavItem
 } from "@/api/nav";
+import { usePagination } from "@/hooks/usePagination";
 
 // 分类列表
 const isCatLoading = ref(false);
@@ -339,15 +337,38 @@ const categories = ref<NavCategory[]>([]);
 
 // 选中分类
 const selectedCatId = ref<number | null>(null);
-const selectedCat = ref<NavCategory | null>(null);
 
-// 条目列表与分页
-const isItemLoading = ref(false);
-const items = ref<NavItem[]>([]);
-const itemTotal = ref(0);
-const itemPage = ref(1);
-const itemPageSize = ref(10);
-const itemKeyword = ref("");
+// 条目列表与分页（使用公共 usePagination hook）
+const {
+  isLoading: isItemLoading,
+  tableData: items,
+  total: itemTotal,
+  pageNum: itemPage,
+  pageSize: itemPageSize,
+  searchParams: itemSearchParams,
+  fetchData: fetchItems,
+  handleSearch: handleSearchItem,
+  handleReset: handleResetItem,
+  handlePageChange: handleItemCurrentChange,
+  handleSizeChange: handleItemSizeChange,
+  handleDeleteRefresh: handleItemDeleteRefresh
+} = usePagination<NavItem>({
+  immediate: false,
+  defaultParams: {
+    keyword: ""
+  },
+  fetchApi: async (params) => {
+    if (!selectedCatId.value) return { list: [], total: 0 };
+    return getNavItems(selectedCatId.value, {
+      keyword: params.keyword,
+      pageNum: params.pageNum,
+      pageSize: params.pageSize
+    });
+  },
+  errorMessage: "获取条目失败"
+});
+
+const itemKeyword = toRef(itemSearchParams, "keyword");
 const selectedIds = ref<number[]>([]);
 const isBatchDeleting = ref(false);
 
@@ -358,7 +379,7 @@ const isCatDialogOpen = ref(false);
 const catDialogTitle = ref("新增分类");
 const catFormRef = ref<FormInstance>();
 const catForm = reactive<Partial<NavCategory>>({
-  id: 0, slug: "", name: "", icon: "", description: "", sortOrder: 0, isVisible: true
+  id: 0, slug: "", name: "", description: "", sortOrder: 0, isVisible: true
 });
 const catRules: FormRules = {
   slug: [
@@ -372,10 +393,12 @@ const catRules: FormRules = {
 const isItemDialogOpen = ref(false);
 const itemDialogTitle = ref("新增条目");
 const itemFormRef = ref<FormInstance>();
+let originalItemCategoryId: number | undefined;
 const itemForm = reactive<Partial<NavItem>>({
   id: 0, categoryId: 0, slug: "", title: "", url: "", desc: "", tag: "", sortOrder: 0, isVisible: true
 });
 const itemRules: FormRules = {
+  categoryId: [{ required: true, message: "请选择所属分类", trigger: "change" }],
   slug: [
     { required: true, message: "请输入条目标识", trigger: "blur" },
     { pattern: /^[a-z0-9-]+$/, message: "只允许小写字母、数字和连字符", trigger: "blur" }
@@ -393,7 +416,7 @@ const isImporting = ref(false);
 const importJson = ref("");
 const fileInputRef = ref<HTMLInputElement>();
 
-const fetchCategories = async (keepSelection = true) => {
+const fetchCategories = async ({ refreshItems = false } = {}) => {
   isCatLoading.value = true;
   try {
     const res: any = await listNavCategories({
@@ -403,20 +426,14 @@ const fetchCategories = async (keepSelection = true) => {
     if (res?.list) {
       categories.value = res.list;
 
-      // 默认选中逻辑：优先保留当前选中项，初次进入或项不存在时默认选中第一个
-      if (categories.value.length > 0) {
-        let targetCat = keepSelection
-          ? categories.value.find((c) => c.id === selectedCatId.value)
-          : null;
-        if (!targetCat) {
-          targetCat = categories.value[0];
-        }
-        await selectCategory(targetCat);
-      } else {
+      const targetCat = categories.value.find((cat) => cat.id === selectedCatId.value) ?? categories.value[0];
+      if (!targetCat) {
         selectedCatId.value = null;
-        selectedCat.value = null;
         items.value = [];
         itemTotal.value = 0;
+        selectedIds.value = [];
+      } else if (targetCat.id !== selectedCatId.value || refreshItems) {
+        await selectCategory(targetCat);
       }
     }
   } catch (err: any) {
@@ -429,72 +446,16 @@ const fetchCategories = async (keepSelection = true) => {
 const selectCategory = async (cat: NavCategory) => {
   if (selectedCatId.value !== cat.id) {
     selectedCatId.value = cat.id;
-    selectedCat.value = cat;
     itemPage.value = 1;
     itemKeyword.value = "";
     selectedIds.value = [];
-  } else {
-    selectedCat.value = cat;
   }
-  await fetchItems(cat.id);
-};
-
-const fetchItems = async (categoryId?: number) => {
-  const targetId = categoryId ?? selectedCatId.value;
-  if (!targetId) {
-    items.value = [];
-    itemTotal.value = 0;
-    return;
-  }
-  isItemLoading.value = true;
-  try {
-    const res: any = await getNavItems(targetId, {
-      keyword: itemKeyword.value,
-      pageNum: itemPage.value,
-      pageSize: itemPageSize.value
-    });
-    if (res?.list) {
-      items.value = res.list;
-      itemTotal.value = res.total;
-    } else if (Array.isArray(res)) {
-      items.value = res;
-      itemTotal.value = res.length;
-    } else {
-      items.value = [];
-      itemTotal.value = 0;
-    }
-  } catch (err: any) {
-    ElMessage.error(err?.message || "获取条目失败");
-  } finally {
-    isItemLoading.value = false;
-  }
-};
-
-const handleSearchItem = () => {
-  itemPage.value = 1;
-  fetchItems();
-};
-
-const handleResetItem = () => {
-  itemKeyword.value = "";
-  itemPage.value = 1;
-  fetchItems();
-};
-
-const handleItemSizeChange = (val: number) => {
-  itemPageSize.value = val;
-  itemPage.value = 1;
-  fetchItems();
-};
-
-const handleItemCurrentChange = (val: number) => {
-  itemPage.value = val;
-  fetchItems();
+  await fetchItems();
 };
 
 // 分类操作
 const openAddCategory = () => {
-  Object.assign(catForm, { id: 0, slug: "", name: "", icon: "", description: "", sortOrder: 0, isVisible: true });
+  Object.assign(catForm, { id: 0, slug: "", name: "", description: "", sortOrder: 0, isVisible: true });
   catDialogTitle.value = "新增分类";
   isCatDialogOpen.value = true;
   nextTick(() => catFormRef.value?.clearValidate());
@@ -516,9 +477,6 @@ const confirmSaveCategory = async () => {
       if (catForm.id) {
         await updateNavCategory(catForm.id, catForm);
         ElMessage.success("修改成功");
-        if (selectedCatId.value === catForm.id) {
-          selectedCat.value = { ...selectedCat.value!, ...catForm } as NavCategory;
-        }
       } else {
         await createNavCategory(catForm);
         ElMessage.success("新增分类成功");
@@ -537,13 +495,7 @@ const handleDeleteCategory = async (cat: NavCategory) => {
   try {
     await deleteNavCategory(cat.id);
     ElMessage.success("删除成功");
-    if (selectedCatId.value === cat.id) {
-      selectedCatId.value = null;
-      selectedCat.value = null;
-      items.value = [];
-      itemTotal.value = 0;
-    }
-    fetchCategories(false);
+    fetchCategories();
   } catch (err: any) {
     ElMessage.error(err?.message || "删除失败");
   }
@@ -551,13 +503,14 @@ const handleDeleteCategory = async (cat: NavCategory) => {
 
 // 条目操作
 const openAddItem = () => {
-  Object.assign(itemForm, { id: 0, categoryId: selectedCatId.value, slug: "", title: "", url: "", desc: "", tag: "", icon: "", sortOrder: 0, isVisible: true });
+  Object.assign(itemForm, { id: 0, categoryId: selectedCatId.value, slug: "", title: "", url: "", desc: "", tag: "", sortOrder: 0, isVisible: true });
   itemDialogTitle.value = "新增条目";
   isItemDialogOpen.value = true;
   nextTick(() => itemFormRef.value?.clearValidate());
 };
 
 const openEditItem = (row: NavItem) => {
+  originalItemCategoryId = row.categoryId;
   Object.assign(itemForm, { ...row });
   itemDialogTitle.value = "编辑条目";
   isItemDialogOpen.value = true;
@@ -570,16 +523,24 @@ const confirmSaveItem = async () => {
     if (!valid) return;
     isSubmitting.value = true;
     try {
+      const categoryId = itemForm.categoryId;
+      const moved = Boolean(itemForm.id) && categoryId !== originalItemCategoryId;
       if (itemForm.id) {
         await updateNavItem(itemForm.id, itemForm);
         ElMessage.success("修改成功");
       } else {
         await createNavItem(itemForm);
+        const category = categories.value.find((cat) => cat.id === categoryId);
+        if (category) category.itemCount = (category.itemCount ?? 0) + 1;
         ElMessage.success("新增成功");
       }
       isItemDialogOpen.value = false;
-      await fetchItems();
-      fetchCategories(true); // 更新 itemCount 并保持当前选中
+      if (moved && selectedCatId.value === originalItemCategoryId) {
+        await handleItemDeleteRefresh();
+      } else if (selectedCatId.value === categoryId) {
+        await fetchItems();
+      }
+      if (moved) await fetchCategories();
     } catch (err: any) {
       ElMessage.error(err?.message || "保存失败");
     } finally {
@@ -593,11 +554,8 @@ const handleDeleteItem = async (row: NavItem) => {
     await deleteNavItem(row.id);
     ElMessage.success("删除成功");
     selectedIds.value = selectedIds.value.filter((id) => id !== row.id);
-    if (items.value.length === 1 && itemPage.value > 1) {
-      itemPage.value--;
-    }
-    await fetchItems();
-    fetchCategories(true);
+    await handleItemDeleteRefresh();
+    fetchCategories();
   } catch (err: any) {
     ElMessage.error(err?.message || "删除失败");
   }
@@ -622,16 +580,14 @@ const handleBatchDelete = async () => {
       }
     );
 
+    const deleteCount = selectedIds.value.length;
     isBatchDeleting.value = true;
     const res: any = await batchDeleteNavItems(selectedIds.value);
     ElMessage.success(res?.message ?? `成功删除 ${selectedIds.value.length} 个条目`);
 
-    if (items.value.length === selectedIds.value.length && itemPage.value > 1) {
-      itemPage.value--;
-    }
     selectedIds.value = [];
-    await fetchItems();
-    fetchCategories(true);
+    await handleItemDeleteRefresh(deleteCount);
+    fetchCategories();
   } catch (error: any) {
     if (error !== "cancel") {
       ElMessage.error(error?.message ?? "批量删除失败");
@@ -646,7 +602,6 @@ const loadExampleJson = () => {
     {
       id: "dev-tools",
       name: "开发工具",
-      icon: "🛠️",
       description: "代码托管、边缘云、研发调试与文档规范",
       items: [
         {
@@ -700,8 +655,7 @@ const confirmImport = async () => {
     ElMessage.success(res?.message || `导入成功！共处理 ${parsed.length} 个分类`);
     isImportDialogOpen.value = false;
     importJson.value = "";
-    fetchCategories();
-    if (selectedCatId.value) fetchItems(selectedCatId.value);
+    await fetchCategories({ refreshItems: true });
   } catch (err: any) {
     ElMessage.error(err?.message || "导入失败");
   } finally {

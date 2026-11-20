@@ -89,6 +89,21 @@ bun run db:generate
 bun run db:push
 ```
 
+## 导航图标字段迁移
+
+新数据库直接使用 `src/db/init.sql`。已有数据库在切换到新版后端后，先备份，再在 `backend` 目录按环境执行一次迁移。迁移仅删除 `nav_category.icon` 和 `nav_item.icon`，保留其他列和记录。
+
+```bash
+# Bun 本地 SQLite（需已安装 sqlite3）
+sqlite3 data/local.db ".read src/db/migrations/drop-nav-icons.sql"
+
+# Wrangler 本地 D1
+bun x wrangler d1 execute minimalist-db --local --file=./src/db/migrations/drop-nav-icons.sql
+
+# 线上 D1
+bun x wrangler d1 execute minimalist-db --remote --file=./src/db/migrations/drop-nav-icons.sql
+```
+
 ## 按需扩展
 
 ```bash
