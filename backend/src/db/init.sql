@@ -82,3 +82,35 @@ CREATE TABLE IF NOT EXISTS friend_link (
 );
 
 CREATE INDEX IF NOT EXISTS idx_friend_link_status_sort ON friend_link (status, sort_order, created_at);
+
+-- 导航分类表
+CREATE TABLE IF NOT EXISTS nav_category (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  slug TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  icon TEXT,
+  description TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  is_visible INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- 导航条目表
+CREATE TABLE IF NOT EXISTS nav_item (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  category_id INTEGER NOT NULL,
+  slug TEXT NOT NULL,
+  title TEXT NOT NULL,
+  url TEXT NOT NULL,
+  desc TEXT,
+  tag TEXT,
+  icon TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  is_visible INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_nav_item_category ON nav_item (category_id, sort_order);
+CREATE INDEX IF NOT EXISTS idx_nav_category_sort ON nav_category (sort_order, id);

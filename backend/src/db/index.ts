@@ -33,7 +33,8 @@ export const getDb = (d1?: D1Database): any => {
       }
       const { Database } = bunRequire("bun:sqlite");
       const { drizzle } = bunRequire("drizzle-orm/bun-sqlite");
-      const dataDir = path.resolve(process.cwd(), "data");
+      const baseDir = typeof (import.meta as any).dir === "string" ? (import.meta as any).dir : __dirname;
+      const dataDir = path.resolve(baseDir, "../../data");
       if (!fs.existsSync(dataDir)) {
         fs.mkdirSync(dataDir, { recursive: true });
       }
@@ -41,7 +42,7 @@ export const getDb = (d1?: D1Database): any => {
       sqlite.run("PRAGMA journal_mode = WAL;");
 
       // 自动确保表结构初始化
-      const initSqlPath = path.resolve(process.cwd(), "src/db/init.sql");
+      const initSqlPath = path.resolve(baseDir, "init.sql");
       if (fs.existsSync(initSqlPath)) {
         const sqlContent = fs.readFileSync(initSqlPath, "utf-8");
         const statements = sqlContent

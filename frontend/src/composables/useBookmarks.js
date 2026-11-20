@@ -1,4 +1,4 @@
-import { DEFAULT_NAV_CATEGORIES, TOOL_NAV_CATEGORIES } from "@/config/navData";
+import { getPublicNav } from "@/api/nav";
 import {
   exportBookmarksToHtml,
   parseBookmarksFromHtml
@@ -6,14 +6,96 @@ import {
 import { ElMessage, ElMessageBox } from "element-plus";
 import { computed, ref } from "vue";
 
+/**
+ * 顶部「导航工具」专属分类数据
+ */
+const TOOL_NAV_CATEGORIES = [
+  {
+    id: "nav-tools",
+    name: "导航工具",
+    icon: "🧰",
+    description: "自研工具资源包与开源项目集合，支持离线包直接下载与 GitHub 仓库直达",
+    items: [
+      {
+        id: "tool-uni-offline-pack",
+        title: "UniOfflinePack",
+        url: "https://github.com/Ckangjie/uni-packer",
+        repoUrl: "https://github.com/Ckangjie/uni-packer",
+        desc: "零 Android Studio 依赖的 uni-app 本地离线打包工作台，支持环境一键自愈、证书自动嗅探与极速 APK 编译交付",
+        tag: "开源工具",
+        icon: "📦"
+      },
+      {
+        id: "tool-bookmark-desk",
+        title: "BookmarkDesk",
+        url: "https://github.com/Ckangjie/bookmark-desk",
+        downloadUrl: "/resources/BookmarkDesk.zip",
+        downloadName: "BookmarkDesk.zip",
+        repoUrl: "https://github.com/Ckangjie/bookmark-desk",
+        desc: "书签管家 BookmarkDesk 是一个本地书签工作台。打开扩展即可在独立标签页里查看、搜索和整理导入的浏览器书签",
+        tag: "ZIP",
+        isZip: true,
+        icon: "📑"
+      }
+    ]
+  }
+];
+
 const CUSTOM_STORAGE_KEY = "jie_hub_custom_bookmarks";
 const MODE_STORAGE_KEY = "jie_hub_nav_mode";
+const NAV_CACHE_KEY = "jie_hub_system_nav_cache";
+const NAV_CACHE_TTL = 5 * 60 * 1000; // 5分钟缓存
 
 // 顶层导航模式仅保存在当前页签的会话中。
 const currentNavMode = ref(loadInitialMode());
 
 // 用户自定义收藏书签列表
 const customCategories = ref(loadCustomCategories());
+
+// 系统导航：优先读取 sessionStorage 缓存，无缓存默认为空数组，异步从 API 实时加载
+const systemCategories = ref(loadSystemNavCache() ?? []);
+const isSystemNavLoading = ref(false);
+
+function loadSystemNavCache() {
+  try {
+    const raw = sessionStorage.getItem(NAV_CACHE_KEY);
+    if (!raw) return null;
+    const { data, ts } = JSON.parse(raw);
+    if (Date.now() - ts < NAV_CACHE_TTL && Array.isArray(data) && data.length > 0) {
+      return data;
+    }
+  } catch {
+    // 忽略
+  }
+  return null;
+}
+
+function saveSystemNavCache(data) {
+  try {
+    sessionStorage.setItem(NAV_CACHE_KEY, JSON.stringify({ data, ts: Date.now() }));
+  } catch {
+    // 忽略
+  }
+}
+
+async function fetchSystemNav() {
+  if (isSystemNavLoading.value) return;
+  isSystemNavLoading.value = true;
+  try {
+    const data = await getPublicNav();
+    if (Array.isArray(data) && data.length > 0) {
+      systemCategories.value = data;
+      saveSystemNavCache(data);
+    }
+  } catch (err) {
+    console.warn("[NavHub] 从 API 加载系统导航失败:", err);
+  } finally {
+    isSystemNavLoading.value = false;
+  }
+}
+
+// 应用启动时立即异步拉取
+fetchSystemNav();
 
 function loadInitialMode() {
   try {
@@ -67,7 +149,7 @@ export function useBookmarks() {
     if (currentNavMode.value === "tools") {
       return TOOL_NAV_CATEGORIES;
     }
-    return DEFAULT_NAV_CATEGORIES;
+    return systemCategories.value;
   });
 
   // 收藏导航内的书签总数
@@ -197,11 +279,13 @@ export function useBookmarks() {
   return {
     currentNavMode,
     activeCategories,
-    systemCategories: DEFAULT_NAV_CATEGORIES,
+    systemCategories,
     toolCategories: TOOL_NAV_CATEGORIES,
     customCategories,
     customCount,
     toolsCount,
+    isSystemNavLoading,
+    fetchSystemNav,
     switchNavMode,
     importFromFile,
     clearCustomBookmarks

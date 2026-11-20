@@ -49,6 +49,15 @@ const routes: RouteRecordRaw[] = [
           title: "友链管理",
           icon: "Link"
         }
+      },
+      {
+        path: "nav",
+        name: "NavManage",
+        component: () => import("@/views/nav/index.vue"),
+        meta: {
+          title: "导航管理",
+          icon: "Grid"
+        }
       }
     ]
   },

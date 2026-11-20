@@ -121,6 +121,15 @@
           </section>
         </div>
 
+        <!-- 数据加载中占位（仅在无数据且正在从 API 加载时显示） -->
+        <section
+          v-else-if="isSystemNavLoading && !hasResults"
+          class="empty-state flex flex-col items-center justify-center py-20 px-4 rounded-2xl border border-dashed gap-3"
+        >
+          <div class="text-3xl animate-spin">⏳</div>
+          <p class="empty-text text-sm m-0 text-muted">正在同步云端导航数据...</p>
+        </section>
+
         <!-- 收藏导航为空时的专属引导空状态（仅桌面端展示） -->
         <section
           v-else-if="currentNavMode === 'bookmarks' && !hasActiveSearch && !isMobile"
@@ -176,6 +185,8 @@ const {
   systemCategories,
   customCount,
   toolsCount,
+  isSystemNavLoading,
+  fetchSystemNav,
   switchNavMode,
   importFromFile,
   clearCustomBookmarks
@@ -387,6 +398,7 @@ onMounted(() => {
   window.addEventListener("scroll", handleScrollSpy, { passive: true });
   handleScrollSpy();
   loadUserInfo();
+  fetchSystemNav();
 });
 
 onUnmounted(() => {

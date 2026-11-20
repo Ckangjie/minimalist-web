@@ -70,8 +70,15 @@
 </template>
 
 <script setup>
-import { SEARCH_ENGINES } from "@/config/navData";
 import { computed, nextTick, ref, watch } from "vue";
+
+const SEARCH_ENGINES = [
+  { id: "site", name: "站内直搜", icon: "🔍", placeholder: "输入关键词实时过滤导航书签..." },
+  { id: "google", name: "Google", icon: "🌐", url: "https://www.google.com/search?q=" },
+  { id: "github", name: "GitHub", icon: "🐙", url: "https://github.com/search?q=" },
+  { id: "baidu", name: "百度", icon: "🐾", url: "https://www.baidu.com/s?wd=" },
+  { id: "bing", name: "Bing", icon: "⚡", url: "https://www.bing.com/search?q=" }
+];
 
 const props = defineProps({
   modelValue: {

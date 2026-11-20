@@ -93,3 +93,41 @@ export const friendLink = sqliteTable("friend_link", {
 
 export type FriendLink = typeof friendLink.$inferSelect;
 export type NewFriendLink = typeof friendLink.$inferInsert;
+
+/**
+ * 导航分类表
+ */
+export const navCategory = sqliteTable("nav_category", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  slug: text("slug").notNull().unique(),
+  name: text("name").notNull(),
+  icon: text("icon"),
+  description: text("description"),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  isVisible: integer("is_visible", { mode: "boolean" }).default(true).notNull(),
+  createdAt: text("created_at").default(sql`(datetime('now'))`).notNull(),
+  updatedAt: text("updated_at").default(sql`(datetime('now'))`).notNull()
+});
+
+/**
+ * 导航条目表
+ */
+export const navItem = sqliteTable("nav_item", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  categoryId: integer("category_id").notNull(),
+  slug: text("slug").notNull(),
+  title: text("title").notNull(),
+  url: text("url").notNull(),
+  desc: text("desc"),
+  tag: text("tag"),
+  icon: text("icon"),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  isVisible: integer("is_visible", { mode: "boolean" }).default(true).notNull(),
+  createdAt: text("created_at").default(sql`(datetime('now'))`).notNull(),
+  updatedAt: text("updated_at").default(sql`(datetime('now'))`).notNull()
+});
+
+export type NavCategory = typeof navCategory.$inferSelect;
+export type NewNavCategory = typeof navCategory.$inferInsert;
+export type NavItem = typeof navItem.$inferSelect;
+export type NewNavItem = typeof navItem.$inferInsert;

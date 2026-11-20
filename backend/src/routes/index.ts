@@ -6,6 +6,7 @@ import * as guestbookController from "../controllers/guestbookController";
 import * as authController from "../controllers/authController";
 import * as visitorController from "../controllers/visitorController";
 import * as friendLinkController from "../controllers/friendLinkController";
+import * as navController from "../controllers/navController";
 
 const apiRouter = new Hono<{ Bindings: Bindings }>();
 
@@ -69,5 +70,18 @@ apiRouter.post("/admin/friend-links", friendLinkController.createLink);
 apiRouter.put("/admin/friend-links/:id/status", friendLinkController.changeStatus);
 apiRouter.put("/admin/friend-links/:id", friendLinkController.updateInfo);
 apiRouter.delete("/admin/friend-links/:id", friendLinkController.remove);
+
+// 导航数据接口
+apiRouter.get("/nav", navController.getPublicList);
+apiRouter.get("/admin/nav/categories", navController.getManageCategoryList);
+apiRouter.post("/admin/nav/categories", navController.createCategory);
+apiRouter.put("/admin/nav/categories/:id", navController.updateCategory);
+apiRouter.delete("/admin/nav/categories/:id", navController.deleteCategory);
+apiRouter.get("/admin/nav/categories/:id/items", navController.getCategoryItems);
+apiRouter.post("/admin/nav/items", navController.createItem);
+apiRouter.put("/admin/nav/items/:id", navController.updateItem);
+apiRouter.delete("/admin/nav/items/:id", navController.deleteItem);
+apiRouter.post("/admin/nav/items/batch-delete", navController.batchDeleteItems);
+apiRouter.post("/admin/nav/batch-import", navController.batchImport);
 
 export default apiRouter;

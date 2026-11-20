@@ -56,7 +56,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { House, ChatDotRound, Document, User } from "@element-plus/icons-vue";
+import { House, ChatDotRound, Document, User, Link, Grid } from "@element-plus/icons-vue";
 
 defineProps<{
   isCollapse: boolean;
@@ -69,7 +69,9 @@ const iconMap: Record<string, any> = {
   House,
   ChatDotRound,
   Document,
-  User
+  User,
+  Link,
+  Grid
 };
 
 const activeMenu = computed(() => route.path);
