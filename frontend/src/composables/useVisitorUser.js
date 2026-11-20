@@ -156,8 +156,8 @@ const syncWithServer = async () => {
         console.warn("写入本地游客缓存失败", e);
       }
     }
-  } catch (err) {
-    console.warn("同步游客信息至服务器失败，使用本地缓存:", err);
+  } catch {
+    return;
   } finally {
     isSyncing.value = false;
   }
@@ -170,6 +170,16 @@ export const useVisitorUser = () => {
   const updateEmail = async (email) => {
     if (!visitorState.value) return;
     const cleanEmail = typeof email === "string" ? email.trim().slice(0, 100) : "";
+    await request("/api/guestbook/visitor/sync", {
+      method: "POST",
+      body: {
+        uuid: visitorState.value.uuid,
+        defaultNickname: visitorState.value.nickname,
+        avatar: visitorState.value.avatar || "",
+        email: cleanEmail
+      }
+    });
+
     visitorState.value.email = cleanEmail;
 
     try {
@@ -184,21 +194,6 @@ export const useVisitorUser = () => {
       );
     } catch (e) {
       console.warn("写入本地游客缓存失败", e);
-    }
-
-    // 同步到后端
-    try {
-      await request("/api/guestbook/visitor/sync", {
-        method: "POST",
-        body: {
-          uuid: visitorState.value.uuid,
-          defaultNickname: visitorState.value.nickname,
-          avatar: visitorState.value.avatar || "",
-          email: cleanEmail
-        }
-      });
-    } catch (e) {
-      console.error("同步邮箱到服务器失败:", e);
     }
   };
 

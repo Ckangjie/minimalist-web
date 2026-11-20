@@ -43,8 +43,8 @@ const fetchOnlineStats = async () => {
       if (typeof res.onlineCount === "number") stats.onlineCount = res.onlineCount;
       if (typeof res.totalVisitors === "number") stats.totalVisitors = res.totalVisitors;
     }
-  } catch (err) {
-    console.warn("获取在线统计失败:", err);
+  } catch {
+    return;
   }
 };
 

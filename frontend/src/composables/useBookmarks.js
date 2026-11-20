@@ -92,8 +92,8 @@ async function fetchToolNav() {
       toolCategories.value = data;
       saveToolNavCache(data);
     }
-  } catch (err) {
-    console.warn("[NavHub] 从 API 加载导航工具失败:", err);
+  } catch {
+    return;
   } finally {
     isToolNavLoading.value = false;
   }
@@ -130,8 +130,8 @@ async function fetchSystemNav() {
       systemCategories.value = data;
       saveSystemNavCache(data);
     }
-  } catch (err) {
-    console.warn("[NavHub] 从 API 加载系统导航失败:", err);
+  } catch {
+    return;
   } finally {
     isSystemNavLoading.value = false;
   }

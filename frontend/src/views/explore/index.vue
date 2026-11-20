@@ -331,8 +331,8 @@ const fetchFriendLinks = async () => {
     if (Array.isArray(res)) {
       linkList.value = res;
     }
-  } catch (err) {
-    ElMessage.error(err?.message || "获取友链列表失败");
+  } catch {
+    return;
   } finally {
     isLoading.value = false;
   }
@@ -406,8 +406,8 @@ const handleSubmitApply = async () => {
       ElMessage.success("申请已提交，审核通过后将展示，感谢支持！");
       isApplyDialogOpen.value = false;
       formRef.value.resetFields();
-    } catch (err) {
-      ElMessage.error(err?.message || "提交申请失败，请稍后重试");
+    } catch {
+      return;
     } finally {
       isSubmitting.value = false;
     }

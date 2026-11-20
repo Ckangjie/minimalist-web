@@ -83,6 +83,7 @@ apiRouter.post("/admin/nav/items", navController.createItem);
 apiRouter.put("/admin/nav/items/:id", navController.updateItem);
 apiRouter.delete("/admin/nav/items/:id", navController.deleteItem);
 apiRouter.post("/admin/nav/items/batch-delete", navController.batchDeleteItems);
+apiRouter.post("/admin/nav/items/batch-update-category", navController.batchUpdateItemCategory);
 apiRouter.post("/admin/nav/batch-import", navController.batchImport);
 
 export default apiRouter;

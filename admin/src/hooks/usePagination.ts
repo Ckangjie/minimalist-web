@@ -1,5 +1,4 @@
 import { ref, reactive, toRef, onMounted } from "vue";
-import { ElMessage } from "element-plus";
 
 export interface PaginationOptions<T, P extends Record<string, any>> {
   /**
@@ -26,10 +25,6 @@ export interface PaginationOptions<T, P extends Record<string, any>> {
    * 自定义数据解析回调
    */
   formatResult?: (res: any) => { list: T[]; total: number };
-  /**
-   * 请求错误提示文案
-   */
-  errorMessage?: string;
 }
 
 /**
@@ -44,8 +39,7 @@ export function usePagination<T = any, P extends Record<string, any> = Record<st
     defaultPageSize = 10,
     defaultPageNum = 1,
     immediate = true,
-    formatResult,
-    errorMessage = "获取列表数据失败"
+    formatResult
   } = options;
 
   const isLoading = ref(false);
@@ -88,8 +82,8 @@ export function usePagination<T = any, P extends Record<string, any> = Record<st
       const formatted = parser(res);
       tableData.value = formatted.list ?? [];
       total.value = formatted.total ?? 0;
-    } catch (err: any) {
-      ElMessage.error(err?.message ?? errorMessage);
+    } catch {
+      return;
     } finally {
       isLoading.value = false;
     }

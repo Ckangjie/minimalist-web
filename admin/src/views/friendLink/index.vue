@@ -321,8 +321,7 @@ const {
   defaultParams: {
     keyword: "",
     status: ""
-  },
-  errorMessage: "获取友链列表失败"
+  }
 });
 
 const isRejectDialogOpen = ref(false);
@@ -385,8 +384,8 @@ const handleStatusChange = async (row: FriendLinkItem, newStatus: string) => {
     await updateFriendLinkStatus(row.id, newStatus);
     ElMessage.success("状态更新成功");
     fetchData();
-  } catch (err: any) {
-    ElMessage.error(err?.message || "更新状态失败");
+  } catch {
+    return;
   }
 };
 
@@ -404,8 +403,8 @@ const confirmReject = async () => {
     ElMessage.success("已拒绝申请");
     isRejectDialogOpen.value = false;
     fetchData();
-  } catch (err: any) {
-    ElMessage.error(err?.message || "处理失败");
+  } catch {
+    return;
   } finally {
     isSubmitting.value = false;
   }
@@ -462,8 +461,8 @@ const confirmSave = async () => {
       }
       isEditDialogOpen.value = false;
       fetchData();
-    } catch (err: any) {
-      ElMessage.error(err?.message || "保存失败");
+    } catch {
+      return;
     } finally {
       isSubmitting.value = false;
     }
@@ -475,8 +474,8 @@ const handleDelete = async (row: FriendLinkItem) => {
     await deleteFriendLink(row.id);
     ElMessage.success("删除成功");
     handleDeleteRefresh();
-  } catch (err: any) {
-    ElMessage.error(err?.message || "删除失败");
+  } catch {
+    return;
   }
 };
 </script>

@@ -76,6 +76,9 @@ export const deleteNavItem = (id: number) =>
 export const batchDeleteNavItems = (ids: number[]) =>
   request("/api/admin/nav/items/batch-delete", { method: "POST", body: { ids } as any });
 
+export const batchUpdateNavItemsCategory = (ids: number[], categoryId: number) =>
+  request("/api/admin/nav/items/batch-update-category", { method: "POST", body: { ids, categoryId } as any });
+
 // 批量导入
 export const batchImportNav = (categories: any[]) =>
   request("/api/admin/nav/batch-import", { method: "POST", body: { categories } as any });

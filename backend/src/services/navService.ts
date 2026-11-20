@@ -284,10 +284,19 @@ export const updateCategory = async (db: any, id: number, body: any) => {
 };
 
 /**
- * 后台：删除分类（同时删除下属条目）
+ * 后台：删除分类（需满足该分类下无子条目）
  */
 export const deleteCategory = async (db: any, id: number) => {
-  await db.delete(navItem).where(eq(navItem.categoryId, id));
+  const existingItems = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(navItem)
+    .where(eq(navItem.categoryId, id));
+
+  const itemCount = Number(existingItems[0]?.count ?? 0);
+  if (itemCount > 0) {
+    throw new Error(`该分类下仍存在 ${itemCount} 个子条目，无法直接删除。请先转移或清空其子条目。`);
+  }
+
   await db.delete(navCategory).where(eq(navCategory.id, id));
   return { id };
 };
@@ -410,6 +419,37 @@ export const batchDeleteItems = async (db: any, ids: number[]) => {
   }
   await db.delete(navItem).where(inArray(navItem.id, ids));
   return { message: `已成功删除 ${ids.length} 个条目` };
+};
+
+/**
+ * 后台：批量调整条目分类
+ */
+export const batchUpdateItemCategory = async (db: any, ids: number[], categoryId: number) => {
+  if (!ids || ids.length === 0) {
+    throw new Error("请选择要调整分类的条目");
+  }
+
+  const cat = await db
+    .select({ id: navCategory.id, name: navCategory.name })
+    .from(navCategory)
+    .where(eq(navCategory.id, categoryId))
+    .limit(1);
+
+  if (cat.length === 0) {
+    throw new Error("目标分类不存在");
+  }
+
+  const nowTime = formatDateTime();
+  await db
+    .update(navItem)
+    .set({ categoryId, updatedAt: nowTime })
+    .where(inArray(navItem.id, ids));
+
+  return {
+    count: ids.length,
+    categoryName: cat[0].name,
+    message: `已成功将 ${ids.length} 个条目移动至【${cat[0].name}】`
+  };
 };
 
 /**

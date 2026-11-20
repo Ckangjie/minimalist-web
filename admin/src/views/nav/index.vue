@@ -8,7 +8,7 @@
           <el-button type="primary" plain :icon="Plus" @click="openAddCategory">新增分类</el-button>
         </div>
       </template>
-      <div v-loading="isCatLoading" class="flex-1 min-h-0 overflow-y-auto flex flex-col">
+      <div v-loading="isCatLoading" class="category-list flex-1 min-h-0 overflow-y-auto flex flex-col pr-1">
         <div
           v-for="cat in categories"
           :key="cat.id"
@@ -23,8 +23,23 @@
           <div class="flex items-center gap-1 flex-shrink-0 ml-2">
             <el-tag type="info" class="!text-xs">{{ cat.itemCount ?? 0 }}</el-tag>
             <el-button link type="primary" :icon="Edit" @click.stop="openEditCategory(cat)" />
+            <!-- 当分类下存在子条目时禁用删除并提示，只有为空时才允许删除 -->
+            <el-tooltip
+              v-if="(cat.itemCount ?? 0) > 0"
+              content="该分类下仍有子条目，无法删除"
+              placement="top"
+            >
+              <el-button
+                link
+                type="info"
+                :icon="Delete"
+                class="!cursor-not-allowed opacity-40 hover:opacity-40"
+                @click.stop="handleBlockedDeleteCategory(cat)"
+              />
+            </el-tooltip>
             <el-popconfirm
-              title="确定删除该分类及其全部条目？"
+              v-else
+              title="确定删除该分类？"
               confirm-button-text="删除"
               cancel-button-text="取消"
               confirm-button-type="danger"
@@ -93,6 +108,15 @@
             <el-button
               type="warning"
               plain
+              :icon="FolderChecked"
+              :disabled="selectedIds.length === 0"
+              @click="openBatchMoveDialog"
+            >
+              批量调整分类 ({{ selectedIds.length }})
+            </el-button>
+            <el-button
+              type="warning"
+              plain
               :icon="Upload"
               @click="isImportDialogOpen = true"
             >
@@ -155,7 +179,7 @@
               <el-table-column prop="desc" label="描述" min-width="180" show-overflow-tooltip>
                 <template #default="{ row }">{{ row.desc || '—' }}</template>
               </el-table-column>
-              <el-table-column prop="tag" label="标签" width="80" align="center">
+              <el-table-column prop="tag" label="标签" width="100" align="center">
                 <template #default="{ row }">
                   <el-tag v-if="row.tag">{{ row.tag }}</el-tag>
                   <span v-else class="text-gray-400">—</span>
@@ -317,16 +341,62 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 批量调整分类弹窗 -->
+    <el-dialog
+      v-model="isBatchMoveDialogOpen"
+      title="批量调整分类"
+      width="440px"
+      destroy-on-close
+      @closed="targetBatchCatId = undefined"
+    >
+      <el-form label-position="top">
+        <el-form-item label="已选条目">
+          <div class="text-sm text-gray-600 font-medium">
+            已选中 <span class="text-primary font-bold">{{ selectedIds.length }}</span> 个导航条目
+          </div>
+        </el-form-item>
+        <el-form-item label="调整至目标分类" required>
+          <el-select
+            v-model="targetBatchCatId"
+            placeholder="请选择目标分类"
+            class="!w-full"
+            filterable
+          >
+            <el-option
+              v-for="cat in categories"
+              :key="cat.id"
+              :label="`${cat.name} (${cat.slug})`"
+              :value="cat.id"
+              :disabled="cat.id === selectedCatId"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <el-button @click="isBatchMoveDialogOpen = false">取消</el-button>
+          <el-button
+            type="primary"
+            :loading="isBatchMoving"
+            :disabled="!targetBatchCatId || targetBatchCatId === selectedCatId"
+            @click="confirmBatchMove"
+          >
+            确定调整
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, toRef, onMounted, nextTick } from "vue";
-import { Search, Refresh, Plus, Edit, Delete, Upload } from "@element-plus/icons-vue";
+import { Search, Refresh, Plus, Edit, Delete, Upload, FolderChecked } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from "element-plus";
 import {
   listNavCategories, createNavCategory, updateNavCategory, deleteNavCategory,
-  getNavItems, createNavItem, updateNavItem, deleteNavItem, batchDeleteNavItems, batchImportNav,
+  getNavItems, createNavItem, updateNavItem, deleteNavItem, batchDeleteNavItems, batchUpdateNavItemsCategory, batchImportNav,
   type NavCategory, type NavItem
 } from "@/api/nav";
 import { usePagination } from "@/hooks/usePagination";
@@ -364,13 +434,15 @@ const {
       pageNum: params.pageNum,
       pageSize: params.pageSize
     });
-  },
-  errorMessage: "获取条目失败"
+  }
 });
 
 const itemKeyword = toRef(itemSearchParams, "keyword");
 const selectedIds = ref<number[]>([]);
 const isBatchDeleting = ref(false);
+const isBatchMoveDialogOpen = ref(false);
+const isBatchMoving = ref(false);
+const targetBatchCatId = ref<number | undefined>(undefined);
 
 const isSubmitting = ref(false);
 
@@ -436,8 +508,8 @@ const fetchCategories = async ({ refreshItems = false } = {}) => {
         await selectCategory(targetCat);
       }
     }
-  } catch (err: any) {
-    ElMessage.error(err?.message || "获取分类列表失败");
+  } catch {
+    return;
   } finally {
     isCatLoading.value = false;
   }
@@ -483,21 +555,29 @@ const confirmSaveCategory = async () => {
       }
       isCatDialogOpen.value = false;
       fetchCategories();
-    } catch (err: any) {
-      ElMessage.error(err?.message || "保存失败");
+    } catch {
+      return;
     } finally {
       isSubmitting.value = false;
     }
   });
 };
 
+const handleBlockedDeleteCategory = (cat: NavCategory) => {
+  ElMessage.warning(`分类【${cat.name}】下仍有 ${cat.itemCount ?? 0} 个子条目，无法删除。请先转移或清空子条目。`);
+};
+
 const handleDeleteCategory = async (cat: NavCategory) => {
+  if ((cat.itemCount ?? 0) > 0) {
+    handleBlockedDeleteCategory(cat);
+    return;
+  }
   try {
     await deleteNavCategory(cat.id);
     ElMessage.success("删除成功");
     fetchCategories();
-  } catch (err: any) {
-    ElMessage.error(err?.message || "删除失败");
+  } catch {
+    return;
   }
 };
 
@@ -541,8 +621,8 @@ const confirmSaveItem = async () => {
         await fetchItems();
       }
       if (moved) await fetchCategories();
-    } catch (err: any) {
-      ElMessage.error(err?.message || "保存失败");
+    } catch {
+      return;
     } finally {
       isSubmitting.value = false;
     }
@@ -556,8 +636,8 @@ const handleDeleteItem = async (row: NavItem) => {
     selectedIds.value = selectedIds.value.filter((id) => id !== row.id);
     await handleItemDeleteRefresh();
     fetchCategories();
-  } catch (err: any) {
-    ElMessage.error(err?.message || "删除失败");
+  } catch {
+    return;
   }
 };
 
@@ -588,12 +668,34 @@ const handleBatchDelete = async () => {
     selectedIds.value = [];
     await handleItemDeleteRefresh(deleteCount);
     fetchCategories();
-  } catch (error: any) {
-    if (error !== "cancel") {
-      ElMessage.error(error?.message ?? "批量删除失败");
-    }
+  } catch {
+    return;
   } finally {
     isBatchDeleting.value = false;
+  }
+};
+
+const openBatchMoveDialog = () => {
+  if (selectedIds.value.length === 0) return;
+  targetBatchCatId.value = undefined;
+  isBatchMoveDialogOpen.value = true;
+};
+
+const confirmBatchMove = async () => {
+  if (!targetBatchCatId.value || selectedIds.value.length === 0 || isBatchMoving.value) return;
+  isBatchMoving.value = true;
+  try {
+    const moveCount = selectedIds.value.length;
+    const res: any = await batchUpdateNavItemsCategory(selectedIds.value, targetBatchCatId.value);
+    ElMessage.success(res?.message ?? `成功调整 ${moveCount} 个条目的分类`);
+    isBatchMoveDialogOpen.value = false;
+    selectedIds.value = [];
+    await handleItemDeleteRefresh(moveCount);
+    fetchCategories();
+  } catch {
+    return;
+  } finally {
+    isBatchMoving.value = false;
   }
 };
 
@@ -656,8 +758,8 @@ const confirmImport = async () => {
     isImportDialogOpen.value = false;
     importJson.value = "";
     await fetchCategories({ refreshItems: true });
-  } catch (err: any) {
-    ElMessage.error(err?.message || "导入失败");
+  } catch {
+    return;
   } finally {
     isImporting.value = false;
   }
@@ -681,6 +783,29 @@ onMounted(() => {
   padding: 16px;
   box-sizing: border-box;
   min-height: 0;
+}
+
+/* 自定义左侧分类列表滚动条 */
+.category-list {
+  scrollbar-width: thin;
+  scrollbar-color: #dcdfe6 transparent;
+}
+
+.category-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.category-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.category-list::-webkit-scrollbar-thumb {
+  background: #dcdfe6;
+  border-radius: 4px;
+}
+
+.category-list::-webkit-scrollbar-thumb:hover {
+  background: #c0c4cc;
 }
 
 .category-item {

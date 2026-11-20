@@ -177,8 +177,8 @@ const fetchStats = async () => {
     stats.pending = list.filter((item: any) => item.status === "pending").length;
     stats.approved = list.filter((item: any) => item.status === "approved").length;
     stats.hiddenOrRejected = list.filter((item: any) => item.status === "hidden" || item.status === "rejected").length;
-  } catch (error) {
-    console.error("加载留言统计失败:", error);
+  } catch {
+    return;
   }
 };
 
@@ -188,8 +188,8 @@ const fetchVisitorStats = async () => {
     const res = await getVisitorList({ pageNum: 1, pageSize: 5 });
     visitorStats.total = res?.total ?? 0;
     visitorStats.recentList = res?.list ?? [];
-  } catch (error) {
-    console.error("加载访客统计失败:", error);
+  } catch {
+    return;
   } finally {
     isVisitorLoading.value = false;
   }

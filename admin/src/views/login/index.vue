@@ -118,8 +118,8 @@ const refreshCaptcha = async () => {
     captchaImg.value = res.img;
     loginForm.uuid = res.uuid;
     loginForm.code = "";
-  } catch (error) {
-    console.error("获取验证码异常:", error);
+  } catch {
+    return;
   }
 };
 
@@ -147,8 +147,7 @@ const handleLogin = async () => {
 
     const redirect = (route.query.redirect as string) || "/dashboard";
     router.replace(redirect);
-  } catch (error: any) {
-    ElMessage.error(error?.message ?? "登录失败，请检查账号密码及验证码");
+  } catch {
     refreshCaptcha();
   } finally {
     isLoading.value = false;

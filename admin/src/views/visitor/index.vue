@@ -176,8 +176,7 @@ const {
   fetchApi: getVisitorList,
   defaultParams: {
     keyword: ""
-  },
-  errorMessage: "获取访客用户列表失败"
+  }
 });
 
 const handleSelectionChange = (selection: any[]) => {
@@ -189,8 +188,8 @@ const handleDelete = async (row: any) => {
     await deleteVisitor(row.id);
     ElMessage.success("用户已删除");
     handleDeleteRefresh();
-  } catch (err: any) {
-    ElMessage.error(err?.message ?? "删除失败");
+  } catch {
+    return;
   }
 };
 
@@ -213,8 +212,8 @@ const handleBatchDelete = async () => {
     ElMessage.success("批量删除成功");
     selectedIds.value = [];
     handleDeleteRefresh(deleteCount);
-  } catch (e) {
-    // 取消
+  } catch {
+    return;
   }
 };
 

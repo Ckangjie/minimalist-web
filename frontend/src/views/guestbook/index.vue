@@ -90,9 +90,7 @@
           <span class="text-xs tracking-wide">留言加载中...</span>
         </div>
 
-        <!-- 异常提示 -->
         <div v-else-if="hasError" class="py-12 text-center text-muted">
-          <p class="text-sm m-0 mb-3">{{ errorMessage }}</p>
           <el-button type="primary" size="small" @click="fetchComments">重新加载</el-button>
         </div>
 
@@ -347,7 +345,6 @@ const isLoading = ref(false);
 const isLoadingMore = ref(false);
 const isSubmitting = ref(false);
 const hasError = ref(false);
-const errorMessage = ref("");
 
 const commentList = ref([]);
 const totalCount = ref(0);
@@ -420,7 +417,6 @@ const fetchComments = async (isRefresh = false) => {
   }
   isLoading.value = true;
   hasError.value = false;
-  errorMessage.value = "";
 
   try {
     const res = await getOpenList({
@@ -431,9 +427,8 @@ const fetchComments = async (isRefresh = false) => {
     currentPage.value = 1;
     commentList.value = formatCommentItems(res?.list);
     totalCount.value = res?.total ?? 0;
-  } catch (err) {
+  } catch {
     hasError.value = true;
-    errorMessage.value = err?.message ?? "加载公开留言失败，请重试";
   } finally {
     isLoading.value = false;
   }
@@ -456,8 +451,8 @@ const handleLoadMore = async () => {
     commentList.value = [...commentList.value, ...newItems];
     totalCount.value = res?.total ?? 0;
     currentPage.value = nextPage;
-  } catch (err) {
-    ElMessage.error(err?.message ?? "加载更多留言失败，请重试");
+  } catch {
+    return;
   } finally {
     isLoadingMore.value = false;
   }
@@ -481,8 +476,8 @@ const handleSubmitRoot = async () => {
     }
     rootForm.content = "";
     fetchComments(true);
-  } catch (err) {
-    ElMessage.error(err?.message ?? "提交留言失败，请检查后重试");
+  } catch {
+    return;
   } finally {
     isSubmitting.value = false;
   }
@@ -528,8 +523,8 @@ const handleSubmitReply = async () => {
     if (currentRoot) {
       expandedRootIds.value = new Set([...expandedRootIds.value, currentRoot]);
     }
-  } catch (err) {
-    ElMessage.error(err?.message ?? "提交回复失败，请重试");
+  } catch {
+    return;
   } finally {
     isSubmitting.value = false;
   }

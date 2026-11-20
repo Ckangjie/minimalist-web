@@ -377,8 +377,8 @@ const loadUserInfo = async () => {
       userName.value = data.name;
       localStorage.setItem(USER_NAME_STORAGE_KEY, data.name);
     }
-  } catch (error) {
-    console.error("获取用户信息异常:", error);
+  } catch {
+    return;
   }
 };
 

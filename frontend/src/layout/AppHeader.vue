@@ -322,7 +322,11 @@ const handleSaveEmail = async () => {
     ElMessage.warning("请输入合法的邮箱地址");
     return;
   }
-  await updateEmail(mail);
+  try {
+    await updateEmail(mail);
+  } catch {
+    return;
+  }
   ElMessage.success("通知邮箱已更新");
 };
 

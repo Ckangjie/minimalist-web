@@ -168,6 +168,28 @@ export const batchDeleteItems = async (c: Context) => {
 };
 
 /**
+ * 后台：批量调整条目分类
+ */
+export const batchUpdateItemCategory = async (c: Context) => {
+  try {
+    const db = getDatabase(c);
+    const body = await c.req.json().catch(() => ({}));
+    const ids = Array.isArray(body.ids) ? body.ids.map(Number).filter(Boolean) : [];
+    const categoryId = Number(body.categoryId);
+    if (ids.length === 0) {
+      return fail(c, "请选择要调整分类的条目ID列表", 400);
+    }
+    if (!categoryId || isNaN(categoryId)) {
+      return fail(c, "请选择有效的目标分类", 400);
+    }
+    const result = await navService.batchUpdateItemCategory(db, ids, categoryId);
+    return success(c, result, "批量调整条目分类成功");
+  } catch (error: any) {
+    return fail(c, error?.message ?? "批量调整条目分类失败");
+  }
+};
+
+/**
  * 后台：批量导入导航数据
  */
 export const batchImport = async (c: Context) => {

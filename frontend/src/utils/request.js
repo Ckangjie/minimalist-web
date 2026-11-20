@@ -1,3 +1,5 @@
+import { ElMessage } from "element-plus";
+
 /**
  * 统一网络请求封装
  * @param {string} url 请求地址
@@ -18,7 +20,9 @@ export const request = async (url, options = {}) => {
       config.body = JSON.stringify(config.body);
     }
 
-    const res = await fetch(url, config);
+    const res = await fetch(url, config).catch((error) => {
+      throw new Error("网络请求失败，请稍后重试", { cause: error });
+    });
     let json;
     try {
       json = await res.json();
@@ -26,11 +30,11 @@ export const request = async (url, options = {}) => {
       // 非 JSON 格式
     }
 
-    if (json?.code === 200) {
+    if (res.ok && json?.code === 200) {
       return json.data;
     }
 
-    if (json?.message) {
+    if (typeof json?.message === "string" && json.message.trim() && json.code !== 200) {
       throw new Error(json.message);
     }
 
@@ -41,6 +45,7 @@ export const request = async (url, options = {}) => {
     throw new Error("业务处理异常");
   } catch (error) {
     console.error("请求异常:", error);
+    ElMessage.error(error instanceof Error ? error.message : "请求失败，请稍后重试");
     throw error;
   }
 };

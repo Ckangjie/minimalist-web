@@ -566,8 +566,7 @@ const {
     status: (route.query.status as string) || "",
     level: "" as string | number,
     authorType: ""
-  },
-  errorMessage: "获取留言列表失败"
+  }
 });
 
 // 状态审核弹窗
@@ -643,8 +642,8 @@ const handleQuickStatus = async (
     await updateCommentStatus(row.id, action);
     ElMessage.success("操作成功");
     fetchData();
-  } catch (error: any) {
-    ElMessage.error(error?.message ?? "操作失败");
+  } catch {
+    return;
   }
 };
 
@@ -671,8 +670,8 @@ const submitStatusChange = async () => {
     ElMessage.success("操作成功");
     isStatusDialogVisible.value = false;
     fetchData();
-  } catch (error: any) {
-    ElMessage.error(error?.message ?? "操作失败");
+  } catch {
+    return;
   } finally {
     isSubmitting.value = false;
   }
@@ -684,8 +683,8 @@ const handleDelete = async (row: GuestbookComment) => {
     await deleteComment(row.id);
     ElMessage.success("删除成功");
     handleDeleteRefresh();
-  } catch (err: any) {
-    ElMessage.error(err?.message ?? "删除失败");
+  } catch {
+    return;
   }
 };
 
@@ -716,10 +715,8 @@ const handleBatchDelete = async () => {
     ElMessage.success(res?.message ?? `成功删除 ${selectedIds.value.length} 条留言`);
     selectedIds.value = [];
     handleDeleteRefresh(deleteCount);
-  } catch (error: any) {
-    if (error !== "cancel") {
-      ElMessage.error(error?.message ?? "批量删除失败");
-    }
+  } catch {
+    return;
   } finally {
     isBatchDeleting.value = false;
   }
@@ -740,8 +737,8 @@ const submitAdminReply = async () => {
     ElMessage.success("回复发布成功");
     isReplyDialogVisible.value = false;
     fetchData();
-  } catch (error: any) {
-    ElMessage.error(error?.message ?? "回复失败");
+  } catch {
+    return;
   } finally {
     isSubmitting.value = false;
   }
@@ -762,8 +759,8 @@ const submitEditReply = async () => {
     ElMessage.success("修改回复成功");
     isEditDialogVisible.value = false;
     fetchData();
-  } catch (error: any) {
-    ElMessage.error(error?.message ?? "修改失败");
+  } catch {
+    return;
   } finally {
     isSubmitting.value = false;
   }
@@ -779,8 +776,8 @@ const openDetailDrawer = async (row: GuestbookComment) => {
     if (res) {
       detailData.value = res;
     }
-  } catch (error: any) {
-    ElMessage.error(error?.message ?? "获取详情失败");
+  } catch {
+    return;
   } finally {
     isLoadingDetail.value = false;
   }
