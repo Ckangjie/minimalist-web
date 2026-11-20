@@ -46,8 +46,8 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 text-xs text-[var(--text-regular)]">
           <div class="truncate"><b>名称：</b>Jie Hub</div>
-          <div class="truncate"><b>网址：</b>https://du1.ccwu.cc/</div>
-          <div class="truncate"><b>图标：</b>https://du1.ccwu.cc/logo.svg</div>
+          <div class="truncate"><b>网址：</b>{{ siteUrl }}/</div>
+          <div class="truncate"><b>图标：</b>{{ siteUrl }}/logo.svg</div>
           <div class="truncate"><b>简介：</b>云端聚合导航与个人精选工具站</div>
         </div>
       </section>
@@ -121,7 +121,7 @@
                   class="w-full h-full flex items-center justify-center text-white font-bold text-xs sm:text-sm"
                   :style="{ backgroundColor: getAvatarColor(item.name) }"
                 >
-                  {{ (item.name || 'J').charAt(0).toUpperCase() }}
+                  {{ (item.name?.charAt(0) ?? 'J').toUpperCase() }}
                 </div>
               </div>
 
@@ -231,7 +231,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, computed, onMounted } from "vue";
 import {
   Compass,
   Plus,
@@ -243,6 +243,13 @@ import {
 import { ElMessage } from "element-plus";
 import { getFriendLinks, applyFriendLink } from "@/api/friendLink";
 import { appendSiteRef } from "@/utils/url";
+
+const siteUrl = computed(() => {
+  if (typeof window !== "undefined" && window.location?.origin) {
+    return window.location.origin;
+  }
+  return "https://du1.ccwu.cc";
+});
 
 const isLoading = ref(false);
 const isSubmitting = ref(false);
@@ -363,9 +370,9 @@ const copyTextToClipboard = async (text) => {
     textArea.focus();
     textArea.select();
     textArea.setSelectionRange(0, textArea.value.length);
-    const successful = document.execCommand("copy");
+    const isSuccessful = document.execCommand("copy");
     document.body.removeChild(textArea);
-    return successful;
+    return isSuccessful;
   } catch (err) {
     console.error("复制异常:", err);
     return false;
@@ -373,9 +380,10 @@ const copyTextToClipboard = async (text) => {
 };
 
 const handleCopySiteInfo = async () => {
+  const origin = siteUrl.value;
   const infoText = `网站名称：Jie Hub
-网站地址：https://du1.ccwu.cc/
-网站图标：https://du1.ccwu.cc/logo.svg
+网站地址：${origin}/
+网站图标：${origin}/logo.svg
 网站描述：云端聚合导航与个人精选工具站`;
   const isSuccess = await copyTextToClipboard(infoText);
   if (isSuccess) {
@@ -444,13 +452,7 @@ onMounted(() => {
 </style>
 
 <style lang="scss">
-/* 友链申请弹窗（全局生效，穿透 append-to-body） */
-.el-overlay-dialog {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
+/* 友链申请弹窗（穿透 append-to-body） */
 .apply-dialog {
   width: 92% !important;
   max-width: 480px !important;

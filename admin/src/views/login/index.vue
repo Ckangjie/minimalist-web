@@ -98,6 +98,7 @@ const loginFormRef = ref<FormInstance>();
 const isLoading = ref(false);
 const isRememberMe = ref(true);
 const captchaImg = ref("");
+const REMEMBER_KEY = "admin_remembered_username";
 
 const loginForm = reactive({
   username: "admin",
@@ -143,6 +144,11 @@ const handleLogin = async () => {
 
     localStorage.setItem("admin_token", res.token);
     localStorage.setItem("admin_user", JSON.stringify(res.user));
+    if (isRememberMe.value) {
+      localStorage.setItem(REMEMBER_KEY, loginForm.username);
+    } else {
+      localStorage.removeItem(REMEMBER_KEY);
+    }
     ElMessage.success("登录成功，欢迎回来！");
 
     const redirect = (route.query.redirect as string) || "/dashboard";
@@ -159,6 +165,11 @@ onMounted(() => {
   if (token) {
     router.replace("/dashboard");
     return;
+  }
+  const remembered = localStorage.getItem(REMEMBER_KEY);
+  if (remembered) {
+    loginForm.username = remembered;
+    isRememberMe.value = true;
   }
   refreshCaptcha();
 });

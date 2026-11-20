@@ -168,14 +168,12 @@
 </template>
 
 <script setup>
-import { getUserInfo } from "@/api/user";
 import NavCard from "@/components/NavCard.vue";
 import SearchBar from "@/components/SearchBar.vue";
 import { useBookmarks } from "@/composables/useBookmarks";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-const USER_NAME_STORAGE_KEY = "cached_user_name";
 const route = useRoute();
 const router = useRouter();
 
@@ -207,7 +205,6 @@ watch(
 );
 
 const searchKeyword = ref("");
-const userName = ref(localStorage.getItem(USER_NAME_STORAGE_KEY) ?? "");
 const fileInputRef = ref(null);
 const activeSection = ref("");
 const isMobile = ref(false);
@@ -304,7 +301,7 @@ const scrollToCategory = (id) => {
   if (target) {
     const headerOffset = 80;
     const elementPosition = target.getBoundingClientRect().top;
-    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+    const offsetPosition = elementPosition + (window.scrollY ?? window.pageYOffset) - headerOffset;
     window.scrollTo({
       top: offsetPosition,
       behavior: "smooth"
@@ -323,20 +320,20 @@ const scrollToCategory = (id) => {
 };
 
 // 视口滚动监听与侧边栏高亮联动
-let ticking = false;
+let isTicking = false;
 const handleScrollSpy = () => {
   if (isManualScrolling) return;
 
-  if (!ticking) {
+  if (!isTicking) {
     window.requestAnimationFrame(() => {
       if (isManualScrolling) {
-        ticking = false;
+        isTicking = false;
         return;
       }
 
       const cats = displayCategories.value;
       if (!cats.length) {
-        ticking = false;
+        isTicking = false;
         return;
       }
 
@@ -345,7 +342,7 @@ const handleScrollSpy = () => {
 
       if (window.innerHeight + scrollY >= document.documentElement.scrollHeight - 50) {
         activeSection.value = cats[cats.length - 1].id;
-        ticking = false;
+        isTicking = false;
         return;
       }
 
@@ -356,29 +353,16 @@ const handleScrollSpy = () => {
           const top = el.offsetTop - headerOffset;
           if (scrollY >= top - 20) {
             activeSection.value = cat.id;
-            ticking = false;
+            isTicking = false;
             return;
           }
         }
       }
 
       activeSection.value = cats[0].id;
-      ticking = false;
+      isTicking = false;
     });
-    ticking = true;
-  }
-};
-
-// 异步拉取后端用户信息
-const loadUserInfo = async () => {
-  try {
-    const data = await getUserInfo();
-    if (data?.name) {
-      userName.value = data.name;
-      localStorage.setItem(USER_NAME_STORAGE_KEY, data.name);
-    }
-  } catch {
-    return;
+    isTicking = true;
   }
 };
 
@@ -397,7 +381,6 @@ onMounted(() => {
   window.addEventListener("resize", updateIsMobile);
   window.addEventListener("scroll", handleScrollSpy, { passive: true });
   handleScrollSpy();
-  loadUserInfo();
   fetchSystemNav();
 });
 
@@ -484,13 +467,6 @@ onUnmounted(() => {
 
   .empty-text {
     color: var(--text-muted);
-  }
-}
-
-@media (max-width: 768px) {
-  .hero-title {
-    flex-direction: column;
-    gap: 4px;
   }
 }
 </style>

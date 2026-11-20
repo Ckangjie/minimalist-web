@@ -31,6 +31,7 @@
             type="danger"
             plain
             :icon="Delete"
+            :loading="isBatchDeleting"
             :disabled="selectedIds.length === 0"
             @click="handleBatchDelete"
           >
@@ -160,6 +161,7 @@ import { getVisitorList, deleteVisitor, batchDeleteVisitors, type VisitorItem } 
 import { usePagination } from "@/hooks/usePagination";
 
 const selectedIds = ref<number[]>([]);
+const isBatchDeleting = ref(false);
 
 const {
   isLoading,
@@ -179,11 +181,11 @@ const {
   }
 });
 
-const handleSelectionChange = (selection: any[]) => {
+const handleSelectionChange = (selection: VisitorItem[]) => {
   selectedIds.value = selection.map((item) => item.id);
 };
 
-const handleDelete = async (row: any) => {
+const handleDelete = async (row: VisitorItem) => {
   try {
     await deleteVisitor(row.id);
     ElMessage.success("用户已删除");
@@ -194,7 +196,7 @@ const handleDelete = async (row: any) => {
 };
 
 const handleBatchDelete = async () => {
-  if (selectedIds.value.length === 0) return;
+  if (selectedIds.value.length === 0 || isBatchDeleting.value) return;
 
   try {
     await ElMessageBox.confirm(
@@ -208,19 +210,50 @@ const handleBatchDelete = async () => {
     );
 
     const deleteCount = selectedIds.value.length;
+    isBatchDeleting.value = true;
     await batchDeleteVisitors(selectedIds.value);
     ElMessage.success("批量删除成功");
     selectedIds.value = [];
     handleDeleteRefresh(deleteCount);
   } catch {
     return;
+  } finally {
+    isBatchDeleting.value = false;
   }
 };
 
-const copyText = (text: string) => {
+const copyText = async (text: string) => {
   if (!text) return;
-  navigator.clipboard.writeText(text);
-  ElMessage.success("UUID 已复制到剪贴板");
+  try {
+    if (navigator?.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      ElMessage.success("UUID 已复制到剪贴板");
+      return;
+    }
+  } catch {
+    // 降级使用传统方法
+  }
+
+  try {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.opacity = "0";
+    textArea.style.pointerEvents = "none";
+    textArea.setAttribute("readonly", "");
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    const isSuccessful = document.execCommand("copy");
+    document.body.removeChild(textArea);
+    if (isSuccessful) {
+      ElMessage.success("UUID 已复制到剪贴板");
+    } else {
+      ElMessage.warning("复制受浏览器安全限制，请手动选择复制");
+    }
+  } catch {
+    ElMessage.warning("复制受浏览器安全限制，请手动选择复制");
+  }
 };
 </script>
 

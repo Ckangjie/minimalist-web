@@ -5,7 +5,7 @@
       <div class="flex items-center gap-4">
         <el-avatar :size="54" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
         <div>
-          <h2 class="text-lg font-bold text-[#303133] m-0">早安，管理员！祝您今天工作愉快</h2>
+          <h2 class="text-lg font-bold text-[#303133] m-0">{{ greetingText }}</h2>
           <p class="text-xs text-[#909399] mt-1 m-0">Jie Hub 若依管理系统 · 全站留言板统一运营与审核控制台</p>
         </div>
       </div>
@@ -148,12 +148,19 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, onMounted } from "vue";
+import { reactive, ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { listManageComments } from "@/api/guestbook";
-import { getVisitorList } from "@/api/visitor";
+import { getVisitorList, type VisitorItem } from "@/api/visitor";
 
 const router = useRouter();
+
+const greetingText = computed(() => {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) return "早上好，管理员！祝您今天工作愉快";
+  if (hour >= 12 && hour < 18) return "下午好，管理员！祝您今天工作愉快";
+  return "晚上好，管理员！祝您今天工作愉快";
+});
 
 const stats = reactive({
   total: 0,
@@ -164,19 +171,22 @@ const stats = reactive({
 
 const visitorStats = reactive({
   total: 0,
-  recentList: [] as any[]
+  recentList: [] as VisitorItem[]
 });
 
 const isVisitorLoading = ref(false);
 
 const fetchStats = async () => {
   try {
-    const allRes = await listManageComments({ pageNum: 1, pageSize: 100 });
-    const list = allRes?.list ?? [];
+    const [allRes, pendingRes, approvedRes] = await Promise.all([
+      listManageComments({ pageNum: 1, pageSize: 1 }),
+      listManageComments({ pageNum: 1, pageSize: 1, status: "pending" }),
+      listManageComments({ pageNum: 1, pageSize: 1, status: "approved" })
+    ]);
     stats.total = allRes?.total ?? 0;
-    stats.pending = list.filter((item: any) => item.status === "pending").length;
-    stats.approved = list.filter((item: any) => item.status === "approved").length;
-    stats.hiddenOrRejected = list.filter((item: any) => item.status === "hidden" || item.status === "rejected").length;
+    stats.pending = pendingRes?.total ?? 0;
+    stats.approved = approvedRes?.total ?? 0;
+    stats.hiddenOrRejected = Math.max(0, stats.total - stats.pending - stats.approved);
   } catch {
     return;
   }

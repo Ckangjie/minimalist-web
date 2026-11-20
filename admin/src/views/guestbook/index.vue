@@ -564,7 +564,7 @@ const {
   defaultParams: {
     keyword: "",
     status: (route.query.status as string) || "",
-    level: "" as string | number,
+    level: "" as number | "",
     authorType: ""
   }
 });
@@ -586,7 +586,7 @@ const editContent = ref("");
 // 留言详情与回复抽屉
 const isDetailDrawerVisible = ref(false);
 const isLoadingDetail = ref(false);
-const detailData = ref<any>(null);
+const detailData = ref<(GuestbookComment & { replies?: GuestbookComment[] }) | null>(null);
 
 // 派生校验与文本
 const canSubmitReply = computed(() => {

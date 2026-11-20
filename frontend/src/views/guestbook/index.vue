@@ -122,7 +122,7 @@
                   class="comment-author-avatar flex w-7 h-7 md:w-9 md:h-9 rounded-full items-center justify-center text-white text-xs md:text-sm font-bold flex-shrink-0 shadow-sm"
                   :style="{ background: item.authorType === 'admin' ? '#ef4444' : '#3b82f6' }"
                 >
-                  {{ item.nickname ? item.nickname.charAt(0).toUpperCase() : '访' }}
+                  {{ item.nickname?.charAt(0)?.toUpperCase() ?? '访' }}
                 </div>
                 <div class="flex flex-col">
                   <div class="flex items-center gap-2">

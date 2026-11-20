@@ -87,7 +87,7 @@
                 <a
                   :href="row.url"
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="noopener"
                   class="text-xs text-blue-600 hover:underline flex items-center gap-1"
                 >
                   <span class="truncate">{{ row.url }}</span>
@@ -355,6 +355,18 @@ const formRules: FormRules = {
           cb(new Error("请输入网站网址"));
         } else if (!/^https?:\/\/.+/i.test(val)) {
           cb(new Error("网址必须以 http:// 或 https:// 开头"));
+        } else {
+          cb();
+        }
+      },
+      trigger: "blur"
+    }
+  ],
+  logo: [
+    {
+      validator: (_, val, cb) => {
+        if (val && !/^https?:\/\/.+/i.test(val)) {
+          cb(new Error("Logo 链接必须以 http:// 或 https:// 开头"));
         } else {
           cb();
         }
