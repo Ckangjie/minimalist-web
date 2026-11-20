@@ -384,7 +384,7 @@ const catForm = reactive<Partial<NavCategory>>({
 const catRules: FormRules = {
   slug: [
     { required: true, message: "请输入分类标识", trigger: "blur" },
-    { pattern: /^[a-z0-9-]+$/, message: "只允许小写字母、数字和连字符", trigger: "blur" }
+    { pattern: /^[a-zA-Z0-9-]+$/, message: "只允许字母、数字和连字符", trigger: "blur" }
   ],
   name: [{ required: true, message: "请输入分类名称", trigger: "blur" }]
 };
@@ -401,7 +401,7 @@ const itemRules: FormRules = {
   categoryId: [{ required: true, message: "请选择所属分类", trigger: "change" }],
   slug: [
     { required: true, message: "请输入条目标识", trigger: "blur" },
-    { pattern: /^[a-z0-9-]+$/, message: "只允许小写字母、数字和连字符", trigger: "blur" }
+    { pattern: /^[a-zA-Z0-9-]+$/, message: "只允许字母、数字和连字符", trigger: "blur" }
   ],
   title: [{ required: true, message: "请输入标题", trigger: "blur" }],
   url: [
